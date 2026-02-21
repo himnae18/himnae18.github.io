@@ -166,33 +166,34 @@ async function addSong() {
   play(songs.length - 1);
 }
 
-async function editSong(index) {
-  const s = songs[index];
-  if (!s) return;
+async function addSong() {
+  const ytUrl = document.getElementById("yt").value.trim();
 
-  const newYtUrl = prompt("새 유튜브 링크 (빈칸=유지)", s.ytUrl || "");
-  if (newYtUrl === null) return;
+  const lyrics = safeText(document.getElementById("lyrics").value);
+  const mr = safeLink(document.getElementById("mr").value);
+  const score = safeLink(document.getElementById("score").value);
 
-  const newLyrics = prompt("새 가사 텍스트 (빈칸=유지, del=삭제)", s.lyrics || "");
-  if (newLyrics === null) return;
+  const id = extractID(ytUrl);
 
-  const newMr = prompt("새 MR 링크 (빈칸=유지, del=삭제)", s.mr || "");
-  if (newMr === null) return;
-
-  const newScore = prompt("새 악보 링크 (빈칸=유지, del=삭제)", s.score || "");
-  if (newScore === null) return;
-
-  // 유튜브 변경 시: id + 제목 둘 다 갱신
-  if (newYtUrl.trim() !== "") {
-    const id = extractID(newYtUrl.trim());
-    if (!id) {
-      alert("유튜브 링크가 올바르지 않아! (watch?v= 또는 youtu.be 링크로 넣어봐)");
-      return;
-    }
-    s.ytUrl = newYtUrl.trim();
-    s.id = id;
-    s.title = await fetchYouTubeTitle(s.ytUrl); // ✅ 제목 자동 갱신
+  if (!ytUrl || !id) {
+    alert("유튜브 링크가 올바르지 않아! (watch?v= 또는 youtu.be 링크로 넣어봐)");
+    return;
   }
+
+  const title = await fetchYouTubeTitle(ytUrl);
+
+  songs.push({ title, ytUrl, id, lyrics, mr, score });
+
+  save();
+  showList();
+
+  document.getElementById("yt").value = "";
+  document.getElementById("lyrics").value = "";
+  document.getElementById("mr").value = "";
+  document.getElementById("score").value = "";
+
+  play(songs.length - 1);
+}
 
   const applyField = (key, value) => {
     const v = value.trim();
