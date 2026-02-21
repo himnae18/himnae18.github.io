@@ -275,3 +275,125 @@ button:hover {
   border-radius: 999px;
   font-size: 12px;
 }
+
+/* =========================
+   YouTube 느낌 플레이리스트 레이아웃
+   - 7.5개만 보이게 + 스크롤
+========================= */
+
+/* 한 줄 높이(여기 바꾸면 전체가 같이 맞춰짐) */
+:root{
+  --pl-row-h: 72px;               /* 유튜브 느낌 한 줄 높이 */
+  --pl-max-h: 540px;              /* 72px * 7.5 = 540px */
+}
+
+/* 목록은 7.5개만 보이고 밑은 스크롤 */
+.playlist{
+  width: min(980px, 95%);
+  margin: 10px auto 20px;
+  background: #fff;
+  border: 1px solid #e6e6e6;
+  border-radius: 16px;
+
+  max-height: var(--pl-max-h);
+  overflow-y: auto;
+}
+
+/* 한 줄 */
+.pl-item{
+  height: var(--pl-row-h);
+  display: grid;
+  grid-template-columns: 78px 120px 1fr; /* 왼쪽(번호/핸들/재생) / 썸네일 / 제목+채널 */
+  gap: 12px;
+  align-items: center;
+  padding: 10px 12px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+  background: #fff;
+}
+.pl-item:hover{
+  background: #f3f3f3;
+}
+
+/* 재생중 하이라이트(너가 원한 그 느낌) */
+.pl-item.active{
+  background: #efe7ff;
+}
+
+/* 왼쪽 묶음(번호/핸들/재생삼각형) */
+.pl-left{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+}
+
+/* 순서 번호 */
+.pl-index{
+  width: 18px;
+  text-align: right;
+  color:#666;
+  font-size: 13px;
+}
+
+/* 드래그 핸들(두 줄) */
+.pl-handle{
+  width: 16px;
+  height: 16px;
+  display:flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
+  opacity: 0.55;
+}
+.pl-handle span{
+  display:block;
+  height: 2px;
+  background: #777;
+  border-radius: 4px;
+}
+
+/* 재생 삼각형 */
+.pl-playing{
+  width: 18px;
+  color: #6b2cff;
+  font-weight: 900;
+}
+
+/* 썸네일 */
+.pl-thumb img{
+  width: 120px;
+  height: 68px;
+  object-fit: cover;
+  border-radius: 10px;
+  display:block;
+}
+
+/* 제목/채널 (유튜브처럼 위/아래) */
+.pl-meta{
+  text-align:left;
+  overflow: hidden;
+}
+.pl-title{
+  font-weight: 800;
+  color: #111;
+  font-size: 15px;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pl-sub{
+  margin-top: 4px;
+  font-size: 13px;
+  color: #666;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 스크롤바(선택) */
+.playlist::-webkit-scrollbar{ width: 8px; }
+.playlist::-webkit-scrollbar-thumb{
+  background:#cfcfcf;
+  border-radius: 999px;
+}
