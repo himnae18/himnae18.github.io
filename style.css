@@ -38,6 +38,16 @@ input {
   margin: 5px;
 }
 
+/* textarea 기본(가사 입력용) */
+textarea{
+  padding: 8px;
+  border-radius: 8px;
+  border: none;
+  margin: 5px;
+  width: min(520px, 95%);
+  resize: vertical;
+}
+
 button {
   padding: 8px 12px;
   border-radius: 8px;
@@ -110,6 +120,38 @@ button:hover {
 }
 .edit-btn:hover{
   background:#00aaff;
+}
+
+/* =========================
+   가사 박스 (50줄 + 스크롤)
+========================= */
+.lyrics-box{
+  margin-top:12px;
+  background:#111;
+  padding:12px;
+  border-radius:12px;
+
+  font-size:14px;
+  line-height:1.6;
+
+  /* ✅ 딱 50줄 높이까지만 보이고, 넘치면 스크롤 */
+  max-height: calc(1.6em * 50);
+  overflow-y: auto;
+}
+
+.lyrics-box pre{
+  margin:0;
+  white-space:pre-wrap;
+  font-family:inherit;
+}
+
+/* (선택) 스크롤바 예쁘게 */
+.lyrics-box::-webkit-scrollbar{
+  width: 6px;
+}
+.lyrics-box::-webkit-scrollbar-thumb{
+  background:#444;
+  border-radius: 10px;
 }
 
 /* =========================
