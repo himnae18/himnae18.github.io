@@ -14,9 +14,10 @@ function save() {
 function extractID(url) {
   if (!url) return "";
 
-  // 1) watch?v=
   try {
     const u = new URL(url);
+
+    // 1) watch?v=
     const v = u.searchParams.get("v");
     if (v) return v;
 
@@ -25,7 +26,7 @@ function extractID(url) {
       return u.pathname.replace("/", "");
     }
 
-    // 3) /shorts/ID  or /embed/ID
+    // 3) /shorts/ID or /embed/ID
     const parts = u.pathname.split("/").filter(Boolean);
     const shortsIndex = parts.indexOf("shorts");
     const embedIndex = parts.indexOf("embed");
@@ -33,7 +34,7 @@ function extractID(url) {
     if (embedIndex !== -1 && parts[embedIndex + 1]) return parts[embedIndex + 1];
 
   } catch (e) {
-    // URL 형식이 이상하면 그냥 기존 방식으로도 한 번 시도
+    // URL 형식이 이상하면 기존 방식으로 한 번 더 시도
     if (url.includes("v=")) return url.split("v=")[1]?.split("&")[0] || "";
   }
 
@@ -41,7 +42,6 @@ function extractID(url) {
 }
 
 function safeLink(url) {
-  // 빈칸이면 null 처리 (목록에 안 뜨게)
   if (!url) return "";
   return url.trim();
 }
@@ -68,6 +68,8 @@ function showList() {
           ${s.lyrics ? `<a href="${s.lyrics}" target="_blank">가사</a>` : `<span class="empty">가사</span>`}
           ${s.mr ? `<a href="${s.mr}" target="_blank">MR</a>` : `<span class="empty">MR</span>`}
           ${s.score ? `<a href="${s.score}" target="_blank">악보</a>` : `<span class="empty">악보</span>`}
+
+          <button class="delete-btn" onclick="deleteSong(${i})">삭제</button>
         </div>
       </div>
     `;
@@ -118,8 +120,35 @@ function addSong() {
   document.getElementById("mr").value = "";
   document.getElementById("score").value = "";
 
-  // ✅ 추가하자마자 그 노래 재생(원하면 유지)
+  // ✅ 추가하자마자 그 노래 재생
   play(songs.length - 1);
+}
+
+function deleteSong(index) {
+  if (!confirm("이 노래를 삭제할까?")) return;
+
+  // 삭제하기 전에 현재 재생중이던 곡 인덱스 처리
+  const wasCurrent = (index === current);
+
+  songs.splice(index, 1);
+  save();
+  showList();
+
+  // 재생 중이던 곡을 삭제했다면
+  if (songs.length === 0) {
+    document.getElementById("player").src = "";
+    current = 0;
+    return;
+  }
+
+  if (wasCurrent) {
+    // 삭제한 자리에 있는 곡(또는 마지막 곡)을 이어서 재생
+    if (current >= songs.length) current = songs.length - 1;
+    play(current);
+  } else {
+    // 삭제한 곡이 현재곡보다 앞에 있으면 current 인덱스 보정
+    if (index < current) current--;
+  }
 }
 
 function nextSong() {
