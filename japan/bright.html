@@ -63,9 +63,22 @@
     <!-- 플레이어 -->
     <iframe id="player" width="560" height="315"></iframe>
 
-    <br>
-    <button onclick="nextSong()">⏭ 다음곡</button>
-    <button onclick="randomSong()">🎲 랜덤</button>
+<br>
+
+<div class="controls">
+  <button id="btnSeq">순서대로</button>
+
+  <button id="btnRandOne">랜덤곡</button>
+  <button id="btnRand10">랜덤곡 10회</button>
+  <button id="btnRandAuto">랜덤자동재생</button>
+
+  <button id="btnLoop5">5회반복</button>
+  <button id="btnLoop10">10회반복</button>
+  <button id="btnLoopInf">무한반복</button>
+
+  <button id="btnEdit">수정</button>
+  <button id="btnDelete">삭제</button>
+</div>
 
     <hr>
     <div id="list"></div>
