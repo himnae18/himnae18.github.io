@@ -114,5 +114,34 @@
   <script src="../nav.js"></script>
   <script src="../script.js"></script>
 
+  <!-- ✅ 수정 모달(페이지 안에서 편하게 수정) -->
+<div id="editOverlay" class="modal-overlay" style="display:none;"></div>
+
+<div id="editModal" class="modal" style="display:none;">
+  <div class="modal-head">
+    <div class="modal-title">노래 수정</div>
+    <button id="editCloseBtn" class="modal-close">✕</button>
+  </div>
+
+  <div class="modal-body">
+    <label class="modal-label">유튜브 링크(바꾸면 제목도 자동 갱신)</label>
+    <input id="editYt" placeholder="유튜브 링크">
+
+    <label class="modal-label">가사(복붙)</label>
+    <textarea id="editLyrics" rows="10" placeholder="가사 입력"></textarea>
+
+    <label class="modal-label">MR 링크(선택)</label>
+    <input id="editMr" placeholder="MR 링크">
+
+    <label class="modal-label">악보 링크(선택)</label>
+    <input id="editScore" placeholder="악보 링크">
+  </div>
+
+  <div class="modal-actions">
+    <button id="editSaveBtn">저장</button>
+    <button id="editCancelBtn" class="btn-ghost">취소</button>
+  </div>
+</div>
+  
 </body>
 </html>
