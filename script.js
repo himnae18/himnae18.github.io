@@ -352,3 +352,214 @@ function play(i) {
   // ✅ 추가
   updateLyricsDrawer();
 }
+
+/* =========================
+   ✅ YouTube IFrame Player API로 "끝나면 다음 동작" 구현
+========================= */
+
+let ytPlayer = null;
+
+// 모드: "seq" | "rand_once" | "rand_n" | "rand_auto" | "loop_n" | "loop_inf"
+let playMode = "seq";
+let remainingRandom = 0;   // 랜덤 N회 남은 횟수
+let remainingLoops = 0;    // 반복 N회 남은 횟수 (현재곡 기준)
+let loopInfinite = false;
+
+function ensurePlayerReady(cb) {
+  if (ytPlayer) { cb(); return; }
+
+  // API 스크립트 로드
+  if (!document.getElementById("yt-iframe-api")) {
+    const tag = document.createElement("script");
+    tag.id = "yt-iframe-api";
+    tag.src = "https://www.youtube.com/iframe_api";
+    document.head.appendChild(tag);
+  }
+
+  // API 준비되면 호출되는 전역 함수
+  window.onYouTubeIframeAPIReady = () => {
+    ytPlayer = new YT.Player("player", {
+      width: "560",
+      height: "315",
+      events: {
+        onStateChange: onPlayerStateChange
+      }
+    });
+    cb();
+  };
+}
+
+// 기존 play(i)를 "API로 재생"하도록 교체
+function play(i) {
+  current = i;
+  if (!songs[i] || !songs[i].id) return;
+
+  const id = songs[i].id;
+
+  ensurePlayerReady(() => {
+    ytPlayer.loadVideoById(id); // ✅ 클릭하면 바로 재생
+  });
+
+  showList();
+  if (typeof updateLyricsDrawer === "function") updateLyricsDrawer();
+}
+
+// 끝났을 때(자동재생 로직)
+function onPlayerStateChange(e) {
+  // 0 = ended
+  if (e.data !== 0) return;
+
+  // ✅ 반복 우선 처리
+  if (loopInfinite) {
+    ytPlayer.playVideo(); // 같은 곡 다시
+    return;
+  }
+
+  if (playMode === "loop_n") {
+    if (remainingLoops > 1) {
+      remainingLoops--;
+      ytPlayer.playVideo();
+      return;
+    } else {
+      // 반복 끝 -> 순서대로로 돌아가거나(원하면 유지 가능)
+      playMode = "seq";
+    }
+  }
+
+  // ✅ 랜덤 N회 처리
+  if (playMode === "rand_n") {
+    if (remainingRandom > 1) {
+      remainingRandom--;
+      playRandomPickAndPlay();
+      return;
+    } else {
+      // 마지막 1회 끝 -> 종료(아무것도 안 함) or 순서대로 복귀
+      playMode = "seq";
+      return;
+    }
+  }
+
+  // ✅ 랜덤 자동재생(무한)
+  if (playMode === "rand_auto") {
+    playRandomPickAndPlay();
+    return;
+  }
+
+  // ✅ 랜덤곡(1곡만) 모드는 "끝나면 멈춤"
+  if (playMode === "rand_once") {
+    playMode = "seq";
+    return;
+  }
+
+  // ✅ 기본: 순서대로
+  playNextSequential();
+}
+
+function playNextSequential() {
+  if (songs.length === 0) return;
+  const next = (current + 1) % songs.length;
+  play(next);
+}
+
+function playRandomPickAndPlay() {
+  if (songs.length === 0) return;
+  const idx = Math.floor(Math.random() * songs.length);
+  play(idx);
+}
+
+/* =========================
+   버튼 동작 연결
+========================= */
+document.addEventListener("DOMContentLoaded", () => {
+  const qs = (id) => document.getElementById(id);
+
+  // 순서대로 자동재생
+  qs("btnSeq")?.addEventListener("click", () => {
+    playMode = "seq";
+    loopInfinite = false;
+    remainingLoops = 0;
+    remainingRandom = 0;
+    setActiveControl("btnSeq");
+  });
+
+  // 랜덤곡(딱 1곡만 랜덤으로 재생)
+  qs("btnRandOne")?.addEventListener("click", () => {
+    playMode = "rand_once";
+    loopInfinite = false;
+    remainingLoops = 0;
+    remainingRandom = 0;
+    setActiveControl("btnRandOne");
+    playRandomPickAndPlay();
+  });
+
+  // 랜덤곡 10회 자동재생 (랜덤 10곡 재생 후 종료/순서대로 복귀)
+  qs("btnRand10")?.addEventListener("click", () => {
+    playMode = "rand_n";
+    remainingRandom = 10;
+    loopInfinite = false;
+    remainingLoops = 0;
+    setActiveControl("btnRand10");
+    playRandomPickAndPlay();
+  });
+
+  // 랜덤자동재생(무한)
+  qs("btnRandAuto")?.addEventListener("click", () => {
+    playMode = "rand_auto";
+    remainingRandom = 0;
+    loopInfinite = false;
+    remainingLoops = 0;
+    setActiveControl("btnRandAuto");
+    // 현재곡이 없으면 랜덤으로 시작
+    if (!songs[current]) playRandomPickAndPlay();
+  });
+
+  // 5회 반복(현재 재생곡 기준)
+  qs("btnLoop5")?.addEventListener("click", () => {
+    if (!songs[current]) return alert("먼저 노래를 하나 재생해줘!");
+    playMode = "loop_n";
+    remainingLoops = 5;
+    loopInfinite = false;
+    remainingRandom = 0;
+    setActiveControl("btnLoop5");
+  });
+
+  // 10회 반복
+  qs("btnLoop10")?.addEventListener("click", () => {
+    if (!songs[current]) return alert("먼저 노래를 하나 재생해줘!");
+    playMode = "loop_n";
+    remainingLoops = 10;
+    loopInfinite = false;
+    remainingRandom = 0;
+    setActiveControl("btnLoop10");
+  });
+
+  // 무한 반복
+  qs("btnLoopInf")?.addEventListener("click", () => {
+    if (!songs[current]) return alert("먼저 노래를 하나 재생해줘!");
+    playMode = "loop_inf";
+    loopInfinite = true;
+    remainingLoops = 0;
+    remainingRandom = 0;
+    setActiveControl("btnLoopInf");
+  });
+
+  // 수정/삭제 (현재 재생중인 곡)
+  qs("btnEdit")?.addEventListener("click", () => {
+    if (!songs[current]) return alert("먼저 노래를 하나 재생해줘!");
+    editSong(current);
+  });
+
+  qs("btnDelete")?.addEventListener("click", () => {
+    if (!songs[current]) return alert("먼저 노래를 하나 재생해줘!");
+    deleteSong(current);
+  });
+});
+
+/* =========================
+   (선택) 활성 버튼 표시(누른 모드 하이라이트)
+========================= */
+function setActiveControl(activeId) {
+  const ids = ["btnSeq","btnRandOne","btnRand10","btnRandAuto","btnLoop5","btnLoop10","btnLoopInf"];
+  ids.forEach(id => document.getElementById(id)?.classList.remove("active-control"));
+  document.getElementById(activeId)?.classList.add("active-control");
+}
