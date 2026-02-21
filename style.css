@@ -85,3 +85,16 @@ button {
 .delete-btn:hover{
   background:#ff0000;
 }
+
+.edit-btn{
+  background:#2a2a2a;
+  color:white;
+  border:none;
+  padding:6px 10px;
+  border-radius:10px;
+  cursor:pointer;
+  margin-left:10px;
+}
+.edit-btn:hover{
+  background:#00aaff;
+}
