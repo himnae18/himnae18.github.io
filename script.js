@@ -34,27 +34,36 @@ function extractID(url) {
     if (embedIndex !== -1 && parts[embedIndex + 1]) return parts[embedIndex + 1];
 
   } catch (e) {
-    // URL 형식이 이상하면 기존 방식으로 한 번 더 시도
     if (url.includes("v=")) return url.split("v=")[1]?.split("&")[0] || "";
   }
 
   return "";
 }
 
+// ✅ 유튜브 제목 자동 가져오기(oEmbed) - API키 필요없음
+async function fetchYouTubeTitle(ytUrl) {
+  try {
+    const api = "https://www.youtube.com/oembed?format=json&url=" + encodeURIComponent(ytUrl);
+    const res = await fetch(api);
+    if (!res.ok) throw new Error("oEmbed 실패");
+    const data = await res.json();
+    return data.title || "제목 없음";
+  } catch (e) {
+    return "제목 없음";
+  }
+}
+
 function safeText(v) {
-  // 가사처럼 "텍스트"는 링크 검증 필요 없고, 그냥 공백만 정리
   if (v === undefined || v === null) return "";
   return String(v).trim();
 }
 
 function safeLink(url) {
-  // MR/악보는 링크로 유지
   if (!url) return "";
   return url.trim();
 }
 
 function escapeHTML(str) {
-  // ✅ 가사에 < > 같은 게 있어도 화면 깨지지 않게 처리
   return String(str)
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
@@ -65,9 +74,8 @@ function toggleLyrics(index) {
   const box = document.getElementById("lyrics-" + index);
   if (!box) return;
 
-  box.style.display = (box.style.display === "none" || box.style.display === "")
-    ? "block"
-    : "none";
+  box.style.display =
+    (box.style.display === "none" || box.style.display === "") ? "block" : "none";
 }
 
 function showList() {
@@ -119,14 +127,11 @@ function play(i) {
     "https://www.youtube.com/embed/" + songs[i].id;
 }
 
-function addSong() {
-  const title = document.getElementById("title").value.trim();
+// ✅ 제목 입력칸 제거 버전: 유튜브 제목 자동 저장
+async function addSong() {
   const ytUrl = document.getElementById("yt").value.trim();
 
-  // ✅ 가사는 텍스트로 저장
   const lyrics = safeText(document.getElementById("lyrics").value);
-
-  // ✅ MR/악보는 링크로 유지
   const mr = safeLink(document.getElementById("mr").value);
   const score = safeLink(document.getElementById("score").value);
 
@@ -137,11 +142,14 @@ function addSong() {
     return;
   }
 
+  // ✅ 자동 제목
+  const title = await fetchYouTubeTitle(ytUrl);
+
   songs.push({
-    title: title || "제목 없음",
+    title,
     ytUrl,
     id,
-    lyrics,  // ✅ 텍스트
+    lyrics,
     mr,
     score
   });
@@ -150,7 +158,6 @@ function addSong() {
   showList();
 
   // 입력칸 비우기
-  document.getElementById("title").value = "";
   document.getElementById("yt").value = "";
   document.getElementById("lyrics").value = "";
   document.getElementById("mr").value = "";
@@ -159,17 +166,13 @@ function addSong() {
   play(songs.length - 1);
 }
 
-function editSong(index) {
+async function editSong(index) {
   const s = songs[index];
   if (!s) return;
-
-  const newTitle = prompt("새 제목 (빈칸=유지)", s.title || "");
-  if (newTitle === null) return;
 
   const newYtUrl = prompt("새 유튜브 링크 (빈칸=유지)", s.ytUrl || "");
   if (newYtUrl === null) return;
 
-  // ✅ 가사 = 텍스트 수정 (prompt는 긴 가사엔 불편하지만, 일단 가장 쉬운 버전)
   const newLyrics = prompt("새 가사 텍스트 (빈칸=유지, del=삭제)", s.lyrics || "");
   if (newLyrics === null) return;
 
@@ -179,8 +182,7 @@ function editSong(index) {
   const newScore = prompt("새 악보 링크 (빈칸=유지, del=삭제)", s.score || "");
   if (newScore === null) return;
 
-  if (newTitle.trim() !== "") s.title = newTitle.trim();
-
+  // 유튜브 변경 시: id + 제목 둘 다 갱신
   if (newYtUrl.trim() !== "") {
     const id = extractID(newYtUrl.trim());
     if (!id) {
@@ -189,22 +191,20 @@ function editSong(index) {
     }
     s.ytUrl = newYtUrl.trim();
     s.id = id;
+    s.title = await fetchYouTubeTitle(s.ytUrl); // ✅ 제목 자동 갱신
   }
 
   const applyField = (key, value) => {
     const v = value.trim();
-    if (v === "") return;            // 유지
+    if (v === "") return;           // 유지
     if (v.toLowerCase() === "del") {
-      s[key] = "";                   // 삭제
+      s[key] = "";                  // 삭제
       return;
     }
-    s[key] = v;                      // 변경
+    s[key] = v;                     // 변경
   };
 
-  // ✅ lyrics는 텍스트
   applyField("lyrics", newLyrics);
-
-  // ✅ mr/score는 링크 (문자열로 처리 동일)
   applyField("mr", newMr);
   applyField("score", newScore);
 
@@ -251,15 +251,3 @@ function randomSong() {
 }
 
 showList();
-
-async function fetchYouTubeTitle(ytUrl) {
-  try {
-    const api = "https://www.youtube.com/oembed?format=json&url=" + encodeURIComponent(ytUrl);
-    const res = await fetch(api);
-    if (!res.ok) throw new Error("oEmbed 실패");
-    const data = await res.json();
-    return data.title || "제목 없음";
-  } catch (e) {
-    return "제목 없음";
-  }
-}
