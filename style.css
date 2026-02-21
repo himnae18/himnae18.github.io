@@ -1,9 +1,9 @@
 /* =========================
-   기본 설정
+   기본 설정 (화이트톤)
 ========================= */
 body {
-  background: #0f0f0f;
-  color: white;
+  background: #f5f6f8;
+  color: #222;
   font-family: Arial, sans-serif;
   text-align: center;
   margin: 0;
@@ -15,63 +15,68 @@ body {
 ========================= */
 .menu {
   display: inline-block;
-  background: #222;
+  background: #ffffff;
+  border: 1px solid #e3e3e3;
   padding: 12px 20px;
   margin: 8px;
   border-radius: 14px;
-  color: white;
+  color: #222;
   text-decoration: none;
   font-size: 18px;
   transition: 0.2s;
 }
 .menu:hover {
-  background: #ff0044;
+  background: #f7e9ee;
+  border-color: #b32647;
 }
 
 /* =========================
    입력 & 버튼
 ========================= */
-input {
+input,
+textarea {
   padding: 8px;
   border-radius: 8px;
-  border: none;
+  border: 1px solid #ddd;
   margin: 5px;
+  background: #fff;
+  color: #222;
 }
 
-/* textarea 기본(가사 입력용) */
 textarea{
-  padding: 8px;
-  border-radius: 8px;
-  border: none;
-  margin: 5px;
   width: min(520px, 95%);
   resize: vertical;
 }
 
 button {
-  padding: 8px 12px;
+  padding: 8px 14px;
   border-radius: 8px;
   border: none;
   margin: 5px;
-  background: #ff0044;
+  background: #b32647; /* 와인톤 밝게 */
   color: white;
   cursor: pointer;
   transition: 0.2s;
 }
 button:hover {
-  opacity: 0.85;
+  background: #87142e;
 }
 
 /* =========================
    노래 목록 카드
 ========================= */
 .song-row{
-  background:#222;
+  background:#ffffff;
   margin:12px auto;
   padding:14px;
   border-radius:16px;
   width:min(900px, 95%);
   text-align:left;
+  border:1px solid #e5e5e5;
+  transition: 0.2s;
+}
+.song-row:hover{
+  background:#fff5f7;
 }
 
 .song-title{
@@ -79,6 +84,13 @@ button:hover {
   cursor:pointer;
   margin-bottom:8px;
   font-weight: bold;
+  color:#222;
+}
+
+/* 재생중일 때 하이라이트 */
+.song-row.active{
+  background:#f7e9ee;
+  border-color:#b32647;
 }
 
 .song-links a{
@@ -86,21 +98,20 @@ button:hover {
   margin-right:10px;
   color:#fff;
   text-decoration:none;
-  background:#ff0044;
+  background:#b32647;
   padding:6px 10px;
   border-radius:12px;
   font-size:14px;
 }
-
 .song-links a:hover{
-  opacity:0.85;
+  background:#87142e;
 }
 
 .empty{
   display:inline-block;
   margin-right:10px;
-  opacity:0.35;
-  background:#444;
+  opacity:0.4;
+  background:#eee;
   padding:6px 10px;
   border-radius:12px;
   font-size:14px;
@@ -108,18 +119,20 @@ button:hover {
 
 /* 삭제 버튼 */
 .delete-btn{
-  background:#444;
+  background:#999;
 }
 .delete-btn:hover{
-  background:#ff0000;
+  background:#cc3333;
 }
 
 /* 수정 버튼 */
 .edit-btn{
-  background:#2a2a2a;
+  background:#ddd;
+  color:#333;
 }
 .edit-btn:hover{
-  background:#00aaff;
+  background:#b32647;
+  color:#fff;
 }
 
 /* =========================
@@ -127,44 +140,41 @@ button:hover {
 ========================= */
 .lyrics-box{
   margin-top:12px;
-  background:#111;
+  background:#ffffff;
   padding:12px;
   border-radius:12px;
+  border:1px solid #e3e3e3;
 
   font-size:14px;
   line-height:1.6;
 
-  /* ✅ 딱 50줄 높이까지만 보이고, 넘치면 스크롤 */
   max-height: calc(1.6em * 50);
   overflow-y: auto;
 }
-
 .lyrics-box pre{
   margin:0;
   white-space:pre-wrap;
   font-family:inherit;
 }
 
-/* (선택) 스크롤바 예쁘게 */
+/* 스크롤바 */
 .lyrics-box::-webkit-scrollbar{
   width: 6px;
 }
 .lyrics-box::-webkit-scrollbar-thumb{
-  background:#444;
+  background:#b32647;
   border-radius: 10px;
 }
 
 /* =========================
-   햄버거 드로어 메뉴
+   햄버거 드로어 메뉴 (화이트톤)
 ========================= */
-
-/* 햄버거 버튼 */
 .hamburger{
   position: fixed;
   top: 14px;
   left: 14px;
   z-index: 9999;
-  background: #ff0044;
+  background: #b32647;
   color: #fff;
   border: none;
   border-radius: 14px;
@@ -172,12 +182,14 @@ button:hover {
   cursor: pointer;
   font-size: 18px;
 }
+.hamburger:hover{
+  background:#87142e;
+}
 
-/* 오버레이 */
 .drawer-overlay{
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.55);
+  background: rgba(0,0,0,0.3);
   z-index: 9998;
   display: none;
 }
@@ -185,7 +197,6 @@ button:hover {
   display:block;
 }
 
-/* 드로어 본체 */
 .drawer{
   position: fixed;
   top: 0;
@@ -193,21 +204,18 @@ button:hover {
   width: 300px;
   max-width: 85vw;
   height: 100vh;
-  background: #111;
+  background: #ffffff;
   z-index: 9999;
   transform: translateX(-110%);
   transition: transform 0.25s ease;
   padding: 18px;
-  box-shadow: 12px 0 30px rgba(0,0,0,0.45);
-
-  /* body 가운데정렬 영향 차단 */
+  box-shadow: 12px 0 30px rgba(0,0,0,0.15);
   text-align: left !important;
 }
 .drawer.open{
   transform: translateX(0);
 }
 
-/* 드로어 헤더 */
 .drawer-header{
   display:flex;
   justify-content: space-between;
@@ -217,52 +225,53 @@ button:hover {
 .drawer-title{
   font-size: 18px;
   font-weight: 800;
+  color:#222;
 }
 .drawer-close{
-  background:#222;
+  background:#eee;
   border-radius: 12px;
   padding: 6px 10px;
 }
 
-/* 섹션 */
 .drawer-section{
   margin-top: 14px;
   padding-top: 12px;
-  border-top: 1px solid #2a2a2a;
+  border-top: 1px solid #eee;
 }
 .drawer-section h3{
   margin: 0 0 10px 0;
   font-size: 13px;
-  opacity: 0.85;
+  opacity: 0.7;
+  color:#555;
 }
 
-/* 링크 */
 .drawer a,
 .drawer a:visited{
   display:flex;
   justify-content: space-between;
   align-items:center;
-  background:#222;
-  color:#fff !important;
+  background:#fff;
+  color:#222 !important;
   text-decoration:none !important;
   padding: 10px 12px;
   border-radius: 14px;
   margin: 8px 0;
+  border:1px solid #eee;
 }
 .drawer a:hover{
-  background:#ff0044;
+  background:#f7e9ee;
+  border-color:#b32647;
 }
 
 .drawer .sub{
   margin-left: 12px;
-  background:#1c1c1c;
+  background:#fff5f7;
 }
 
-/* 개수 표시 */
 .count-pill{
-  background:#444;
+  background:#b32647;
+  color:#fff;
   padding: 2px 9px;
   border-radius: 999px;
   font-size: 12px;
-  opacity: 0.9;
 }
