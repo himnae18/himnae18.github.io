@@ -298,3 +298,43 @@ function onDrop(e, dropIndex) {
 }
 
 showList();
+
+// ===== 오른쪽 가사 패널 =====
+function openLyricsDrawer(){
+  document.body.classList.add("lyrics-open");
+  updateLyricsDrawer();
+}
+function closeLyricsDrawer(){
+  document.body.classList.remove("lyrics-open");
+}
+function toggleLyricsDrawer(){
+  document.body.classList.toggle("lyrics-open");
+  if (document.body.classList.contains("lyrics-open")) updateLyricsDrawer();
+}
+
+function updateLyricsDrawer(){
+  const titleEl = document.getElementById("lyricsNowTitle");
+  const textEl = document.getElementById("lyricsNowText");
+  if (!titleEl || !textEl) return;
+
+  if (!songs || songs.length === 0 || !songs[current]) {
+    titleEl.textContent = "재생중인 곡이 없어";
+    textEl.textContent = "노래를 재생하면 여기서 가사를 볼 수 있어.";
+    return;
+  }
+
+  const s = songs[current];
+  titleEl.textContent = s.title || "제목 없음";
+  textEl.textContent = (s.lyrics && s.lyrics.trim()) ? s.lyrics : "가사가 아직 없어.";
+}
+
+// 버튼 이벤트 연결
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("lyricsBtn")?.addEventListener("click", toggleLyricsDrawer);
+  document.getElementById("lyricsCloseBtn")?.addEventListener("click", closeLyricsDrawer);
+  document.getElementById("lyricsOverlay")?.addEventListener("click", closeLyricsDrawer);
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeLyricsDrawer();
+  });
+});
