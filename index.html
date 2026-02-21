@@ -7,7 +7,51 @@
 </head>
 
 <body>
+  
+<button id="hamburgerBtn" class="hamburger">☰</button>
 
+<div id="drawerOverlay" class="drawer-overlay"></div>
+
+<nav id="drawer" class="drawer">
+  <div class="drawer-header">
+    <div class="drawer-title">메뉴</div>
+    <button id="drawerCloseBtn" class="drawer-close">✕</button>
+  </div>
+
+  <div class="drawer-section">
+    <h3>일본노래</h3>
+    <a href="/japan/index.html">
+      <span>🇯🇵 일본노래</span>
+      <span>›</span>
+    </a>
+
+    <a class="sub" href="/japan/bright.html">
+      <span>밝은노래</span>
+      <span class="count-pill">(<span id="count-jp-bright">0</span>)</span>
+    </a>
+  </div>
+
+  <div class="drawer-section">
+    <h3>중국노래</h3>
+    <a href="/china/index.html">
+      <span>🇨🇳 중국노래</span>
+      <span>›</span>
+    </a>
+
+    <a class="sub" href="/china/bright.html">
+      <span>밝은노래</span>
+      <span class="count-pill">(<span id="count-cn-bright">0</span>)</span>
+    </a>
+  </div>
+
+  <div class="drawer-section">
+    <a href="/index.html">
+      <span>🏠 메인으로</span>
+      <span>›</span>
+    </a>
+  </div>
+</nav>
+  
 <h1>🎧 My Music Library</h1>
 <p>나라별 노래 모음</p>
 
