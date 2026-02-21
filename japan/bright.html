@@ -6,9 +6,9 @@
   <link rel="stylesheet" href="../style.css">
 </head>
 
-<body>
+<body class="light-page">
 
-  <!-- ✅ 햄버거 드로어(절대 ... 쓰면 안됨) -->
+  <!-- ✅ 햄버거 드로어 -->
   <button id="hamburgerBtn" class="hamburger">☰</button>
   <div id="drawerOverlay" class="drawer-overlay"></div>
 
@@ -52,29 +52,54 @@
     </div>
   </nav>
 
-  <h1>🇯🇵 일본 밝은 노래</h1>
+  <!-- ✅ 오른쪽 상단: 가사 패널 토글 버튼(줄2개 느낌) -->
+  <button id="lyricsBtn" class="lyrics-toggle" title="가사 패널">≡</button>
 
-  <!-- 플레이어 -->
-  <iframe id="player" width="560" height="315"></iframe>
+  <!-- ✅ 본문(영상 포함): 패널 열릴 때 자연스럽게 밀리는 대상 -->
+  <div id="mainContent">
 
-  <br>
-  <button onclick="nextSong()">⏭ 다음곡</button>
-  <button onclick="randomSong()">🎲 랜덤</button>
+    <h1>🇯🇵 일본 밝은 노래</h1>
 
-  <hr>
-  <div id="list"></div>
+    <!-- 플레이어 -->
+    <iframe id="player" width="560" height="315"></iframe>
 
-  <hr>
-  <h2>🎵 노래 추가</h2>
+    <br>
+    <button onclick="nextSong()">⏭ 다음곡</button>
+    <button onclick="randomSong()">🎲 랜덤</button>
 
-  <input id="yt" placeholder="유튜브 링크">
-  <textarea id="lyrics" placeholder="가사 입력 (복붙 가능)" rows="6"></textarea>
-  <input id="mr" placeholder="MR 링크(선택)">
-  <input id="score" placeholder="악보 링크(선택)">
-  <!-- ✅ 추가 버튼은 1개만 -->
-  <button onclick="addSong()">추가</button>
+    <hr>
+    <div id="list"></div>
+
+    <hr>
+    <h2>🎵 노래 추가</h2>
+
+    <input id="yt" placeholder="유튜브 링크">
+    <textarea id="lyrics" placeholder="가사 입력 (복붙 가능)" rows="6"></textarea>
+    <input id="mr" placeholder="MR 링크(선택)">
+    <input id="score" placeholder="악보 링크(선택)">
+    <button onclick="addSong()">추가</button>
+
+  </div>
+
+  <!-- ✅ 오른쪽 가사 패널 -->
+  <aside id="lyricsDrawer" class="lyrics-drawer">
+    <div class="lyrics-head">
+      <div class="lyrics-head-title">가사</div>
+      <button id="lyricsCloseBtn" class="lyrics-close">✕</button>
+    </div>
+
+    <div id="lyricsNowTitle" class="lyrics-now-title">재생중인 곡이 없어</div>
+
+    <div class="lyrics-body">
+      <pre id="lyricsNowText">노래를 재생하면 여기서 가사를 볼 수 있어.</pre>
+    </div>
+  </aside>
+
+  <!-- ✅ 바깥 클릭 닫기용 오버레이 -->
+  <div id="lyricsOverlay" class="lyrics-overlay"></div>
 
   <script src="../nav.js"></script>
   <script src="../script.js"></script>
+
 </body>
 </html>
