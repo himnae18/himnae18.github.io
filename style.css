@@ -1,43 +1,65 @@
+/* =========================
+   기본 설정
+========================= */
 body {
   background: #0f0f0f;
   color: white;
-  font-family: Arial;
+  font-family: Arial, sans-serif;
   text-align: center;
+  margin: 0;
+  padding: 0;
 }
 
+/* =========================
+   메인 메뉴 버튼
+========================= */
 .menu {
   display: inline-block;
   background: #222;
   padding: 12px 20px;
-  margin: 5px;
-  border-radius: 12px;
+  margin: 8px;
+  border-radius: 14px;
   color: white;
   text-decoration: none;
   font-size: 18px;
+  transition: 0.2s;
 }
-
 .menu:hover {
   background: #ff0044;
 }
 
-input, button {
+/* =========================
+   입력 & 버튼
+========================= */
+input {
   padding: 8px;
-  border-radius: 6px;
+  border-radius: 8px;
   border: none;
-  margin: 3px;
+  margin: 5px;
 }
 
 button {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: none;
+  margin: 5px;
   background: #ff0044;
   color: white;
   cursor: pointer;
+  transition: 0.2s;
+}
+button:hover {
+  opacity: 0.85;
 }
 
+/* =========================
+   노래 목록 카드
+========================= */
 .song-row{
   background:#222;
-  margin:10px auto;
-  padding:10px;
-  border-radius:12px;
+  margin:12px auto;
+  padding:14px;
+  border-radius:16px;
   width:min(900px, 95%);
   text-align:left;
 }
@@ -46,6 +68,7 @@ button {
   font-size:18px;
   cursor:pointer;
   margin-bottom:8px;
+  font-weight: bold;
 }
 
 .song-links a{
@@ -55,7 +78,7 @@ button {
   text-decoration:none;
   background:#ff0044;
   padding:6px 10px;
-  border-radius:10px;
+  border-radius:12px;
   font-size:14px;
 }
 
@@ -69,139 +92,134 @@ button {
   opacity:0.35;
   background:#444;
   padding:6px 10px;
-  border-radius:10px;
+  border-radius:12px;
   font-size:14px;
 }
 
+/* 삭제 버튼 */
 .delete-btn{
   background:#444;
-  color:white;
-  border:none;
-  padding:6px 10px;
-  border-radius:10px;
-  cursor:pointer;
-  margin-left:10px;
 }
 .delete-btn:hover{
   background:#ff0000;
 }
 
+/* 수정 버튼 */
 .edit-btn{
   background:#2a2a2a;
-  color:white;
-  border:none;
-  padding:6px 10px;
-  border-radius:10px;
-  cursor:pointer;
-  margin-left:10px;
 }
 .edit-btn:hover{
   background:#00aaff;
 }
 
-/* ====== 햄버거 버튼 ====== */
-.hamburger {
+/* =========================
+   햄버거 드로어 메뉴
+========================= */
+
+/* 햄버거 버튼 */
+.hamburger{
   position: fixed;
   top: 14px;
   left: 14px;
-  z-index: 2000;
-  background: #222;
-  color: white;
+  z-index: 9999;
+  background: #ff0044;
+  color: #fff;
   border: none;
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 10px 12px;
   cursor: pointer;
   font-size: 18px;
 }
 
-/* ====== 오버레이(배경 어둡게) ====== */
-.drawer-overlay {
+/* 오버레이 */
+.drawer-overlay{
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,0.55);
-  z-index: 1900;
+  z-index: 9998;
   display: none;
 }
-.drawer-overlay.open {
-  display: block;
+.drawer-overlay.open{
+  display:block;
 }
 
-/* ====== 드로어 본체 ====== */
-.drawer {
+/* 드로어 본체 */
+.drawer{
   position: fixed;
   top: 0;
   left: 0;
-  width: 280px;
+  width: 300px;
+  max-width: 85vw;
   height: 100vh;
   background: #111;
-  z-index: 1950;
-  transform: translateX(-100%);
+  z-index: 9999;
+  transform: translateX(-110%);
   transition: transform 0.25s ease;
-  padding: 16px;
-  text-align: left;
+  padding: 18px;
+  box-shadow: 12px 0 30px rgba(0,0,0,0.45);
+
+  /* body 가운데정렬 영향 차단 */
+  text-align: left !important;
 }
-.drawer.open {
+.drawer.open{
   transform: translateX(0);
 }
 
-.drawer-header {
-  display: flex;
+/* 드로어 헤더 */
+.drawer-header{
+  display:flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
+  align-items:center;
+  margin-bottom: 14px;
 }
-
-.drawer-title {
+.drawer-title{
   font-size: 18px;
-  font-weight: bold;
+  font-weight: 800;
 }
-
-.drawer-close {
-  background: #222;
-  color: white;
-  border: none;
-  border-radius: 10px;
+.drawer-close{
+  background:#222;
+  border-radius: 12px;
   padding: 6px 10px;
-  cursor: pointer;
 }
 
-.drawer-section {
-  margin-top: 12px;
-  padding-top: 10px;
+/* 섹션 */
+.drawer-section{
+  margin-top: 14px;
+  padding-top: 12px;
   border-top: 1px solid #2a2a2a;
 }
-
-.drawer-section h3 {
-  margin: 0 0 8px 0;
-  font-size: 14px;
-  opacity: 0.8;
+.drawer-section h3{
+  margin: 0 0 10px 0;
+  font-size: 13px;
+  opacity: 0.85;
 }
 
-/* 드로어 링크 */
-.drawer a {
-  display: flex;
+/* 링크 */
+.drawer a,
+.drawer a:visited{
+  display:flex;
   justify-content: space-between;
-  align-items: center;
-  background: #222;
-  color: white;
-  text-decoration: none;
+  align-items:center;
+  background:#222;
+  color:#fff !important;
+  text-decoration:none !important;
   padding: 10px 12px;
-  border-radius: 12px;
-  margin: 6px 0;
+  border-radius: 14px;
+  margin: 8px 0;
+}
+.drawer a:hover{
+  background:#ff0044;
 }
 
-.drawer a:hover {
-  background: #ff0044;
-}
-
-.drawer .sub {
+.drawer .sub{
   margin-left: 12px;
-  background: #1c1c1c;
+  background:#1c1c1c;
 }
 
-.count-pill {
-  background: #444;
-  padding: 2px 8px;
+/* 개수 표시 */
+.count-pill{
+  background:#444;
+  padding: 2px 9px;
   border-radius: 999px;
   font-size: 12px;
   opacity: 0.9;
