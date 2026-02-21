@@ -1,159 +1,730 @@
 /* =========================
-   공통 버튼 기본 리셋
+   기본 설정 (화이트톤)
 ========================= */
-button{
-  padding:10px 14px;
-  border-radius:12px;
-  border:none;
-  font-weight:700;
-  cursor:pointer;
-  transition:0.2s;
+body {
+  background: #f5f6f8;
+  color: #222;
+  font-family: Arial, sans-serif;
+  text-align: center;
+  margin: 0;
+  padding: 0;
+}
+
+/* 제목이 너무 위에 붙는 것 방지(햄버거/가사버튼과 겹침 방지) */
+h1{
+  margin-top: 18px;
 }
 
 /* =========================
-   🎮 컨트롤 버튼 색상 체계
+   메인 메뉴 버튼
 ========================= */
-
-/* 순서대로 - 연두 */
-.btn-seq{
-  background:#8ee38e;
-  color:#114411;
+.menu {
+  display: inline-block;
+  background: #ffffff;
+  border: 1px solid #e3e3e3;
+  padding: 12px 20px;
+  margin: 8px;
+  border-radius: 14px;
+  color: #222;
+  text-decoration: none;
+  font-size: 18px;
+  transition: 0.2s;
 }
-.btn-seq:hover{ background:#6fd36f; }
-
-/* 랜덤 - 하늘색 */
-.btn-random{
-  background:#8fd3ff;
-  color:#00334d;
-}
-.btn-random:hover{ background:#6ec2ff; }
-
-/* 반복 - 보라 */
-.btn-loop{
-  background:#c7a6ff;
-  color:#2d0066;
-}
-.btn-loop:hover{ background:#b58cff; }
-
-/* 수정 - 노랑 */
-.btn-edit-main{
-  background:#ffe27a;
-  color:#664d00;
-}
-.btn-edit-main:hover{ background:#ffd84d; }
-
-/* 삭제 - 빨강 */
-.btn-delete-main{
-  background:#ff8b8b;
-  color:#4d0000;
-}
-.btn-delete-main:hover{ background:#ff5c5c; }
-
-/* 활성 버튼 */
-.active-control{
-  outline:3px solid rgba(0,0,0,0.15);
-  transform:scale(1.05);
+.menu:hover {
+  background: #f7e9ee;
+  border-color: #b32647;
 }
 
 /* =========================
-   플레이리스트 영역
+   입력 & 버튼
 ========================= */
-.playlist{
-  width:min(980px,95%);
-  margin:10px auto;
-  max-height:540px;
-  overflow-y:auto;
-  background:#fff;
+input,
+textarea {
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  margin: 5px;
+  background: #fff;
+  color: #222;
+}
+
+textarea{
+  width: min(520px, 95%);
+  resize: vertical;
+}
+
+button {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: none;
+  margin: 5px;
+  background: #b32647; /* 와인톤 밝게 */
+  color: white;
+  cursor: pointer;
+  transition: 0.2s;
+}
+button:hover {
+  background: #87142e;
+}
+
+/* =========================
+   플레이어(iframe) 반응형
+========================= */
+#player{
+  width: min(980px, 95%);
+  aspect-ratio: 16 / 9;
+  height: auto;
+  border: 0;
+  border-radius: 14px;
+  background: #000;
+}
+
+/* =========================
+   노래 목록 카드(구버전 카드가 남아있을 때 대비)
+========================= */
+.song-row{
+  background:#ffffff;
+  margin:12px auto;
+  padding:14px;
   border-radius:16px;
+  width:min(900px, 95%);
+  text-align:left;
+  border:1px solid #e5e5e5;
+  transition: 0.2s;
+}
+.song-row:hover{
+  background:#fff5f7;
+}
+
+.song-title{
+  font-size:18px;
+  cursor:pointer;
+  margin-bottom:8px;
+  font-weight: bold;
+  color:#222;
+}
+
+/* 재생중일 때 하이라이트 */
+.song-row.active{
+  background:#f7e9ee;
+  border-color:#b32647;
+}
+
+.song-links a{
+  display:inline-block;
+  margin-right:10px;
+  color:#fff;
+  text-decoration:none;
+  background:#b32647;
+  padding:6px 10px;
+  border-radius:12px;
+  font-size:14px;
+}
+.song-links a:hover{
+  background:#87142e;
+}
+
+.empty{
+  display:inline-block;
+  margin-right:10px;
+  opacity:0.4;
+  background:#eee;
+  padding:6px 10px;
+  border-radius:12px;
+  font-size:14px;
+}
+
+/* 삭제 버튼 */
+.delete-btn{
+  background:#999;
+}
+.delete-btn:hover{
+  background:#cc3333;
+}
+
+/* 수정 버튼 */
+.edit-btn{
+  background:#ddd;
+  color:#333;
+}
+.edit-btn:hover{
+  background:#b32647;
+  color:#fff;
+}
+
+/* 빈 목록 문구 */
+.empty-center{
+  opacity: 0.7;
+  padding: 18px 10px;
+}
+
+/* =========================
+   가사 박스 (50줄 + 스크롤) - (목록 아래 펼치는 버전)
+========================= */
+.lyrics-box{
+  margin: 10px auto 0;
+  background:#ffffff;
+  padding:12px;
+  border-radius:12px;
+  border:1px solid #e3e3e3;
+
+  font-size:14px;
+  line-height:1.6;
+
+  width: min(980px, 95%);
+  max-height: calc(1.6em * 50);
+  overflow-y: auto;
+
+  text-align: left;
+}
+.lyrics-box pre{
+  margin:0;
+  white-space:pre-wrap;
+  font-family:inherit;
+}
+
+/* 스크롤바 */
+.lyrics-box::-webkit-scrollbar{
+  width: 6px;
+}
+.lyrics-box::-webkit-scrollbar-thumb{
+  background:#b32647;
+  border-radius: 10px;
+}
+
+/* =========================
+   햄버거 드로어 메뉴 (화이트톤)
+========================= */
+.hamburger{
+  position: fixed;
+  top: 14px;
+  left: 14px;
+  z-index: 9999;
+  background: #b32647;
+  color: #fff;
+  border: none;
+  border-radius: 14px;
+  padding: 10px 12px;
+  cursor: pointer;
+  font-size: 18px;
+}
+.hamburger:hover{
+  background:#87142e;
+}
+
+.drawer-overlay{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.3);
+  z-index: 9998;
+  display: none;
+}
+.drawer-overlay.open{
+  display:block;
+}
+
+.drawer{
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 300px;
+  max-width: 85vw;
+  height: 100vh;
+  background: #ffffff;
+  z-index: 9999;
+  transform: translateX(-110%);
+  transition: transform 0.25s ease;
+  padding: 18px;
+  box-shadow: 12px 0 30px rgba(0,0,0,0.15);
+  text-align: left !important;
+}
+.drawer.open{
+  transform: translateX(0);
+}
+
+.drawer-header{
+  display:flex;
+  justify-content: space-between;
+  align-items:center;
+  margin-bottom: 14px;
+}
+.drawer-title{
+  font-size: 18px;
+  font-weight: 800;
+  color:#222;
+}
+.drawer-close{
+  background:#eee;
+  border-radius: 12px;
+  padding: 6px 10px;
+}
+
+.drawer-section{
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid #eee;
+}
+.drawer-section h3{
+  margin: 0 0 10px 0;
+  font-size: 13px;
+  opacity: 0.7;
+  color:#555;
+}
+
+.drawer a,
+.drawer a:visited{
+  display:flex;
+  justify-content: space-between;
+  align-items:center;
+  background:#fff;
+  color:#222 !important;
+  text-decoration:none !important;
+  padding: 10px 12px;
+  border-radius: 14px;
+  margin: 8px 0;
   border:1px solid #eee;
 }
-
-.pl-item{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  padding:12px;
-  border-bottom:1px solid #eee;
-  cursor:pointer;
+.drawer a:hover{
+  background:#f7e9ee;
+  border-color:#b32647;
 }
 
-.pl-item:hover{ background:#f5f5f5; }
-
-.pl-item.active{
-  background:#efe7ff;
+.drawer .sub{
+  margin-left: 12px;
+  background:#fff5f7;
 }
 
-.pl-thumb img{
-  width:120px;
-  height:68px;
-  border-radius:10px;
-  object-fit:cover;
-}
-
-.pl-meta{
-  flex:1;
-  text-align:left;
-}
-
-.pl-title{
-  font-weight:800;
-}
-
-.pl-sub{
-  font-size:13px;
-  color:#666;
-}
-
-.pl-right{
-  display:flex;
-  gap:6px;
-  flex-wrap:wrap;
-}
-
-.pl-right button{
-  padding:6px 10px;
-  font-size:13px;
-}
-
-/* 수정/삭제 (리스트 안) */
-.edit-btn{
-  background:#ffe27a;
-}
-.delete-btn{
-  background:#ff8b8b;
+.count-pill{
+  background:#b32647;
+  color:#fff;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 12px;
 }
 
 /* =========================
-   모달
+   YouTube 느낌 플레이리스트 레이아웃
+   - 7.5개만 보이게 + 스크롤
+========================= */
+
+/* 한 줄 높이(여기 바꾸면 전체가 같이 맞춰짐) */
+:root{
+  --pl-row-h: 72px;               /* 유튜브 느낌 한 줄 높이 */
+  --pl-max-h: 540px;              /* 72px * 7.5 = 540px */
+
+  /* 오른쪽 가사 드로어 폭 */
+  --lyrics-w: 360px;
+}
+
+/* 목록은 7.5개만 보이고 밑은 스크롤 */
+.playlist{
+  width: min(980px, 95%);
+  margin: 10px auto 20px;
+  background: #fff;
+  border: 1px solid #e6e6e6;
+  border-radius: 16px;
+
+  max-height: var(--pl-max-h);
+  overflow-y: auto;
+}
+
+/* 한 줄 */
+.pl-item{
+  height: var(--pl-row-h);
+  display: grid;
+  grid-template-columns: 78px 120px 1fr auto; /* 왼쪽 / 썸네일 / 제목 / 오른쪽 버튼들 */
+  gap: 12px;
+  align-items: center;
+  padding: 10px 12px;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+  background: #fff;
+}
+.pl-item:hover{
+  background: #f3f3f3;
+}
+
+/* 재생중 하이라이트 */
+.pl-item.active{
+  background: #efe7ff;
+}
+
+/* 왼쪽 묶음(번호/핸들/재생삼각형) */
+.pl-left{
+  display:flex;
+  align-items:center;
+  gap: 10px;
+}
+
+/* 순서 번호 */
+.pl-index{
+  width: 18px;
+  text-align: right;
+  color:#666;
+  font-size: 13px;
+}
+
+/* 드래그 핸들(두 줄) */
+.pl-handle{
+  width: 16px;
+  height: 16px;
+  display:flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
+  opacity: 0.55;
+}
+.pl-handle span{
+  display:block;
+  height: 2px;
+  background: #777;
+  border-radius: 4px;
+}
+
+/* 재생 삼각형 */
+.pl-playing{
+  width: 18px;
+  color: #6b2cff;
+  font-weight: 900;
+}
+
+/* 썸네일 */
+.pl-thumb img{
+  width: 120px;
+  height: 68px;
+  object-fit: cover;
+  border-radius: 10px;
+  display:block;
+}
+
+/* 제목/채널 */
+.pl-meta{
+  text-align:left;
+  overflow: hidden;
+}
+.pl-title{
+  font-weight: 800;
+  color: #111;
+  font-size: 15px;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pl-sub{
+  margin-top: 4px;
+  font-size: 13px;
+  color: #666;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 오른쪽 버튼 영역(유튜브/가사/MR/악보/수정/삭제) */
+.pl-right{
+  display:flex;
+  align-items:center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  max-width: 340px;
+}
+
+/* 오른쪽 링크 버튼(유튜브/MR/악보) */
+.pl-link{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding: 7px 10px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 800;
+  text-decoration:none;
+  background: #b32647;
+  color:#fff;
+  border: 0;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.pl-link:hover{
+  background:#87142e;
+}
+
+/* 오른쪽 "가사" 버튼 */
+.pl-btn{
+  padding: 7px 10px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 800;
+  background: #eee;
+  color:#111;
+}
+.pl-btn:hover{
+  background:#b32647;
+  color:#fff;
+}
+
+/* 없는 항목 표시(가사 없음/MR/악보 없음) */
+.pl-empty{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding: 7px 10px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 800;
+  background: #eee;
+  color:#111;
+  opacity: 0.45;
+}
+
+/* 스크롤바(선택) */
+.playlist::-webkit-scrollbar{ width: 8px; }
+.playlist::-webkit-scrollbar-thumb{
+  background:#cfcfcf;
+  border-radius: 999px;
+}
+
+/* =========================
+   상단 컨트롤 버튼 줄
+========================= */
+.controls{
+  width: min(980px, 95%);
+  margin: 10px auto 0;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.controls button{
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-weight: 800;
+}
+
+/* ✅ 활성(모드) 버튼 강조 + 남은횟수 표시가 들어가도 예쁘게 */
+.active-control{
+  outline: 3px solid rgba(179, 38, 71, 0.18);
+  box-shadow: 0 0 0 3px rgba(179, 38, 71, 0.10) inset;
+}
+
+/* =========================
+   ✅ 오른쪽 가사 패널(드로어)
+========================= */
+
+/* 가사 토글 버튼(오른쪽 상단 ≡) */
+.lyrics-toggle{
+  position: fixed;
+  top: 14px;
+  right: 14px;
+  z-index: 9999;
+  background: #ffffff;
+  border: 1px solid #e3e3e3;
+  color: #222;
+  border-radius: 14px;
+  padding: 10px 12px;
+  cursor: pointer;
+  font-size: 18px;
+  transition: 0.2s;
+}
+.lyrics-toggle:hover{
+  background:#f7e9ee;
+  border-color:#b32647;
+}
+
+/* 본문 영역(패널 열리면 밀리게) */
+#mainContent{
+  transition: transform 0.25s ease;
+  will-change: transform;
+}
+
+/* 드로어 본체 */
+.lyrics-drawer{
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: var(--lyrics-w);
+  max-width: 90vw;
+  height: 100vh;
+  background: #ffffff;
+  border-left: 1px solid #e6e6e6;
+  box-shadow: -12px 0 30px rgba(0,0,0,0.12);
+  transform: translateX(110%);
+  transition: transform 0.25s ease;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+/* 열림 상태 */
+body.lyrics-open .lyrics-drawer{
+  transform: translateX(0);
+}
+
+/* 본문 밀기(데스크탑에서만 자연스러움) */
+@media (min-width: 980px){
+  body.lyrics-open #mainContent{
+    transform: translateX(calc(var(--lyrics-w) * -1 / 2));
+  }
+}
+
+/* 오버레이 */
+.lyrics-overlay{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.25);
+  z-index: 9998;
+  display: none;
+}
+body.lyrics-open .lyrics-overlay{
+  display:block;
+}
+
+/* 헤더 */
+.lyrics-head{
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid #eee;
+}
+.lyrics-head-title{
+  font-weight: 900;
+  color:#111;
+}
+.lyrics-close{
+  background:#eee;
+  color:#111;
+  border:none;
+  border-radius: 12px;
+  padding: 6px 10px;
+  cursor:pointer;
+}
+.lyrics-close:hover{
+  background:#ddd;
+}
+
+/* 현재 곡 제목 */
+.lyrics-now-title{
+  padding: 12px 16px 0;
+  font-weight: 900;
+  color:#111;
+}
+
+/* 내용 */
+.lyrics-body{
+  padding: 10px 16px 16px;
+  overflow: auto;
+}
+.lyrics-body pre{
+  margin:0;
+  white-space:pre-wrap;
+  line-height: 1.6;
+  font-family: inherit;
+}
+
+/* =========================
+   모달(수정창)
 ========================= */
 .modal-overlay{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,0.3);
-  z-index:9998;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.25);
+  z-index: 9998;
 }
 
 .modal{
-  position:fixed;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%);
-  width:min(640px,92vw);
-  background:#fff;
-  border-radius:16px;
-  padding:16px;
-  z-index:9999;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%,-50%);
+  width: min(640px, 92vw);
+  max-height: 85vh;
+  overflow: auto;
+  background: #fff;
+  border: 1px solid #e6e6e6;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+  z-index: 9999;
+  text-align: left;
+}
+
+.modal-head{
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid #eee;
+}
+
+.modal-title{
+  font-weight: 900;
+  color: #111;
+}
+
+.modal-close{
+  background:#eee;
+  color:#111;
+  border:none;
+  border-radius: 10px;
+  padding: 6px 10px;
+  cursor:pointer;
 }
 
 .modal-body{
+  padding: 14px 16px;
   display:flex;
-  flex-direction:column;
-  gap:10px;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.modal-label{
+  font-size: 12px;
+  opacity: 0.75;
+  margin-top: 6px;
+}
+
+.modal-body input,
+.modal-body textarea{
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .modal-actions{
+  padding: 14px 16px;
+  border-top: 1px solid #eee;
   display:flex;
-  justify-content:flex-end;
-  gap:10px;
-  margin-top:12px;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.btn-ghost{
+  background:#eee !important;
+  color:#111 !important;
+}
+.btn-ghost:hover{
+  background:#ddd !important;
+}
+
+/* =========================
+   모바일에서 오른쪽 버튼 영역 너무 길어질 때 정리
+========================= */
+@media (max-width: 720px){
+  .pl-item{
+    grid-template-columns: 78px 110px 1fr;
+    height: auto;
+    padding: 10px 12px 12px;
+  }
+  .pl-thumb img{
+    width: 110px;
+    height: 62px;
+  }
+  .pl-right{
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+    max-width: none;
+    margin-top: 8px;
+  }
 }
