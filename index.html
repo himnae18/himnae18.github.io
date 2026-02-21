@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>My Music Playlist</title>
+</head>
+<body>
+
+<h1>🎧 내가 좋아하는 노래</h1>
+
+<h2>🇰🇷 한국곡</h2>
+<p>여기에 노래 넣기</p>
+
+<h2>🇯🇵 일본곡</h2>
+<p>여기에 노래 넣기</p>
+
+<h2>🇨🇳 중국곡</h2>
+<p>여기에 노래 넣기</p>
+
+<div id="timer"></div>
+
+<script>
+let start = Date.now();
+setInterval(()=>{
+  let s = Math.floor((Date.now()-start)/1000);
+  document.getElementById("timer").innerText =
+    "이 페이지에 머문 시간: " + s + "초";
+},1000);
+</script>
+
+</body>
+</html>
