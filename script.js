@@ -568,3 +568,54 @@ let lastRandomIndex = -1;
 
 let totalRandom = 0;   // 랜덤 N 전체횟수
 let totalLoops = 0;    // 반복 N 전체횟수
+
+function updateControlLabels() {
+  const $ = (id) => document.getElementById(id);
+
+  // 기본 라벨
+  const base = {
+    btnSeq: "순서대로",
+    btnRandOne: "랜덤곡",
+    btnRand10: "랜덤곡 10회",
+    btnRandAuto: "랜덤자동재생",
+    btnLoop5: "5회반복",
+    btnLoop10: "10회반복",
+    btnLoopInf: "무한반복"
+  };
+
+  // 초기화
+  Object.keys(base).forEach(id => {
+    const el = $(id);
+    if (el) el.textContent = base[id];
+  });
+
+  // 랜덤 N 남은횟수 표시
+  if (playMode === "rand_n" && totalRandom > 0) {
+    const el = $("btnRand10");
+    if (el) el.textContent = `랜덤곡 10회 (${remainingRandom}/${totalRandom})`;
+  }
+
+  // 반복 N 남은횟수 표시 (현재 곡 기준)
+  if (playMode === "loop_n" && totalLoops > 0) {
+    if (totalLoops === 5) {
+      const el = $("btnLoop5");
+      if (el) el.textContent = `5회반복 (${remainingLoops}/${totalLoops})`;
+    }
+    if (totalLoops === 10) {
+      const el = $("btnLoop10");
+      if (el) el.textContent = `10회반복 (${remainingLoops}/${totalLoops})`;
+    }
+  }
+
+  // 랜덤자동재생 ON 표시(선택)
+  if (playMode === "rand_auto") {
+    const el = $("btnRandAuto");
+    if (el) el.textContent = `랜덤자동재생 (ON)`;
+  }
+
+  // 무한반복 ON 표시(선택)
+  if (playMode === "loop_inf") {
+    const el = $("btnLoopInf");
+    if (el) el.textContent = `무한반복 (ON)`;
+  }
+}
