@@ -251,3 +251,15 @@ function randomSong() {
 }
 
 showList();
+
+async function fetchYouTubeTitle(ytUrl) {
+  try {
+    const api = "https://www.youtube.com/oembed?format=json&url=" + encodeURIComponent(ytUrl);
+    const res = await fetch(api);
+    if (!res.ok) throw new Error("oEmbed 실패");
+    const data = await res.json();
+    return data.title || "제목 없음";
+  } catch (e) {
+    return "제목 없음";
+  }
+}
