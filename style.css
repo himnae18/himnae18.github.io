@@ -1,26 +1,34 @@
 body {
-  font-family: Arial;
-  background: #111;
+  background: #0f0f0f;
   color: white;
+  font-family: Arial;
   text-align: center;
-  padding: 20px;
-}
-
-.menu-box {
-  margin-top: 20px;
 }
 
 .menu {
-  font-size: 20px;
-  text-decoration: none;
-  color: white;
-  background: #222;
-  padding: 10px 20px;
-  border-radius: 10px;
   display: inline-block;
+  background: #222;
+  padding: 12px 20px;
   margin: 5px;
+  border-radius: 12px;
+  color: white;
+  text-decoration: none;
+  font-size: 18px;
 }
 
 .menu:hover {
-  background: #444;
+  background: #ff0044;
+}
+
+input, button {
+  padding: 8px;
+  border-radius: 6px;
+  border: none;
+  margin: 3px;
+}
+
+button {
+  background: #ff0044;
+  color: white;
+  cursor: pointer;
 }
