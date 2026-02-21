@@ -1,41 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>일본 밝은 노래</title>
+<link rel="stylesheet" href="../style.css">
+</head>
+
+<body>
+
 <h1>🇯🇵 일본 밝은 노래</h1>
 
-<div class="song">
-<h3>노래 제목</h3>
-
-<!-- 유튜브 -->
-<iframe width="560" height="315"
-src="<iframe width="560" height="315" src="https://www.youtube.com/embed/OEYI3DOJEOw?si=wUztjGkZGdjQ2cc5" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>"
-frameborder="0" allowfullscreen></iframe>
-  
-<!-- MR -->
-<audio controls src="../songs/lemon.mp3"></audio>
-
-<!-- 가사 -->
-<details>
-<summary>가사 보기</summary>
-<p>가사 내용...</p>
-</details>
-
-<!-- 악보 -->
-<a href="../score/lemon.pdf">악보 다운로드</a>
-</div>
-
-<hr>
-
-<button onclick="addSong()">+ 노래 추가</button>
-<div id="songList"></div>
-
-<script src="../script.js"></script>
-
-
-<h1>🌸 일본 밝은 노래</h1>
-
-<input id="title" placeholder="노래 제목">
-<input id="yt" placeholder="유튜브 링크">
-<button onclick="addSong()">노래 추가</button>
-
-<hr>
 <div id="list"></div>
 
+<hr>
+
+<h2>🎵 노래 추가</h2>
+<input id="title" placeholder="노래 제목">
+<input id="yt" placeholder="유튜브 링크 (전체 URL)">
+<button onclick="addSong()">노래 추가</button>
+
 <script src="../script.js"></script>
+
+</body>
+</html>
