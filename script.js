@@ -96,12 +96,15 @@ function showList() {
            ondrop="onDrop(event, ${i})"
            onclick="play(${i})">
 
-        <div class="pl-left">
-          <div class="pl-handle" title="드래그해서 순서 변경">
-            <span></span><span></span>
-          </div>
-          <div class="pl-playing">${i === current ? "▶" : ""}</div>
-        </div>
+<div class="pl-left">
+  <div class="pl-index">${i + 1}</div>
+
+  <div class="pl-handle" title="드래그해서 순서 변경" onclick="event.stopPropagation();">
+    <span></span><span></span>
+  </div>
+
+  <div class="pl-playing">${i === current ? "▶" : ""}</div>
+</div>
 
         <div class="pl-thumb">
           ${thumb ? `<img src="${thumb}" alt="thumb">` : ""}
