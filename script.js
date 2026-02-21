@@ -69,6 +69,7 @@ function showList() {
           ${s.mr ? `<a href="${s.mr}" target="_blank">MR</a>` : `<span class="empty">MR</span>`}
           ${s.score ? `<a href="${s.score}" target="_blank">악보</a>` : `<span class="empty">악보</span>`}
 
+          <button class="edit-btn" onclick="editSong(${i})">수정</button>
           <button class="delete-btn" onclick="deleteSong(${i})">삭제</button>
         </div>
       </div>
@@ -124,17 +125,71 @@ function addSong() {
   play(songs.length - 1);
 }
 
+function editSong(index) {
+  const s = songs[index];
+  if (!s) return;
+
+  // ✅ 빈칸이면 "유지", del 입력하면 "삭제"
+  const newTitle = prompt("새 제목 (빈칸=유지)", s.title || "");
+  if (newTitle === null) return;
+
+  const newYtUrl = prompt("새 유튜브 링크 (빈칸=유지)", s.ytUrl || "");
+  if (newYtUrl === null) return;
+
+  const newLyrics = prompt("새 가사 링크 (빈칸=유지, del=삭제)", s.lyrics || "");
+  if (newLyrics === null) return;
+
+  const newMr = prompt("새 MR 링크 (빈칸=유지, del=삭제)", s.mr || "");
+  if (newMr === null) return;
+
+  const newScore = prompt("새 악보 링크 (빈칸=유지, del=삭제)", s.score || "");
+  if (newScore === null) return;
+
+  // 제목 변경
+  if (newTitle.trim() !== "") s.title = newTitle.trim();
+
+  // 유튜브 변경(바꾸면 id도 다시 뽑기)
+  if (newYtUrl.trim() !== "") {
+    const id = extractID(newYtUrl.trim());
+    if (!id) {
+      alert("유튜브 링크가 올바르지 않아! (watch?v= 또는 youtu.be 링크로 넣어봐)");
+      return;
+    }
+    s.ytUrl = newYtUrl.trim();
+    s.id = id;
+  }
+
+  // 링크 변경/삭제 처리 함수
+  const applyLink = (key, value) => {
+    const v = value.trim();
+    if (v === "") return;                 // 유지
+    if (v.toLowerCase() === "del") {
+      s[key] = "";                        // 삭제
+      return;
+    }
+    s[key] = v;                           // 변경
+  };
+
+  applyLink("lyrics", newLyrics);
+  applyLink("mr", newMr);
+  applyLink("score", newScore);
+
+  save();
+  showList();
+
+  // 지금 재생 중인 곡을 수정했으면 플레이어도 업데이트
+  if (index === current) play(current);
+}
+
 function deleteSong(index) {
   if (!confirm("이 노래를 삭제할까?")) return;
 
-  // 삭제하기 전에 현재 재생중이던 곡 인덱스 처리
   const wasCurrent = (index === current);
 
   songs.splice(index, 1);
   save();
   showList();
 
-  // 재생 중이던 곡을 삭제했다면
   if (songs.length === 0) {
     document.getElementById("player").src = "";
     current = 0;
@@ -142,11 +197,9 @@ function deleteSong(index) {
   }
 
   if (wasCurrent) {
-    // 삭제한 자리에 있는 곡(또는 마지막 곡)을 이어서 재생
     if (current >= songs.length) current = songs.length - 1;
     play(current);
   } else {
-    // 삭제한 곡이 현재곡보다 앞에 있으면 current 인덱스 보정
     if (index < current) current--;
   }
 }
