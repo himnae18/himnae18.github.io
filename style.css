@@ -417,3 +417,91 @@ button:hover {
   outline: 3px solid rgba(179, 38, 71, 0.25);
   box-shadow: 0 0 0 3px rgba(179, 38, 71, 0.15) inset;
 }
+
+/* =========================
+   모달(수정창)
+========================= */
+.modal-overlay{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.25);
+  z-index: 9998;
+}
+
+.modal{
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%,-50%);
+  width: min(640px, 92vw);
+  max-height: 85vh;
+  overflow: auto;
+  background: #fff;
+  border: 1px solid #e6e6e6;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+  z-index: 9999;
+  text-align: left;
+}
+
+.modal-head{
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid #eee;
+}
+
+.modal-title{
+  font-weight: 900;
+  color: #111;
+}
+
+.modal-close{
+  background:#eee;
+  color:#111;
+  border:none;
+  border-radius: 10px;
+  padding: 6px 10px;
+  cursor:pointer;
+}
+
+.modal-body{
+  padding: 14px 16px;
+  display:flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.modal-label{
+  font-size: 12px;
+  opacity: 0.75;
+  margin-top: 6px;
+}
+
+.modal-body input,
+.modal-body textarea{
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.modal-actions{
+  padding: 14px 16px;
+  border-top: 1px solid #eee;
+  display:flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.btn-ghost{
+  background:#eee !important;
+  color:#111 !important;
+}
+
+/* =========================
+   컨트롤 버튼 남은횟수 표시용(선택)
+========================= */
+.active-control{
+  outline: 3px solid rgba(179, 38, 71, 0.18);
+  box-shadow: 0 0 0 3px rgba(179, 38, 71, 0.10) inset;
+}
