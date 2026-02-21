@@ -1,50 +1,26 @@
-details > summary {
-  font-size: 20px;
-  cursor: pointer;
-  color: #38bdf8;
-  margin: 10px 0;
-}
-
-details[open] > summary {
-  color: #facc15;
-}
-
-details {
-  margin-bottom: 15px;
-}
-
 body {
-  background: #0f172a;
-  color: white;
   font-family: Arial;
+  background: #111;
+  color: white;
+  text-align: center;
   padding: 20px;
 }
 
+.menu-box {
+  margin-top: 20px;
+}
+
 .menu {
-  display: inline-block;
-  background: #1f2937;
-  padding: 10px 15px;
-  margin: 5px 0;
-  border-radius: 8px;
+  font-size: 20px;
   text-decoration: none;
   color: white;
-  font-size: 18px;
+  background: #222;
+  padding: 10px 20px;
+  border-radius: 10px;
+  display: inline-block;
+  margin: 5px;
 }
 
 .menu:hover {
-  background: #2563eb;
-}
-
-.song {
-  background: #111827;
-  padding: 15px;
-  border-radius: 10px;
-  margin: 10px 0;
-}
-
-details > summary {
-  font-size: 20px;
-  cursor: pointer;
-  color: #38bdf8;
-  margin: 10px 0;
+  background: #444;
 }
