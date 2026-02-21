@@ -36,3 +36,47 @@ player.addEventListener("ended", () => {
   player.src = playlist[current];
   player.play();
 });
+
+let songs = JSON.parse(localStorage.getItem("songs")) || [];
+
+function addSong() {
+  let song = {
+    country: country.value,
+    mood: mood.value,
+    title: title.value,
+    youtube: youtube.value,
+    mr: mr.value,
+    score: score.value,
+    lyrics: lyrics.value
+  };
+
+  songs.push(song);
+  localStorage.setItem("songs", JSON.stringify(songs));
+  showSongs();
+}
+
+function showSongs() {
+  let html = "";
+
+  for (let s of songs) {
+    html += `
+    <div class="song">
+      <h3>${s.country} / ${s.mood} / ${s.title}</h3>
+
+      <iframe width="300" src="${s.youtube.replace("watch?v=","embed/")}"></iframe>
+      <audio controls src="${s.mr}"></audio>
+
+      <details>
+        <summary>가사</summary>
+        <p>${s.lyrics}</p>
+      </details>
+
+      <a href="${s.score}">악보</a>
+    </div>
+    `;
+  }
+
+  document.getElementById("playlist").innerHTML = html;
+}
+
+showSongs();
