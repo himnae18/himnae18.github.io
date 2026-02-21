@@ -1,39 +1,80 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<title>일본 밝은 노래</title>
-<link rel="stylesheet" href="../style.css">
+  <meta charset="UTF-8">
+  <title>일본 밝은 노래</title>
+  <link rel="stylesheet" href="../style.css">
 </head>
 
 <body>
 
-<!-- 여기 붙여넣기 -->
-<button id="hamburgerBtn" class="hamburger">☰</button>
-...
-</nav>
-  
-<h1>🇯🇵 일본 밝은 노래</h1>
+  <!-- ✅ 햄버거 드로어(절대 ... 쓰면 안됨) -->
+  <button id="hamburgerBtn" class="hamburger">☰</button>
+  <div id="drawerOverlay" class="drawer-overlay"></div>
 
-<!-- 플레이어 -->
-<iframe id="player" width="560" height="315"></iframe>
+  <nav id="drawer" class="drawer">
+    <div class="drawer-header">
+      <div class="drawer-title">메뉴</div>
+      <button id="drawerCloseBtn" class="drawer-close">✕</button>
+    </div>
 
-<br>
-<button onclick="nextSong()">⏭ 다음곡</button>
-<button onclick="randomSong()">🎲 랜덤</button>
+    <div class="drawer-section">
+      <h3>일본노래</h3>
+      <a href="../japan/index.html">
+        <span>🇯🇵 일본노래</span>
+        <span>›</span>
+      </a>
 
-<hr>
-<div id="list"></div>
+      <a class="sub" href="../japan/bright.html">
+        <span>밝은노래</span>
+        <span class="count-pill">(<span id="count-jp-bright">0</span>)</span>
+      </a>
+    </div>
 
-<hr>
-<h2>🎵 노래 추가</h2>
-<input id="yt" placeholder="유튜브 링크">
-<textarea id="lyrics" placeholder="가사 입력 (복붙 가능)" rows="6"></textarea>
-<input id="mr" placeholder="MR 링크(선택)">
-<input id="score" placeholder="악보 링크(선택)">
-<button onclick="addSong()">추가</button>
+    <div class="drawer-section">
+      <h3>중국노래</h3>
+      <a href="../china/index.html">
+        <span>🇨🇳 중국노래</span>
+        <span>›</span>
+      </a>
 
-<script src="../nav.js"></script>
-<script src="../script.js"></script>
+      <a class="sub" href="../china/bright.html">
+        <span>밝은노래</span>
+        <span class="count-pill">(<span id="count-cn-bright">0</span>)</span>
+      </a>
+    </div>
+
+    <div class="drawer-section">
+      <a href="../index.html">
+        <span>🏠 메인으로</span>
+        <span>›</span>
+      </a>
+    </div>
+  </nav>
+
+  <h1>🇯🇵 일본 밝은 노래</h1>
+
+  <!-- 플레이어 -->
+  <iframe id="player" width="560" height="315"></iframe>
+
+  <br>
+  <button onclick="nextSong()">⏭ 다음곡</button>
+  <button onclick="randomSong()">🎲 랜덤</button>
+
+  <hr>
+  <div id="list"></div>
+
+  <hr>
+  <h2>🎵 노래 추가</h2>
+
+  <input id="yt" placeholder="유튜브 링크">
+  <textarea id="lyrics" placeholder="가사 입력 (복붙 가능)" rows="6"></textarea>
+  <input id="mr" placeholder="MR 링크(선택)">
+  <input id="score" placeholder="악보 링크(선택)">
+  <!-- ✅ 추가 버튼은 1개만 -->
+  <button onclick="addSong()">추가</button>
+
+  <script src="../nav.js"></script>
+  <script src="../script.js"></script>
 </body>
 </html>
