@@ -1,25 +1,19 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>일본 밝은 노래</title>
-<link rel="stylesheet" href="../style.css">
-</head>
-
-<body>
-
 <h1>🇯🇵 일본 밝은 노래</h1>
 
+<!-- 플레이어 -->
+<iframe id="player" width="560" height="315"></iframe>
+
+<br>
+<button onclick="nextSong()">⏭ 다음곡</button>
+<button onclick="randomSong()">🎲 랜덤</button>
+
+<hr>
 <div id="list"></div>
 
 <hr>
-
-<h2>🎵 노래 추가</h2>
+<h2>노래 추가</h2>
 <input id="title" placeholder="노래 제목">
-<input id="yt" placeholder="https://www.youtube.com/watch?v=Cil62GG5bKg">
-<button onclick="addSong()">노래 추가</button>
+<input id="yt" placeholder="유튜브 링크">
+<button onclick="addSong()">추가</button>
 
 <script src="../script.js"></script>
-
-</body>
-</html>
