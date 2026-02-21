@@ -397,3 +397,23 @@ button:hover {
   background:#cfcfcf;
   border-radius: 999px;
 }
+
+.controls{
+  width: min(980px, 95%);
+  margin: 10px auto 0;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.controls button{
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-weight: 700;
+}
+
+.active-control{
+  outline: 3px solid rgba(179, 38, 71, 0.25);
+  box-shadow: 0 0 0 3px rgba(179, 38, 71, 0.15) inset;
+}
