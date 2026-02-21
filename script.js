@@ -1,50 +1,47 @@
-let songs = [];
-let currentIndex = 0;
+let songs = JSON.parse(localStorage.getItem("jpBright")) || [];
+let current = 0;
 
-// 유튜브 링크 → embed 변환
-function convertYT(url) {
-  let id = url.split("v=")[1];
-  if (!id) return "";
-  id = id.split("&")[0];
-  return "https://www.youtube.com/embed/" + id;
+function save() {
+  localStorage.setItem("jpBright", JSON.stringify(songs));
 }
 
-// 노래 추가
+function extractID(url) {
+  return url.split("v=")[1]?.split("&")[0];
+}
+
+function showList() {
+  let html = "";
+  songs.forEach((s, i) => {
+    html += `<p onclick="play(${i})">▶ ${s.title}</p>`;
+  });
+  document.getElementById("list").innerHTML = html;
+}
+
+function play(i) {
+  current = i;
+  document.getElementById("player").src =
+    "https://www.youtube.com/embed/" + songs[i].id;
+}
+
 function addSong() {
   let title = document.getElementById("title").value;
-  let yt = document.getElementById("yt").value;
-  let embed = convertYT(yt);
+  let url = document.getElementById("yt").value;
+  let id = extractID(url);
 
-  songs.push({ title, embed });
-
+  songs.push({ title, id });
+  save();
   showList();
-  playSong(songs.length - 1);
 }
 
-// 리스트 표시
-function showList() {
-  let list = document.getElementById("list");
-  list.innerHTML = "";
-
-  songs.forEach((song, i) => {
-    list.innerHTML += `<div onclick="playSong(${i})">🎵 ${song.title}</div>`;
-  });
-}
-
-// 재생
-function playSong(index) {
-  currentIndex = index;
-  document.getElementById("player").src = songs[index].embed;
-}
-
-// 다음곡
 function nextSong() {
-  currentIndex = (currentIndex + 1) % songs.length;
-  playSong(currentIndex);
+  current++;
+  if (current >= songs.length) current = 0;
+  play(current);
 }
 
-// 랜덤
 function randomSong() {
-  currentIndex = Math.floor(Math.random() * songs.length);
-  playSong(currentIndex);
+  current = Math.floor(Math.random() * songs.length);
+  play(current);
 }
+
+showList();
