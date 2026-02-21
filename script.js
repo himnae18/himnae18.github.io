@@ -338,3 +338,17 @@ document.addEventListener("DOMContentLoaded", () => {
     if (e.key === "Escape") closeLyricsDrawer();
   });
 });
+
+function play(i) {
+  current = i;
+  if (!songs[i] || !songs[i].id) return;
+
+  const id = songs[i].id;
+  document.getElementById("player").src =
+    "https://www.youtube.com/embed/" + id + "?autoplay=1&rel=0";
+
+  showList();
+
+  // ✅ 추가
+  updateLyricsDrawer();
+}
