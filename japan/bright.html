@@ -1,30 +1,26 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>일본 밝은 노래</title>
-  <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="../style.css" />
 </head>
 
 <body class="light-page">
+  <!-- 햄버거 -->
+  <button id="hamburgerBtn" class="hamburger" aria-label="메뉴 열기">☰</button>
+  <div id="drawerOverlay" class="drawer-overlay" aria-hidden="true"></div>
 
-  <!-- ✅ 햄버거 드로어 -->
-  <button id="hamburgerBtn" class="hamburger">☰</button>
-  <div id="drawerOverlay" class="drawer-overlay"></div>
-
-  <nav id="drawer" class="drawer">
+  <nav id="drawer" class="drawer" aria-label="사이드 메뉴">
     <div class="drawer-header">
       <div class="drawer-title">메뉴</div>
-      <button id="drawerCloseBtn" class="drawer-close">✕</button>
+      <button id="drawerCloseBtn" class="drawer-close" aria-label="메뉴 닫기">✕</button>
     </div>
 
     <div class="drawer-section">
       <h3>일본노래</h3>
-      <a href="../japan/index.html">
-        <span>🇯🇵 일본노래</span>
-        <span>›</span>
-      </a>
-
+      <a href="../japan/index.html"><span>🇯🇵 일본노래</span><span>›</span></a>
       <a class="sub" href="../japan/bright.html">
         <span>밝은노래</span>
         <span class="count-pill">(<span id="count-jp-bright">0</span>)</span>
@@ -33,11 +29,7 @@
 
     <div class="drawer-section">
       <h3>중국노래</h3>
-      <a href="../china/index.html">
-        <span>🇨🇳 중국노래</span>
-        <span>›</span>
-      </a>
-
+      <a href="../china/index.html"><span>🇨🇳 중국노래</span><span>›</span></a>
       <a class="sub" href="../china/bright.html">
         <span>밝은노래</span>
         <span class="count-pill">(<span id="count-cn-bright">0</span>)</span>
@@ -45,103 +37,100 @@
     </div>
 
     <div class="drawer-section">
-      <a href="../index.html">
-        <span>🏠 메인으로</span>
-        <span>›</span>
-      </a>
+      <a href="../index.html"><span>🏠 메인으로</span><span>›</span></a>
     </div>
   </nav>
 
-  <!-- ✅ 오른쪽 상단: 가사 패널 토글 버튼(줄2개 느낌) -->
-  <button id="lyricsBtn" class="lyrics-toggle" title="가사 패널">≡</button>
+  <!-- 가사 패널 토글 -->
+  <button id="lyricsBtn" class="lyrics-toggle" title="가사 패널" aria-label="가사 패널">≡</button>
 
-  <!-- ✅ 본문(영상 포함): 패널 열릴 때 자연스럽게 밀리는 대상 -->
-  <div id="mainContent">
-
+  <!-- 본문 -->
+  <main id="mainContent">
     <h1>🇯🇵 일본 밝은 노래</h1>
 
-    <!-- 플레이어 -->
-    <iframe id="player" width="560" height="315"></iframe>
+    <iframe id="player" allow="autoplay; encrypted-media" allowfullscreen></iframe>
 
-<br>
+    <div class="controls">
+      <button id="btnSeq">순서대로</button>
 
-<div class="controls">
-  <button id="btnSeq">순서대로</button>
+      <button id="btnRandOne">랜덤곡</button>
+      <button id="btnRand10">랜덤곡 10회</button>
+      <button id="btnRandAuto">랜덤자동재생</button>
 
-  <button id="btnRandOne">랜덤곡</button>
-  <button id="btnRand10">랜덤곡 10회</button>
-  <button id="btnRandAuto">랜덤자동재생</button>
+      <button id="btnLoop5">5회반복</button>
+      <button id="btnLoop10">10회반복</button>
+      <button id="btnLoopInf">무한반복</button>
 
-  <button id="btnLoop5">5회반복</button>
-  <button id="btnLoop10">10회반복</button>
-  <button id="btnLoopInf">무한반복</button>
-
-  <button id="btnEdit">수정</button>
-  <button id="btnDelete">삭제</button>
-</div>
-
-    <hr>
-    <div id="list"></div>
-
-    <hr>
-    <h2>🎵 노래 추가</h2>
-
-    <input id="yt" placeholder="유튜브 링크">
-    <textarea id="lyrics" placeholder="가사 입력 (복붙 가능)" rows="6"></textarea>
-    <input id="mr" placeholder="MR 링크(선택)">
-    <input id="score" placeholder="악보 링크(선택)">
-    <button onclick="addSong()">추가</button>
-
-  </div>
-
-  <!-- ✅ 오른쪽 가사 패널 -->
-  <aside id="lyricsDrawer" class="lyrics-drawer">
-    <div class="lyrics-head">
-      <div class="lyrics-head-title">가사</div>
-      <button id="lyricsCloseBtn" class="lyrics-close">✕</button>
+      <button id="btnEdit">수정</button>
+      <button id="btnDelete">삭제</button>
     </div>
 
-    <div id="lyricsNowTitle" class="lyrics-now-title">재생중인 곡이 없어</div>
+    <hr />
 
+    <!-- ✅ 목록은 script.js가 그려줌 -->
+    <div id="list"></div>
+
+    <hr />
+
+    <h2>🎵 노래 추가</h2>
+    <input id="yt" placeholder="유튜브 링크" />
+    <textarea id="lyrics" placeholder="가사 입력 (복붙 가능)" rows="6"></textarea>
+    <input id="mr" placeholder="MR 링크(선택)" />
+    <input id="score" placeholder="악보 링크(선택)" />
+    <button onclick="addSong()">추가</button>
+  </main>
+
+  <!-- ✅ 가사 패널(플로팅 창) -->
+  <aside id="lyricsDrawer" class="lyrics-drawer" aria-label="가사 패널">
+    <div class="lyrics-head">
+      <div class="lyrics-head-title">가사</div>
+      <button id="lyricsCloseBtn" class="lyrics-close" aria-label="가사 닫기">✕</button>
+    </div>
+
+    <!-- ✅ 여기에서 유튜브/MR/악보 링크 보여주기 -->
     <div class="lyrics-body">
+      <div id="lyricsNowTitle" class="lyrics-now-title">재생중인 곡이 없어</div>
+
+      <div class="lyrics-links" style="padding:10px 0 6px;">
+        <a id="nowYoutube" class="pl-link" href="#" target="_blank" rel="noopener">유튜브</a>
+        <a id="nowMr" class="pl-link" href="#" target="_blank" rel="noopener">MR</a>
+        <a id="nowScore" class="pl-link" href="#" target="_blank" rel="noopener">악보</a>
+      </div>
+
       <pre id="lyricsNowText">노래를 재생하면 여기서 가사를 볼 수 있어.</pre>
     </div>
   </aside>
 
-  <!-- ✅ 바깥 클릭 닫기용 오버레이 -->
-  <div id="lyricsOverlay" class="lyrics-overlay"></div>
+  <!-- ✅ 수정 모달 -->
+  <div id="editOverlay" class="modal-overlay" style="display:none;"></div>
+
+  <div id="editModal" class="modal" style="display:none;">
+    <div class="modal-head">
+      <div class="modal-title">노래 수정</div>
+      <button id="editCloseBtn" class="modal-close" aria-label="수정창 닫기">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <label class="modal-label">유튜브 링크(바꾸면 제목도 자동 갱신)</label>
+      <input id="editYt" placeholder="유튜브 링크" />
+
+      <label class="modal-label">가사(복붙)</label>
+      <textarea id="editLyrics" rows="10" placeholder="가사 입력"></textarea>
+
+      <label class="modal-label">MR 링크(선택)</label>
+      <input id="editMr" placeholder="MR 링크" />
+
+      <label class="modal-label">악보 링크(선택)</label>
+      <input id="editScore" placeholder="악보 링크" />
+    </div>
+
+    <div class="modal-actions">
+      <button id="editSaveBtn">저장</button>
+      <button id="editCancelBtn" class="btn-ghost">취소</button>
+    </div>
+  </div>
 
   <script src="../nav.js"></script>
   <script src="../script.js"></script>
-
-  <!-- ✅ 수정 모달(페이지 안에서 편하게 수정) -->
-<div id="editOverlay" class="modal-overlay" style="display:none;"></div>
-
-<div id="editModal" class="modal" style="display:none;">
-  <div class="modal-head">
-    <div class="modal-title">노래 수정</div>
-    <button id="editCloseBtn" class="modal-close">✕</button>
-  </div>
-
-  <div class="modal-body">
-    <label class="modal-label">유튜브 링크(바꾸면 제목도 자동 갱신)</label>
-    <input id="editYt" placeholder="유튜브 링크">
-
-    <label class="modal-label">가사(복붙)</label>
-    <textarea id="editLyrics" rows="10" placeholder="가사 입력"></textarea>
-
-    <label class="modal-label">MR 링크(선택)</label>
-    <input id="editMr" placeholder="MR 링크">
-
-    <label class="modal-label">악보 링크(선택)</label>
-    <input id="editScore" placeholder="악보 링크">
-  </div>
-
-  <div class="modal-actions">
-    <button id="editSaveBtn">저장</button>
-    <button id="editCancelBtn" class="btn-ghost">취소</button>
-  </div>
-</div>
-  
 </body>
 </html>
