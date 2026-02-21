@@ -563,3 +563,8 @@ function setActiveControl(activeId) {
   ids.forEach(id => document.getElementById(id)?.classList.remove("active-control"));
   document.getElementById(activeId)?.classList.add("active-control");
 }
+
+let lastRandomIndex = -1;
+
+let totalRandom = 0;   // 랜덤 N 전체횟수
+let totalLoops = 0;    // 반복 N 전체횟수
