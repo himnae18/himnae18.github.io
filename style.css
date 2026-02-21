@@ -72,3 +72,16 @@ button {
   border-radius:10px;
   font-size:14px;
 }
+
+.delete-btn{
+  background:#444;
+  color:white;
+  border:none;
+  padding:6px 10px;
+  border-radius:10px;
+  cursor:pointer;
+  margin-left:10px;
+}
+.delete-btn:hover{
+  background:#ff0000;
+}
