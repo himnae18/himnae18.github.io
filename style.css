@@ -98,3 +98,111 @@ button {
 .edit-btn:hover{
   background:#00aaff;
 }
+
+/* ====== 햄버거 버튼 ====== */
+.hamburger {
+  position: fixed;
+  top: 14px;
+  left: 14px;
+  z-index: 2000;
+  background: #222;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 12px;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+/* ====== 오버레이(배경 어둡게) ====== */
+.drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  z-index: 1900;
+  display: none;
+}
+.drawer-overlay.open {
+  display: block;
+}
+
+/* ====== 드로어 본체 ====== */
+.drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 280px;
+  height: 100vh;
+  background: #111;
+  z-index: 1950;
+  transform: translateX(-100%);
+  transition: transform 0.25s ease;
+  padding: 16px;
+  text-align: left;
+}
+.drawer.open {
+  transform: translateX(0);
+}
+
+.drawer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.drawer-title {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.drawer-close {
+  background: #222;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+.drawer-section {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid #2a2a2a;
+}
+
+.drawer-section h3 {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+/* 드로어 링크 */
+.drawer a {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #222;
+  color: white;
+  text-decoration: none;
+  padding: 10px 12px;
+  border-radius: 12px;
+  margin: 6px 0;
+}
+
+.drawer a:hover {
+  background: #ff0044;
+}
+
+.drawer .sub {
+  margin-left: 12px;
+  background: #1c1c1c;
+}
+
+.count-pill {
+  background: #444;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  opacity: 0.9;
+}
