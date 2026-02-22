@@ -68,7 +68,7 @@ async function fetchYouTubeMeta(ytUrl) {
 }
 
 /* =========================
-   목록 UI (✅ 오른쪽 버튼들 제거한 버전)
+   목록 UI (오른쪽 버튼 영역 제거 버전)
 ========================= */
 function showList() {
   const list = document.getElementById("list");
@@ -120,7 +120,7 @@ function showList() {
 }
 
 /* =========================
-   노래 추가 (제목칸 없이 링크로 자동 저장)
+   노래 추가
 ========================= */
 async function addSong() {
   const ytUrl = safeLink(document.getElementById("yt")?.value);
@@ -170,6 +170,7 @@ function deleteSong(index) {
 
   const wasCurrent = (index === current);
   songs.splice(index, 1);
+
   save();
   showList();
 
@@ -222,7 +223,7 @@ function onDrop(e, dropIndex) {
 }
 
 /* =========================
-   오른쪽 가사 드로어(밀어내는 방식은 CSS가 처리)
+   오른쪽 가사 드로어 (밀어내는 애니메이션은 CSS)
 ========================= */
 function openLyricsDrawer() {
   document.body.classList.add("lyrics-open");
@@ -238,10 +239,10 @@ function toggleLyricsDrawer() {
 
 function updateLyricsDrawer() {
   const titleEl = document.getElementById("lyricsNowTitle");
-  const textEl  = document.getElementById("lyricsNowText");
+  const textEl = document.getElementById("lyricsNowText");
   if (!titleEl || !textEl) return;
 
-  if (!songs || songs.length === 0 || !songs[current]) {
+  if (!songs.length || !songs[current]) {
     titleEl.textContent = "재생중인 곡이 없어";
     textEl.textContent = "노래를 재생하면 여기서 가사를 볼 수 있어.";
     return;
@@ -263,9 +264,9 @@ let apiReadyQueue = [];
 // 모드: "seq" | "rand_once" | "rand_n" | "rand_auto" | "loop_n" | "loop_inf"
 let playMode = "seq";
 let remainingRandom = 0;
-let remainingLoops  = 0;
+let remainingLoops = 0;
 let totalRandom = 0;
-let totalLoops  = 0;
+let totalLoops = 0;
 let loopInfinite = false;
 
 // ✅ 랜덤 연속 방지
@@ -381,7 +382,7 @@ function playNextSequential() {
   play(next);
 }
 
-/* ✅ 랜덤 픽 (연속 방지 옵션) */
+/* ✅ 랜덤 픽(연속 방지) */
 function pickRandomIndex(excludeConsecutive = true) {
   const n = songs.length;
   if (n === 0) return -1;
@@ -407,7 +408,7 @@ function playRandomPickAndPlay(excludeConsecutive = true) {
 }
 
 /* =========================
-   컨트롤 버튼(상단) 동작
+   컨트롤 버튼(상단)
 ========================= */
 function setActiveControl(activeId) {
   const ids = ["btnSeq","btnRandOne","btnRand10","btnRandAuto","btnLoop5","btnLoop10","btnLoopInf"];
@@ -434,13 +435,11 @@ function updateControlLabels() {
     if (el) el.textContent = base[id];
   });
 
-  // 랜덤 10회 남은횟수 표시
   if (playMode === "rand_n" && totalRandom > 0) {
     const el = $("btnRand10");
     if (el) el.textContent = `랜덤곡 10회 (${remainingRandom}/${totalRandom})`;
   }
 
-  // 반복 남은횟수 표시
   if (playMode === "loop_n" && totalLoops > 0) {
     if (totalLoops === 5) {
       const el = $("btnLoop5");
@@ -452,7 +451,6 @@ function updateControlLabels() {
     }
   }
 
-  // ON 표시
   if (playMode === "rand_auto") {
     const el = $("btnRandAuto");
     if (el) el.textContent = `랜덤자동재생 (ON)`;
@@ -464,7 +462,7 @@ function updateControlLabels() {
 }
 
 /* =========================
-   ✅ 수정 모달(prompt 대신)
+   ✅ 수정 모달
 ========================= */
 function closeEditModal() {
   document.getElementById("editModalOverlay")?.remove();
@@ -560,7 +558,7 @@ function openEditModal(index) {
 }
 
 /* =========================
-   DOMContentLoaded: 이벤트 연결
+   DOMContentLoaded
 ========================= */
 document.addEventListener("DOMContentLoaded", () => {
   // 가사 드로어
