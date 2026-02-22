@@ -13,6 +13,33 @@ body{
   text-align:center;
   margin:0;
   padding:0;
+   /* =========================
+   ✅ (추가) 가사 패널 열릴 때: 화면 딱 반(50%) 분할
+   - mainContent는 오른쪽 50vw 공간을 비워서 "영상이 밀린 것처럼" 보이게
+========================= */
+#mainContent{
+  transition:padding 0.25s ease;
+}
+
+@media (min-width:980px){
+  /* ✅ 가사 패널 열리면 본문이 오른쪽 절반(50vw)을 비움 */
+  body.lyrics-open #mainContent{
+    padding-right:50vw;
+  }
+
+  /* ✅ 가사 패널은 오른쪽 절반(50vw) 고정 */
+  body.lyrics-open .lyrics-drawer{
+    width:50vw;
+    max-width:50vw;
+  }
+}
+
+@media (max-width:979px){
+  /* 모바일에서는 기존처럼 슬라이드만 */
+  body.lyrics-open #mainContent{
+    padding-right:0;
+  }
+}
 }
 h1{ margin-top:18px; }
 
@@ -245,6 +272,89 @@ button:hover{ background:#87142e; }
   display:flex;
   flex-direction:column;
   text-align:left;
+   /* =========================
+   ✅ (추가) 가사 패널 탭(가사/MR/악보)
+   - tab-ready : 링크 있음(빨강)
+   - tab-active: 현재 선택(진한 포인트)
+   - tab-disabled: 링크 없음(회색/비활성)
+========================= */
+.lyrics-tabs{
+  display:flex;
+  gap:10px;
+  padding:10px 16px 6px;
+  border-bottom:1px solid #e6e6e6;
+  background:#fff;
+}
+
+.tab-link{
+  flex:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  height:42px;
+  border-radius:14px;
+  font-weight:900;
+  text-decoration:none;
+  border:1px solid #ddd;
+  user-select:none;
+  background:#fff;
+  color:#222;
+  cursor:pointer;
+}
+
+/* ✅ 링크/버튼 동일 스타일 */
+button.tab-link{
+  appearance:none;
+  -webkit-appearance:none;
+  border:1px solid #ddd;
+}
+
+/* ✅ 사용 가능(링크 있음) = 빨강 */
+.tab-ready{
+  background:#e53935;
+  color:#fff;
+  border-color:#e53935;
+}
+
+/* ✅ 현재 선택(활성 탭) = 진한 포인트 */
+.tab-active{
+  background:#b32647;
+  color:#fff;
+  border-color:#b32647;
+}
+
+/* ✅ 비활성(링크 없음) = 회색 + 클릭 불가 */
+.tab-disabled{
+  background:#eee;
+  color:#999;
+  border-color:#e3e3e3;
+  pointer-events:none;
+  opacity:0.95;
+}
+
+/* =========================
+   ✅ (추가) MR iframe 영역
+========================= */
+.lyrics-media{
+  margin-top:10px;
+}
+.lyrics-media iframe{
+  width:100%;
+  aspect-ratio:16/9;
+  border:0;
+  border-radius:14px;
+  background:#000;
+}
+.lyrics-media .media-link{
+  display:inline-block;
+  padding:10px 12px;
+  border-radius:12px;
+  background:#fff;
+  border:1px solid #ddd;
+  color:#222;
+  text-decoration:none;
+  font-weight:900;
+}
 }
 body.lyrics-open .lyrics-drawer{ transform:translateX(0); }
 
