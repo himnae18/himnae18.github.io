@@ -84,17 +84,24 @@
     <button type="button" onclick="addSong()">추가</button>
   </div>
 
-  <!-- ✅ 오른쪽 가사 드로어 -->
-  <aside id="lyricsDrawer" class="lyrics-drawer">
-    <div class="lyrics-head">
-      <div class="lyrics-head-title">가사</div>
-      <button id="lyricsCloseBtn" class="lyrics-close" type="button">✕</button>
-    </div>
-    <div id="lyricsNowTitle" class="lyrics-now-title">재생중인 곡이 없어</div>
-    <div class="lyrics-body">
-      <pre id="lyricsNowText">노래를 재생하면 여기서 가사를 볼 수 있어.</pre>
-    </div>
-  </aside>
+<aside id="lyricsDrawer" class="lyrics-drawer">
+  <div class="lyrics-head">
+    <div class="lyrics-head-title">가사</div>
+    <button id="lyricsCloseBtn" class="lyrics-close" type="button">✕</button>
+  </div>
+
+  <!-- ✅ MR / 악보 버튼 (있으면 빨강, 없으면 회색+비활성) -->
+  <div class="lyrics-tabs">
+    <a id="mrBtn" class="tab-link tab-disabled" href="#" target="_blank" rel="noopener">MR</a>
+    <a id="scoreBtn" class="tab-link tab-disabled" href="#" target="_blank" rel="noopener">악보</a>
+  </div>
+
+  <div id="lyricsNowTitle" class="lyrics-now-title">재생중인 곡이 없어</div>
+
+  <div class="lyrics-body">
+    <pre id="lyricsNowText">노래를 재생하면 여기서 가사를 볼 수 있어.</pre>
+  </div>
+</aside>
 
   <div id="lyricsOverlay" class="lyrics-overlay"></div>
 
