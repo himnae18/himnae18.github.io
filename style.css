@@ -417,6 +417,40 @@
 417:   font-family:inherit;
 418: }
 419: 
+  /* =========================
+   ✅ 가사 패널: MR/악보 버튼(있으면 빨강, 없으면 회색)
+========================= */
+.lyrics-tabs{
+  display:flex;
+  gap:10px;
+  padding:10px 16px 6px;
+  border-bottom:1px solid #e6e6e6;
+  background:#fff;
+}
+.tab-link{
+  flex:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  height:42px;
+  border-radius:14px;
+  font-weight:900;
+  text-decoration:none;
+  border:1px solid #ddd;
+  user-select:none;
+}
+.tab-on{
+  background:#e53935;  /* ✅ 빨강 */
+  color:#fff;
+  border-color:#e53935;
+}
+.tab-disabled{
+  background:#eee;      /* ✅ 회색 */
+  color:#999;
+  border-color:#e3e3e3;
+  pointer-events:none;  /* ✅ 클릭 불가 */
+  opacity:0.95;
+}
 420: /* =========================
 421:    모달(수정창)
 422: ========================= */
