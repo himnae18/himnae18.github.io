@@ -100,16 +100,25 @@
       <button id="lyricsCloseBtn" class="lyrics-close" type="button">✕</button>
     </div>
 
-    <!-- ✅ MR / 악보 버튼 (있으면 빨강, 없으면 회색+비활성) -->
+    <!-- =========================
+         ✅ 탭 3개: 가사 / MR / 악보
+         - 가사: 텍스트 표시
+         - MR: 가사창 안에 iframe 표시(링크 없으면 비활성)
+         - 악보: PNG 링크 새탭 이동(링크 없으면 비활성)
+    ========================= -->
     <div class="lyrics-tabs">
-      <a id="mrBtn" class="tab-link tab-disabled" href="#" target="_blank" rel="noopener">MR</a>
-      <a id="scoreBtn" class="tab-link tab-disabled" href="#" target="_blank" rel="noopener">악보</a>
+      <button id="tabLyrics" class="tab-link tab-active" type="button">가사</button>
+      <button id="tabMr" class="tab-link tab-disabled" type="button">MR</button>
+      <a id="tabScore" class="tab-link tab-disabled" href="#" target="_blank" rel="noopener">악보</a>
     </div>
 
     <div id="lyricsNowTitle" class="lyrics-now-title">재생중인 곡이 없어</div>
 
     <div class="lyrics-body">
       <pre id="lyricsNowText">노래를 재생하면 여기서 가사를 볼 수 있어.</pre>
+
+      <!-- ✅ MR iframe이 들어갈 영역 (가사 탭이면 숨김, MR 탭이면 표시) -->
+      <div id="lyricsNowMedia" class="lyrics-media" style="display:none;"></div>
     </div>
   </aside>
 
