@@ -730,3 +730,88 @@ body.lyrics-open .lyrics-overlay{
 
 .lyrics-drawer{ transform: translateX(110%); }
 body.lyrics-open .lyrics-drawer{ transform: translateX(0); }
+
+
+/* =========================
+   ✅ 가사 드로어 열릴 때: 영상이 살짝 작아지며 밀리는 효과 (완성본)
+   조건: JS가 body에 .lyrics-open 토글
+========================= */
+
+/* 드로어 폭(원하면 숫자만 조절) */
+:root{
+  --lyrics-w: 360px;
+  --shrink: 0.92;           /* 영상/본문 축소 비율 (0.88~0.95 추천) */
+}
+
+/* 드로어 기본(닫힘) */
+.lyrics-drawer{
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: var(--lyrics-w);
+  max-width: 90vw;
+  height: 100vh;
+  background: #ffffff;
+  border-left: 1px solid #e6e6e6;
+  box-shadow: -12px 0 30px rgba(0,0,0,0.12);
+  transform: translateX(110%);
+  transition: transform 0.25s ease;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+/* 열림 */
+body.lyrics-open .lyrics-drawer{
+  transform: translateX(0);
+}
+
+/* 오버레이(닫기 클릭) */
+.lyrics-overlay{
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.25);
+  z-index: 9998;
+  display: none;
+}
+body.lyrics-open .lyrics-overlay{
+  display:block;
+}
+
+/* ✅ 본문 전체(영상 포함) 애니메이션 */
+#mainContent{
+  transition: transform 0.28s ease;
+  transform-origin: center top;
+  will-change: transform;
+}
+
+/* 데스크탑: 본문을 '왼쪽으로' 살짝 밀면서 '살짝 축소' */
+@media (min-width: 980px){
+  body.lyrics-open #mainContent{
+    /* 드로어 폭의 절반만큼 왼쪽으로 이동 + 축소 */
+    transform: translateX(calc(var(--lyrics-w) * -0.5)) scale(var(--shrink));
+  }
+}
+
+/* 모바일/태블릿: 너무 밀리면 답답해서 '축소만 조금' (원하면 이동도 넣어도 됨) */
+@media (max-width: 979px){
+  body.lyrics-open #mainContent{
+    transform: scale(0.96);
+  }
+}
+
+/* ✅ 플레이어(영상)도 더 부드럽게 보이게 살짝 그림자 */
+#player{
+  transition: transform 0.28s ease, box-shadow 0.28s ease;
+  will-change: transform;
+}
+body.lyrics-open #player{
+  box-shadow: 0 18px 50px rgba(0,0,0,0.18);
+}
+
+/* ✅ 오른쪽 위 ≡ 버튼 클릭이 씹히는 경우 방지 */
+.lyrics-toggle{
+  z-index: 100000;
+  pointer-events: auto;
+}
