@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="../style.css" />
 </head>
 
-<body class="light-page">
+<body class="light-page" data-store="jpBright">
 
   <!-- ✅ 햄버거 -->
   <button id="hamburgerBtn" class="hamburger">☰</button>
@@ -56,16 +56,20 @@
   <!-- ✅ 오른쪽 위: 가사 드로어 토글 -->
   <button id="lyricsBtn" class="lyrics-toggle" title="가사 패널">≡</button>
 
-  <!-- ✅ 본문(드로어 열리면 CSS가 이걸 왼쪽으로 밀어줌) -->
+  <!-- ✅ 본문(드로어 열리면 CSS가 이걸 밀어줌) -->
   <div id="mainContent">
     <h1>🇯🇵 일본 밝은 노래</h1>
 
     <!-- 플레이어 -->
-    <iframe id="player" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+    <iframe
+      id="player"
+      allow="autoplay; encrypted-media"
+      allowfullscreen
+    ></iframe>
 
     <br />
 
-    <!-- ✅ 상단 컨트롤(스크립트 id 맞춤) -->
+    <!-- ✅ 상단 컨트롤 -->
     <div class="controls">
       <button id="btnSeq">순서대로</button>
 
@@ -92,14 +96,14 @@
     <textarea id="lyrics" placeholder="가사 입력 (복붙 가능)" rows="6"></textarea>
     <input id="mr" placeholder="MR 링크(선택)" />
     <input id="score" placeholder="악보 링크(선택)" />
-    <button onclick="addSong()">추가</button>
+    <button type="button" onclick="addSong()">추가</button>
   </div>
 
-  <!-- ✅ 오른쪽 가사 드로어(밀어내는 느낌은 CSS에서 처리) -->
+  <!-- ✅ 오른쪽 가사 드로어 -->
   <aside id="lyricsDrawer" class="lyrics-drawer">
     <div class="lyrics-head">
       <div class="lyrics-head-title">가사</div>
-      <button id="lyricsCloseBtn" class="lyrics-close">✕</button>
+      <button id="lyricsCloseBtn" class="lyrics-close" type="button">✕</button>
     </div>
 
     <div id="lyricsNowTitle" class="lyrics-now-title">재생중인 곡이 없어</div>
@@ -109,16 +113,16 @@
     </div>
   </aside>
 
-  <!-- ✅ 바깥 클릭 닫기용(드로어 UX에 필요) -->
+  <!-- ✅ 바깥 클릭 닫기용 -->
   <div id="lyricsOverlay" class="lyrics-overlay"></div>
 
+  <!-- ✅ scripts (한 번씩만) -->
   <script src="../nav.js"></script>
-<script src="../nav.js"></script>
 
-<script src="../js/app-state.js"></script>
-<script src="../js/app-ui.js"></script>
-<script src="../js/app-player.js"></script>
-<script src="../js/app-modal.js"></script>
-  
-<body class="light-page" data-store="jpBright">
+  <script src="../js/app-state.js"></script>
+  <script src="../js/app-ui.js"></script>
+  <script src="../js/app-player.js"></script>
+  <script src="../js/app-modal.js"></script>
+
+</body>
 </html>
