@@ -1,4 +1,4 @@
-// nav.js - 사이드 메뉴(드로어) + 곡 개수 표시
+// nav.js - 사이드 메뉴(드로어) + 곡 개수 표시 (토글 버전)
 
 function getCount(key) {
   try {
@@ -7,6 +7,13 @@ function getCount(key) {
   } catch {
     return 0;
   }
+}
+
+/* =========================
+   드로어 상태/열기/닫기/토글
+========================= */
+function isDrawerOpen() {
+  return document.getElementById("drawer")?.classList.contains("open");
 }
 
 function openDrawer() {
@@ -19,11 +26,17 @@ function closeDrawer() {
   document.getElementById("drawerOverlay")?.classList.remove("open");
 }
 
+function toggleDrawer() {
+  if (isDrawerOpen()) closeDrawer();
+  else openDrawer();
+}
+
+/* =========================
+   곡 개수 업데이트
+========================= */
 function updateDrawerCounts() {
-  // ✅ 네가 쓰는 로컬스토리지 키에 맞춰서 개수 표시
-  // 일본 밝은노래는 지금 jpBright 쓰고 있으니까 여기서 읽음
   const jpBrightCount = getCount("jpBright");
-  const cnBrightCount = getCount("cnBright"); // 아직 없으면 0으로 나옴
+  const cnBrightCount = getCount("cnBright");
 
   const elJp = document.getElementById("count-jp-bright");
   const elCn = document.getElementById("count-cn-bright");
@@ -32,13 +45,20 @@ function updateDrawerCounts() {
   if (elCn) elCn.textContent = cnBrightCount;
 }
 
+/* =========================
+   초기화
+========================= */
 function initDrawer() {
-  // 드로어 HTML이 없는 페이지면 그냥 종료
+  // 드로어 HTML이 없는 페이지면 종료
   if (!document.getElementById("drawer")) return;
 
-  // 버튼 이벤트
-  document.getElementById("hamburgerBtn")?.addEventListener("click", openDrawer);
+  // ✅ 같은 버튼으로 열기/닫기
+  document.getElementById("hamburgerBtn")?.addEventListener("click", toggleDrawer);
+
+  // ✅ 오버레이 클릭하면 닫기
   document.getElementById("drawerOverlay")?.addEventListener("click", closeDrawer);
+
+  // ✅ (혹시 남아있을 수 있는 X 버튼) 있어도 동작만 하고, 없어도 에러 없음
   document.getElementById("drawerCloseBtn")?.addEventListener("click", closeDrawer);
 
   // ESC로 닫기
