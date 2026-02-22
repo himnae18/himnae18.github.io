@@ -820,3 +820,68 @@ body.lyrics-open #player{
   z-index: 100000;
   pointer-events: auto;
 }
+
+/* =========================
+   ✅ 컨트롤 버튼 색상 (요청 색)
+========================= */
+#btnSeq{ background:#1f9d55; }        /* 초록 */
+#btnRandOne,#btnRand10,#btnRandAuto{ background:#3aa0ff; } /* 하늘 */
+#btnLoop5,#btnLoop10,#btnLoopInf{ background:#7a3cff; }   /* 보라 */
+#btnEdit{ background:#f5c400; color:#222; } /* 노랑 */
+#btnDelete{ background:#e53935; }     /* 빨강 */
+
+#btnSeq:hover{ background:#157a41; }
+#btnRandOne:hover,#btnRand10:hover,#btnRandAuto:hover{ background:#2d7fd1; }
+#btnLoop5:hover,#btnLoop10:hover,#btnLoopInf:hover{ background:#5f2fd1; }
+#btnEdit:hover{ background:#d8ab00; }
+#btnDelete:hover{ background:#c62828; }
+
+/* =========================
+   ✅ “≡” 드로어 열릴 때
+   - 본문이 밀리고
+   - 영상이 살짝 작아졌다가
+   - 닫으면 다시 커지며 원위치
+========================= */
+
+/* 플레이어 래퍼 */
+.player-wrap{
+  width: min(980px, 95%);
+  margin: 0 auto;
+  transition: transform 0.25s ease, width 0.25s ease;
+  will-change: transform;
+}
+
+/* 기존 #player 반응형 유지 */
+#player{
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  height: auto;
+  border: 0;
+  border-radius: 14px;
+  background: #000;
+  display:block;
+}
+
+/* 드로어 열림: 영상 살짝 축소 */
+body.lyrics-open .player-wrap{
+  transform: scale(0.94);
+  transform-origin: center top;
+}
+
+/* 드로어 본체는 기존 너비 사용 */
+:root{
+  --lyrics-w: 360px;
+}
+
+/* 본문 밀기 + 자연스럽게 */
+#mainContent{
+  transition: transform 0.25s ease;
+  will-change: transform;
+}
+
+/* 데스크탑에서: 오른쪽 패널만큼 “살짝” 밀기 */
+@media (min-width: 980px){
+  body.lyrics-open #mainContent{
+    transform: translateX(calc(var(--lyrics-w) * -0.35));
+  }
+}
