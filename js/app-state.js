@@ -1,5 +1,6 @@
 // js/app-state.js
 (() => {
+  // body에 data-store가 있으면 그 값 사용, 없으면 기본 "jpBright"
   const storeKey = document.body?.dataset?.store || "jpBright";
 
   let songs = JSON.parse(localStorage.getItem(storeKey)) || [];
@@ -25,6 +26,7 @@
       .replaceAll(">", "&gt;");
   }
 
+  // 유튜브 URL에서 영상 ID 뽑기 (watch?v=, youtu.be, shorts, embed 지원)
   function extractID(url) {
     if (!url) return "";
     try {
@@ -43,11 +45,13 @@
       if (shortsIndex !== -1 && parts[shortsIndex + 1]) return parts[shortsIndex + 1];
       if (embedIndex !== -1 && parts[embedIndex + 1]) return parts[embedIndex + 1];
     } catch (e) {
+      // URL 생성 실패(문자열이 애매한 경우) 대비
       if (String(url).includes("v=")) return String(url).split("v=")[1]?.split("&")[0] || "";
     }
     return "";
   }
 
+  // oEmbed로 제목/채널명 가져오기(실패 시 기본값)
   async function fetchYouTubeMeta(ytUrl) {
     try {
       const api = "https://www.youtube.com/oembed?format=json&url=" + encodeURIComponent(ytUrl);
@@ -63,7 +67,7 @@
     }
   }
 
-  // 전역으로 노출 (충돌 방지용 네임스페이스)
+  // ✅ 충돌 방지 네임스페이스 (권장: 앞으로는 AppState로 접근)
   window.AppState = {
     get storeKey() { return storeKey; },
 
@@ -83,4 +87,30 @@
     extractID,
     fetchYouTubeMeta,
   };
+})();
+
+/* =========================
+   ✅ (호환용) 기존 전역 코드(app-ui/app-player)도 동작하게 브리지
+   - songs/current/dragIndex는 getter/setter로 AppState와 연결
+   - 유틸/저장 함수는 전역으로 바로 노출
+========================= */
+(() => {
+  const S = window.AppState;
+  if (!S) return;
+
+  // 상태 3개는 AppState와 동기화되게 연결
+  const bind = (key) => {
+    Object.defineProperty(window, key, {
+      get: () => S[key],
+      set: (v) => (S[key] = v),
+      configurable: true,
+    });
+  };
+  bind("songs");
+  bind("current");
+  bind("dragIndex");
+
+  // 함수들은 전역으로 바로 연결
+  ["save", "safeText", "safeLink", "escapeHTML", "extractID", "fetchYouTubeMeta"]
+    .forEach((fn) => (window[fn] = S[fn]));
 })();
