@@ -109,4 +109,21 @@
   window.onDragStart = onDragStart;
   window.onDragOver = onDragOver;
   window.onDrop = onDrop;
-})();
+  // ✅ 가사 드로어 토글/열기/닫기 (app-player.js가 호출함)
+  function openLyricsDrawer() {
+    document.body.classList.add("lyrics-open");
+    updateLyricsDrawer(); // 현재 곡 가사 반영
+  }
+  function closeLyricsDrawer() {
+    document.body.classList.remove("lyrics-open");
+  }
+  function toggleLyricsDrawer() {
+    const willOpen = !document.body.classList.contains("lyrics-open");
+    document.body.classList.toggle("lyrics-open");
+    if (willOpen) updateLyricsDrawer();
+  }
+
+  // 전역 노출 (app-player.js에서 직접 호출)
+  window.openLyricsDrawer = openLyricsDrawer;
+  window.closeLyricsDrawer = closeLyricsDrawer;
+  window.toggleLyricsDrawer = toggleLyricsDrawer;})();
