@@ -46,7 +46,7 @@ function extractID(url) {
     if (shortsIndex !== -1 && parts[shortsIndex + 1]) return parts[shortsIndex + 1];
     if (embedIndex !== -1 && parts[embedIndex + 1]) return parts[embedIndex + 1];
   } catch (e) {
-    if (url.includes("v=")) return url.split("v=")[1]?.split("&")[0] || "";
+    if (String(url).includes("v=")) return String(url).split("v=")[1]?.split("&")[0] || "";
   }
   return "";
 }
@@ -68,14 +68,8 @@ async function fetchYouTubeMeta(ytUrl) {
 }
 
 /* =========================
-   목록/재생 UI
+   목록 UI (✅ 오른쪽 버튼들 제거한 버전)
 ========================= */
-function toggleLyricsInline(index) {
-  const box = document.getElementById("lyrics-" + index);
-  if (!box) return;
-  box.style.display = (box.style.display === "none" || box.style.display === "") ? "block" : "none";
-}
-
 function showList() {
   const list = document.getElementById("list");
   if (!list) return;
@@ -88,9 +82,7 @@ function showList() {
   let html = `<div class="playlist">`;
 
   songs.forEach((s, i) => {
-    const ytFull = s.ytUrl || (s.id ? `https://www.youtube.com/watch?v=${s.id}` : "");
     const thumb = s.id ? `https://i.ytimg.com/vi/${s.id}/hqdefault.jpg` : "";
-    const hasLyrics = !!(s.lyrics && String(s.lyrics).trim().length > 0);
     const active = (i === current) ? " active" : "";
 
     html += `
@@ -119,24 +111,6 @@ function showList() {
           <div class="pl-title">${escapeHTML(s.title || "제목 없음")}</div>
           <div class="pl-sub">${escapeHTML(s.author || "")}</div>
         </div>
-
-        <div class="pl-right" onclick="event.stopPropagation();">
-          ${ytFull ? `<a class="pl-link" href="${ytFull}" target="_blank">유튜브</a>` : ""}
-
-          ${hasLyrics
-            ? `<button class="pl-btn" onclick="toggleLyricsInline(${i})">가사</button>`
-            : `<span class="pl-empty">가사 없음</span>`}
-
-          ${s.mr ? `<a class="pl-link" href="${escapeHTML(s.mr)}" target="_blank">MR</a>` : `<span class="pl-empty">MR</span>`}
-          ${s.score ? `<a class="pl-link" href="${escapeHTML(s.score)}" target="_blank">악보</a>` : `<span class="pl-empty">악보</span>`}
-
-          <button class="edit-btn" onclick="openEditModal(${i})">수정</button>
-          <button class="delete-btn" onclick="deleteSong(${i})">삭제</button>
-        </div>
-      </div>
-
-      <div id="lyrics-${i}" class="lyrics-box" style="display:none;">
-        <pre>${escapeHTML(s.lyrics || "")}</pre>
       </div>
     `;
   });
@@ -175,10 +149,15 @@ async function addSong() {
   save();
   showList();
 
-  if (document.getElementById("yt")) document.getElementById("yt").value = "";
-  if (document.getElementById("lyrics")) document.getElementById("lyrics").value = "";
-  if (document.getElementById("mr")) document.getElementById("mr").value = "";
-  if (document.getElementById("score")) document.getElementById("score").value = "";
+  // 입력칸 비우기
+  const ytEl = document.getElementById("yt");
+  const lyEl = document.getElementById("lyrics");
+  const mrEl = document.getElementById("mr");
+  const scEl = document.getElementById("score");
+  if (ytEl) ytEl.value = "";
+  if (lyEl) lyEl.value = "";
+  if (mrEl) mrEl.value = "";
+  if (scEl) scEl.value = "";
 
   play(songs.length - 1);
 }
@@ -195,7 +174,6 @@ function deleteSong(index) {
   showList();
 
   if (songs.length === 0) {
-    // 플레이어 비우기
     if (ytPlayer) ytPlayer.stopVideo();
     current = 0;
     updateLyricsDrawer();
@@ -244,21 +222,21 @@ function onDrop(e, dropIndex) {
 }
 
 /* =========================
-   오른쪽 가사 패널
+   오른쪽 가사 드로어(밀어내는 방식은 CSS가 처리)
 ========================= */
-function openLyricsDrawer(){
+function openLyricsDrawer() {
   document.body.classList.add("lyrics-open");
   updateLyricsDrawer();
 }
-function closeLyricsDrawer(){
+function closeLyricsDrawer() {
   document.body.classList.remove("lyrics-open");
 }
-function toggleLyricsDrawer(){
+function toggleLyricsDrawer() {
   document.body.classList.toggle("lyrics-open");
   if (document.body.classList.contains("lyrics-open")) updateLyricsDrawer();
 }
 
-function updateLyricsDrawer(){
+function updateLyricsDrawer() {
   const titleEl = document.getElementById("lyricsNowTitle");
   const textEl  = document.getElementById("lyricsNowText");
   if (!titleEl || !textEl) return;
@@ -276,7 +254,6 @@ function updateLyricsDrawer(){
 
 /* =========================
    ✅ YouTube IFrame Player API
-   "끝나면 다음 동작" 구현
 ========================= */
 let ytPlayer = null;
 let apiLoading = false;
@@ -285,13 +262,13 @@ let apiReadyQueue = [];
 
 // 모드: "seq" | "rand_once" | "rand_n" | "rand_auto" | "loop_n" | "loop_inf"
 let playMode = "seq";
-let remainingRandom = 0;   // 랜덤 N회 남은 횟수
-let remainingLoops  = 0;   // 반복 N회 남은 횟수 (현재곡 기준)
+let remainingRandom = 0;
+let remainingLoops  = 0;
 let totalRandom = 0;
 let totalLoops  = 0;
 let loopInfinite = false;
 
-// ✅ 랜덤에서 같은 곡 연속 방지용
+// ✅ 랜덤 연속 방지
 let lastRandomIndex = -1;
 
 function ensurePlayerReady(cb) {
@@ -302,7 +279,6 @@ function ensurePlayerReady(cb) {
   if (apiLoading) return;
   apiLoading = true;
 
-  // API 스크립트 로드
   if (!document.getElementById("yt-iframe-api")) {
     const tag = document.createElement("script");
     tag.id = "yt-iframe-api";
@@ -310,15 +286,12 @@ function ensurePlayerReady(cb) {
     document.head.appendChild(tag);
   }
 
-  // 이미 다른 곳에서 정의되어 있을 수도 있어서 "덮어쓰기" 대신 연결
   const prev = window.onYouTubeIframeAPIReady;
   window.onYouTubeIframeAPIReady = () => {
     try { if (typeof prev === "function") prev(); } catch {}
 
     ytPlayer = new YT.Player("player", {
-      events: {
-        onStateChange: onPlayerStateChange
-      }
+      events: { onStateChange: onPlayerStateChange }
     });
 
     apiReady = true;
@@ -330,7 +303,7 @@ function ensurePlayerReady(cb) {
   };
 }
 
-/* ✅ 재생(한 번만 정의!) */
+/* ✅ 재생 */
 function play(i) {
   current = i;
   if (!songs[i] || !songs[i].id) return;
@@ -348,16 +321,15 @@ function play(i) {
 
 /* 끝났을 때 자동재생 로직 */
 function onPlayerStateChange(e) {
-  // 0 = ended
-  if (e.data !== 0) return;
+  if (e.data !== 0) return; // 0 = ended
 
-  // ✅ 반복(무한) 우선
+  // 무한반복
   if (loopInfinite) {
     ytPlayer.playVideo();
     return;
   }
 
-  // ✅ 반복 N
+  // 반복 N
   if (playMode === "loop_n") {
     if (remainingLoops > 1) {
       remainingLoops--;
@@ -365,14 +337,13 @@ function onPlayerStateChange(e) {
       ytPlayer.playVideo();
       return;
     }
-    // 반복 끝
     playMode = "seq";
     remainingLoops = 0;
     totalLoops = 0;
     updateControlLabels();
   }
 
-  // ✅ 랜덤 N회
+  // 랜덤 N회
   if (playMode === "rand_n") {
     if (remainingRandom > 1) {
       remainingRandom--;
@@ -380,7 +351,6 @@ function onPlayerStateChange(e) {
       playRandomPickAndPlay(true);
       return;
     }
-    // 마지막 1회 끝 -> 순서대로로 복귀(원하면 여기서 멈추게도 가능)
     playMode = "seq";
     remainingRandom = 0;
     totalRandom = 0;
@@ -388,20 +358,20 @@ function onPlayerStateChange(e) {
     return;
   }
 
-  // ✅ 랜덤자동재생(무한)
+  // 랜덤자동재생(무한)
   if (playMode === "rand_auto") {
     playRandomPickAndPlay(true);
     return;
   }
 
-  // ✅ 랜덤곡(1곡만) 끝나면 멈춤
+  // 랜덤곡(1곡만) 끝나면 멈춤
   if (playMode === "rand_once") {
     playMode = "seq";
     updateControlLabels();
     return;
   }
 
-  // ✅ 기본: 순서대로 다음
+  // 기본: 순서대로 다음
   playNextSequential();
 }
 
@@ -422,7 +392,6 @@ function pickRandomIndex(excludeConsecutive = true) {
 
   if (!excludeConsecutive) return idx;
 
-  // 같은 곡 연속 방지: current / lastRandomIndex 둘 다 피하기
   while (tries < 30 && (idx === current || idx === lastRandomIndex)) {
     idx = Math.floor(Math.random() * n);
     tries++;
@@ -561,7 +530,6 @@ function openEditModal(index) {
     const newMr = safeLink(document.getElementById("editMr")?.value);
     const newScore = safeLink(document.getElementById("editScore")?.value);
 
-    // 유튜브 링크 변경 시 메타 갱신
     if (newYtUrl) {
       const id = extractID(newYtUrl);
       if (!id) {
@@ -576,7 +544,6 @@ function openEditModal(index) {
       s.author = meta.author;
     }
 
-    // 나머지는 그냥 저장(빈칸이면 지우는 걸로)
     s.lyrics = newLyrics;
     s.mr = newMr;
     s.score = newScore;
@@ -593,10 +560,10 @@ function openEditModal(index) {
 }
 
 /* =========================
-   DOMContentLoaded: 이벤트 연결(한 번만!)
+   DOMContentLoaded: 이벤트 연결
 ========================= */
 document.addEventListener("DOMContentLoaded", () => {
-  // 가사 패널 버튼
+  // 가사 드로어
   document.getElementById("lyricsBtn")?.addEventListener("click", toggleLyricsDrawer);
   document.getElementById("lyricsCloseBtn")?.addEventListener("click", closeLyricsDrawer);
   document.getElementById("lyricsOverlay")?.addEventListener("click", closeLyricsDrawer);
@@ -610,7 +577,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const qs = (id) => document.getElementById(id);
 
-  // 순서대로 자동재생
+  // 순서대로
   qs("btnSeq")?.addEventListener("click", () => {
     playMode = "seq";
     loopInfinite = false;
@@ -619,7 +586,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setActiveControl("btnSeq");
   });
 
-  // 랜덤곡(딱 1곡만)
+  // 랜덤곡(1곡)
   qs("btnRandOne")?.addEventListener("click", () => {
     playMode = "rand_once";
     loopInfinite = false;
@@ -629,7 +596,7 @@ document.addEventListener("DOMContentLoaded", () => {
     playRandomPickAndPlay(true);
   });
 
-  // 랜덤곡 10회 자동재생
+  // 랜덤 10회
   qs("btnRand10")?.addEventListener("click", () => {
     playMode = "rand_n";
     totalRandom = 10;
@@ -648,11 +615,10 @@ document.addEventListener("DOMContentLoaded", () => {
     loopInfinite = false;
     remainingLoops = 0; totalLoops = 0;
     setActiveControl("btnRandAuto");
-
     if (!songs[current]) playRandomPickAndPlay(true);
   });
 
-  // 5회 반복(현재곡)
+  // 5회 반복
   qs("btnLoop5")?.addEventListener("click", () => {
     if (!songs[current]) return alert("먼저 노래를 하나 재생해줘!");
     playMode = "loop_n";
@@ -684,7 +650,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setActiveControl("btnLoopInf");
   });
 
-  // 수정/삭제(현재 재생중)
+  // 수정/삭제(현재 재생중 곡)
   qs("btnEdit")?.addEventListener("click", () => {
     if (!songs[current]) return alert("먼저 노래를 하나 재생해줘!");
     openEditModal(current);
@@ -702,7 +668,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 /* =========================
-   (선택) 예전 버튼 호환 함수
+   (선택) 예전 버튼 호환
 ========================= */
 function nextSong() {
   if (songs.length === 0) return;
