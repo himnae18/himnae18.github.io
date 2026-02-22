@@ -108,9 +108,16 @@ function ensurePlayerReady(cb) {
   window.onYouTubeIframeAPIReady = () => {
     try { if (typeof prev === "function") prev(); } catch {}
 
-    ytPlayer = new YT.Player("player", {
-      events: { onStateChange: onPlayerStateChange }
-    });
+ytPlayer = new YT.Player("player", {
+  width: "100%",
+  height: "100%",
+  playerVars: {
+    autoplay: 1,
+    rel: 0,
+    playsinline: 1
+  },
+  events: { onStateChange: onPlayerStateChange }
+});
 
     apiReady = true;
     apiLoading = false;
