@@ -9,14 +9,17 @@
 
 <body class="light-page" data-store="jpBright">
 
-  <!-- ✅ 햄버거 -->
-  <button id="hamburgerBtn" class="hamburger">☰</button>
+  <!-- =========================
+       ✅ 햄버거 + 드로어(토글)
+       - X 버튼 제거(요청)
+  ========================= -->
+  <button id="hamburgerBtn" class="hamburger" type="button">☰</button>
   <div id="drawerOverlay" class="drawer-overlay"></div>
 
-  <nav id="drawer" class="drawer">
+  <nav id="drawer" class="drawer" aria-label="메뉴">
     <div class="drawer-header">
       <div class="drawer-title">메뉴</div>
-      <button id="drawerCloseBtn" class="drawer-close" type="button">✕</button>
+      <!-- ✅ X 버튼 제거 -->
     </div>
 
     <div class="drawer-section">
@@ -42,18 +45,20 @@
     </div>
   </nav>
 
-  <!-- ✅ 오른쪽 위: 가사 드로어 토글 -->
+  <!-- =========================
+       ✅ 오른쪽 위: 가사 드로어 토글
+  ========================= -->
   <button id="lyricsBtn" class="lyrics-toggle" title="가사 패널" type="button">≡</button>
 
-  <!-- ✅ 본문 -->
+  <!-- =========================
+       ✅ 본문
+  ========================= -->
   <div id="mainContent">
     <h1>🇯🇵 일본 밝은 노래</h1>
 
-    <!-- ✅ 플레이어 래퍼(스케일 애니메이션용) -->
+    <!-- ✅ 플레이어 래퍼(중복 제거) -->
     <div class="player-wrap">
-      <div class="player-wrap">
-  <div id="player"></div>
-</div>
+      <div id="player"></div>
     </div>
 
     <div class="controls">
@@ -71,7 +76,9 @@
       <button id="btnDelete" type="button">삭제</button>
     </div>
 
-    <hr />
+    <!-- ✅ 가사창 높이 제한에 쓸 선(id 추가) -->
+    <hr id="topDivider" />
+
     <div id="list"></div>
 
     <hr />
@@ -84,28 +91,33 @@
     <button type="button" onclick="addSong()">추가</button>
   </div>
 
-<aside id="lyricsDrawer" class="lyrics-drawer">
-  <div class="lyrics-head">
-    <div class="lyrics-head-title">가사</div>
-    <button id="lyricsCloseBtn" class="lyrics-close" type="button">✕</button>
-  </div>
+  <!-- =========================
+       ✅ 오른쪽 가사 패널
+  ========================= -->
+  <aside id="lyricsDrawer" class="lyrics-drawer">
+    <div class="lyrics-head">
+      <div class="lyrics-head-title">가사</div>
+      <button id="lyricsCloseBtn" class="lyrics-close" type="button">✕</button>
+    </div>
 
-  <!-- ✅ MR / 악보 버튼 (있으면 빨강, 없으면 회색+비활성) -->
-  <div class="lyrics-tabs">
-    <a id="mrBtn" class="tab-link tab-disabled" href="#" target="_blank" rel="noopener">MR</a>
-    <a id="scoreBtn" class="tab-link tab-disabled" href="#" target="_blank" rel="noopener">악보</a>
-  </div>
+    <!-- ✅ MR / 악보 버튼 (있으면 빨강, 없으면 회색+비활성) -->
+    <div class="lyrics-tabs">
+      <a id="mrBtn" class="tab-link tab-disabled" href="#" target="_blank" rel="noopener">MR</a>
+      <a id="scoreBtn" class="tab-link tab-disabled" href="#" target="_blank" rel="noopener">악보</a>
+    </div>
 
-  <div id="lyricsNowTitle" class="lyrics-now-title">재생중인 곡이 없어</div>
+    <div id="lyricsNowTitle" class="lyrics-now-title">재생중인 곡이 없어</div>
 
-  <div class="lyrics-body">
-    <pre id="lyricsNowText">노래를 재생하면 여기서 가사를 볼 수 있어.</pre>
-  </div>
-</aside>
+    <div class="lyrics-body">
+      <pre id="lyricsNowText">노래를 재생하면 여기서 가사를 볼 수 있어.</pre>
+    </div>
+  </aside>
 
   <div id="lyricsOverlay" class="lyrics-overlay"></div>
 
-  <!-- ✅ scripts (중복 없이 1번씩만) -->
+  <!-- =========================
+       ✅ scripts (중복 없이 1번씩만)
+  ========================= -->
   <script src="../nav.js"></script>
 
   <script src="../js/app-state.js"></script>
