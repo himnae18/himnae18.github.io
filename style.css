@@ -1,528 +1,286 @@
-001: /* =========================
-002:    기본 설정 (화이트톤)
-003: ========================= */
-004: :root{
-005:   --pl-row-h: 72px;
-006:   --pl-max-h: 540px;
-007:   --lyrics-w: 420px; /* ✅ 오른쪽 가사 패널 폭 */
-008: }
-009: body{
-010:   background:#f5f6f8;
-011:   color:#222;
-012:   font-family:Arial, sans-serif;
-013:   text-align:center;
-014:   margin:0;
-015:   padding:0;
-016: }
-017: h1{ margin-top:18px; }
-018: 
-019: /* =========================
-020:    메인 메뉴 버튼
-021: ========================= */
-022: .menu{
-023:   display:inline-block;
-024:   background:#fff;
-025:   border:1px solid #e3e3e3;
-026:   padding:12px 20px;
-027:   margin:8px;
-028:   border-radius:14px;
-029:   color:#222;
-030:   text-decoration:none;
-031:   font-size:18px;
-032:   transition:0.2s;
-033: }
-034: .menu:hover{ background:#f7e9ee; border-color:#b32647; }
-035: 
-036: /* =========================
-037:    입력 & 버튼 (공통)
-038: ========================= */
-039: input,textarea{
-040:   padding:8px;
-041:   border-radius:8px;
-042:   border:1px solid #ddd;
-043:   margin:5px;
-044:   background:#fff;
-045:   color:#222;
-046: }
-047: textarea{ width:min(520px, 95%); resize:vertical; }
-048: button{
-049:   padding:8px 14px;
-050:   border-radius:8px;
-051:   border:none;
-052:   margin:5px;
-053:   background:#b32647;
-054:   color:#fff;
-055:   cursor:pointer;
-056:   transition:0.2s;
-057: }
-058: button:hover{ background:#87142e; }
-059: 
-060: /* =========================
-061:    플레이어 반응형 (#player는 div)
-062: ========================= */
-063: #player{
-064:   width:100%;
-065:   height:100%;
-066:   border:0;
-067:   border-radius:14px;
-068:   background:#000;
-069: }
-070: .player-wrap{
-071:   width:min(980px, 95%);
-072:   aspect-ratio:16/9;
-073:   margin:0 auto;
-074: }
-075: 
-076: /* =========================
-077:    (구버전 대비) 노래 카드
-078: ========================= */
-079: .song-row{
-080:   background:#fff;
-081:   margin:12px auto;
-082:   padding:14px;
-083:   border-radius:16px;
-084:   width:min(900px, 95%);
-085:   text-align:left;
-086:   border:1px solid #e5e5e5;
-087:   transition:0.2s;
-088: }
-089: .song-row:hover{ background:#fff5f7; }
-090: .song-title{
-091:   font-size:18px;
-092:   cursor:pointer;
-093:   margin-bottom:8px;
-094:   font-weight:bold;
-095:   color:#222;
-096: }
-097: .song-row.active{ background:#f7e9ee; border-color:#b32647; }
-098: .song-links a{
-099:   display:inline-block;
-100:   margin-right:10px;
-101:   color:#fff;
-102:   text-decoration:none;
-103:   background:#b32647;
-104:   padding:6px 10px;
-105:   border-radius:12px;
-106:   font-size:14px;
-107: }
-108: .song-links a:hover{ background:#87142e; }
-109: .empty{
-110:   display:inline-block;
-111:   margin-right:10px;
-112:   opacity:0.4;
-113:   background:#eee;
-114:   padding:6px 10px;
-115:   border-radius:12px;
-116:   font-size:14px;
-117: }
-118: .delete-btn{ background:#999; }
-119: .delete-btn:hover{ background:#cc3333; }
-120: .edit-btn{ background:#ddd; color:#333; }
-121: .edit-btn:hover{ background:#b32647; color:#fff; }
-122: .empty-center{ opacity:0.7; padding:18px 10px; }
-123: 
-124: /* =========================
-125:    햄버거 드로어 메뉴 (화이트톤)
-126: ========================= */
-127: .hamburger{
-128:   position:fixed;
-129:   top:14px;
-130:   left:14px;
-131:   z-index:100000;
-132:   background:#b32647;
-133:   color:#fff;
-134:   border:none;
-135:   border-radius:14px;
-136:   padding:10px 12px;
-137:   cursor:pointer;
-138:   font-size:18px;
-139: }
-140: .hamburger:hover{ background:#87142e; }
-141: .drawer-overlay{
-142:   position:fixed;
-143:   inset:0;
-144:   background:rgba(0,0,0,0.3);
-145:   z-index:99998;
-146:   display:none;
-147: }
-148: .drawer-overlay.open{ display:block; }
-149: .drawer{
-150:   position:fixed;
-151:   top:0;
-152:   left:0;
-153:   width:300px;
-154:   max-width:85vw;
-155:   height:100vh;
-156:   background:#fff;
-157:   z-index:99999;
-158:   transform:translateX(-110%);
-159:   transition:transform 0.25s ease;
-160:   padding:18px;
-161:   box-shadow:12px 0 30px rgba(0,0,0,0.15);
-162:   text-align:left !important;
-163: }
-164: .drawer.open{ transform:translateX(0); }
-165: .drawer-header{
-166:   display:flex;
-167:   justify-content:space-between;
-168:   align-items:center;
-169:   margin-bottom:14px;
-170: }
-171: .drawer-title{ font-size:18px; font-weight:800; color:#222; }
-172: .drawer-close{ background:#eee; border-radius:12px; padding:6px 10px; }
-173: .drawer-section{
-174:   margin-top:14px;
-175:   padding-top:12px;
-176:   border-top:1px solid #eee;
-177: }
-178: .drawer-section h3{
-179:   margin:0 0 10px 0;
-180:   font-size:13px;
-181:   opacity:0.7;
-182:   color:#555;
-183: }
-184: .drawer a,.drawer a:visited{
-185:   display:flex;
-186:   justify-content:space-between;
-187:   align-items:center;
-188:   background:#fff;
-189:   color:#222 !important;
-190:   text-decoration:none !important;
-191:   padding:10px 12px;
-192:   border-radius:14px;
-193:   margin:8px 0;
-194:   border:1px solid #eee;
-195: }
-196: .drawer a:hover{ background:#f7e9ee; border-color:#b32647; }
-197: .drawer .sub{ margin-left:12px; background:#fff5f7; }
-198: .count-pill{
-199:   background:#b32647;
-200:   color:#fff;
-201:   padding:2px 9px;
-202:   border-radius:999px;
-203:   font-size:12px;
-204: }
-205: 
-206: /* =========================
-207:    YouTube 느낌 플레이리스트 (7.5개만)
-208: ========================= */
-209: .playlist{
-210:   width:min(980px, 95%);
-211:   margin:10px auto 20px;
-212:   background:#fff;
-213:   border:1px solid #e6e6e6;
-214:   border-radius:16px;
-215:   max-height:var(--pl-max-h);
-216:   overflow-y:auto;
-217: }
-218: .pl-item{
-219:   height:var(--pl-row-h);
-220:   display:grid;
-221:   grid-template-columns:78px 120px 1fr auto;
-222:   gap:12px;
-223:   align-items:center;
-224:   padding:10px 12px;
-225:   border-bottom:1px solid #eee;
-226:   cursor:pointer;
-227:   background:#fff;
-228: }
-229: .pl-item:hover{ background:#f3f3f3; }
-230: .pl-item.active{ background:#efe7ff; }
-231: .pl-left{ display:flex; align-items:center; gap:10px; }
-232: .pl-index{ width:18px; text-align:right; color:#666; font-size:13px; }
-233: .pl-handle{
-234:   width:16px;
-235:   height:16px;
-236:   display:flex;
-237:   flex-direction:column;
-238:   justify-content:center;
-239:   gap:3px;
-240:   opacity:0.55;
-241: }
-242: .pl-handle span{ display:block; height:2px; background:#777; border-radius:4px; }
-243: .pl-playing{ width:18px; color:#6b2cff; font-weight:900; }
-244: .pl-thumb img{ width:120px; height:68px; object-fit:cover; border-radius:10px; display:block; }
-245: .pl-meta{ text-align:left; overflow:hidden; }
-246: .pl-title{
-247:   font-weight:800;
-248:   color:#111;
-249:   font-size:15px;
-250:   line-height:1.2;
-251:   white-space:nowrap;
-252:   overflow:hidden;
-253:   text-overflow:ellipsis;
-254: }
-255: .pl-sub{
-256:   margin-top:4px;
-257:   font-size:13px;
-258:   color:#666;
-259:   white-space:nowrap;
-260:   overflow:hidden;
-261:   text-overflow:ellipsis;
-262: }
-263: .pl-right{
-264:   display:flex;
-265:   align-items:center;
-266:   gap:8px;
-267:   flex-wrap:wrap;
-268:   justify-content:flex-end;
-269:   max-width:340px;
-270: }
-271: .pl-link{
-272:   display:inline-flex;
-273:   align-items:center;
-274:   justify-content:center;
-275:   padding:7px 10px;
-276:   border-radius:12px;
-277:   font-size:13px;
-278:   font-weight:800;
-279:   text-decoration:none;
-280:   background:#b32647;
-281:   color:#fff;
-282:   border:0;
-283:   cursor:pointer;
-284:   transition:0.2s;
-285: }
-286: .pl-link:hover{ background:#87142e; }
-287: .pl-btn{
-288:   padding:7px 10px;
-289:   border-radius:12px;
-290:   font-size:13px;
-291:   font-weight:800;
-292:   background:#eee;
-293:   color:#111;
-294: }
-295: .pl-btn:hover{ background:#b32647; color:#fff; }
-296: .pl-empty{
-297:   display:inline-flex;
-298:   align-items:center;
-299:   justify-content:center;
-300:   padding:7px 10px;
-301:   border-radius:12px;
-302:   font-size:13px;
-303:   font-weight:800;
-304:   background:#eee;
-305:   color:#111;
-306:   opacity:0.45;
-307: }
-308: .playlist::-webkit-scrollbar{ width:8px; }
-309: .playlist::-webkit-scrollbar-thumb{ background:#cfcfcf; border-radius:999px; }
-310: 
-311: /* =========================
-312:    상단 컨트롤 버튼 줄 + 색상
-313: ========================= */
-314: .controls{
-315:   width:min(980px, 95%);
-316:   margin:10px auto 0;
-317:   display:flex;
-318:   gap:8px;
-319:   flex-wrap:wrap;
-320:   justify-content:center;
-321: }
-322: .controls button{
-323:   padding:10px 12px;
-324:   border-radius:12px;
-325:   font-weight:800;
-326: }
-327: .active-control{
-328:   outline:3px solid rgba(179, 38, 71, 0.18);
-329:   box-shadow:0 0 0 3px rgba(179, 38, 71, 0.10) inset;
-330: }
-331: #btnSeq{ background:#1f9d55; }
-332: #btnRandOne,#btnRand10,#btnRandAuto{ background:#3aa0ff; }
-333: #btnLoop5,#btnLoop10,#btnLoopInf{ background:#7a3cff; }
-334: #btnEdit{ background:#f5c400; color:#222; }
-335: #btnDelete{ background:#e53935; }
-336: #btnSeq:hover{ background:#157a41; }
-337: #btnRandOne:hover,#btnRand10:hover,#btnRandAuto:hover{ background:#2d7fd1; }
-338: #btnLoop5:hover,#btnLoop10:hover,#btnLoopInf:hover{ background:#5f2fd1; }
-339: #btnEdit:hover{ background:#d8ab00; }
-340: #btnDelete:hover{ background:#c62828; }
-341: 
-342: /* =========================
-343:    ✅ 오른쪽 가사 패널 (고정 사이드, 팝업 아님)
-344: ========================= */
-345: .lyrics-toggle{
-346:   position:fixed;
-347:   top:14px;
-348:   right:14px;
-349:   z-index:100000;
-350:   background:#fff;
-351:   border:1px solid #e3e3e3;
-352:   color:#222;
-353:   border-radius:14px;
-354:   padding:10px 12px;
-355:   cursor:pointer;
-356:   font-size:18px;
-357:   transition:0.2s;
-358: }
-359: .lyrics-toggle:hover{ background:#f7e9ee; border-color:#b32647; }
-360: .lyrics-drawer{
-361:   position:fixed;
-362:   top:0;
-363:   right:0;
-364:   width:var(--lyrics-w);
-365:   max-width:92vw;
-366:   height:100vh;
-367:   background:#f8f8f8;
-368:   border-left:1px solid #ddd;
-369:   box-shadow:none;
-370:   transform:translateX(110%);
-371:   transition:transform 0.25s ease;
-372:   z-index:99999;
-373:   display:flex;
-374:   flex-direction:column;
-375:   text-align:left;
-376: }
-377: body.lyrics-open .lyrics-drawer{ transform:translateX(0); }
-378: .lyrics-overlay{
-379:   position:fixed;
-380:   inset:0;
-381:   background:rgba(0,0,0,0.15);
-382:   z-index:99998;
-383:   display:none;
-384: }
-385: body.lyrics-open .lyrics-overlay{ display:block; }
-386: #mainContent{ transition:margin 0.25s ease; }
-387: @media (min-width:980px){
-388:   body.lyrics-open #mainContent{ margin-right:var(--lyrics-w); }
-389: }
-390: @media (max-width:979px){
-391:   body.lyrics-open #mainContent{ margin-right:0; }
-392: }
-393: .lyrics-head{
-394:   display:flex;
-395:   align-items:center;
-396:   justify-content:space-between;
-397:   padding:14px 16px;
-398:   border-bottom:1px solid #e6e6e6;
-399:   background:#fff;
-400: }
-401: .lyrics-head-title{ font-weight:900; color:#111; }
-402: .lyrics-close{
-403:   background:#eee;
-404:   color:#111;
-405:   border:none;
-406:   border-radius:12px;
-407:   padding:6px 10px;
-408:   cursor:pointer;
-409: }
-410: .lyrics-close:hover{ background:#ddd; }
-411: .lyrics-now-title{ padding:12px 16px 0; font-weight:900; color:#111; }
-412: .lyrics-body{ padding:10px 16px 16px; overflow:auto; }
-413: .lyrics-body pre{
-414:   margin:0;
-415:   white-space:pre-wrap;
-416:   line-height:1.6;
-417:   font-family:inherit;
-418: }
-419: 
-  /* =========================
-   ✅ 가사 패널: MR/악보 버튼(있으면 빨강, 없으면 회색)
+/* =========================
+   기본 설정 (화이트톤)
 ========================= */
-.lyrics-tabs{
+:root{
+  --pl-row-h: 72px;
+  --pl-max-h: 540px;
+  --lyrics-w: 420px; /* ✅ 오른쪽 가사 패널 폭 */
+}
+body{
+  background:#f5f6f8;
+  color:#222;
+  font-family:Arial, sans-serif;
+  text-align:center;
+  margin:0;
+  padding:0;
+}
+h1{ margin-top:18px; }
+
+/* =========================
+   메인 메뉴 버튼
+========================= */
+.menu{
+  display:inline-block;
+  background:#fff;
+  border:1px solid #e3e3e3;
+  padding:12px 20px;
+  margin:8px;
+  border-radius:14px;
+  color:#222;
+  text-decoration:none;
+  font-size:18px;
+  transition:0.2s;
+}
+.menu:hover{ background:#f7e9ee; border-color:#b32647; }
+
+/* =========================
+   입력 & 버튼 (공통)
+========================= */
+input,textarea{
+  padding:8px;
+  border-radius:8px;
+  border:1px solid #ddd;
+  margin:5px;
+  background:#fff;
+  color:#222;
+}
+textarea{ width:min(520px, 95%); resize:vertical; }
+button{
+  padding:8px 14px;
+  border-radius:8px;
+  border:none;
+  margin:5px;
+  background:#b32647;
+  color:#fff;
+  cursor:pointer;
+  transition:0.2s;
+}
+button:hover{ background:#87142e; }
+
+/* =========================
+   플레이어 반응형
+========================= */
+#player{
+  width:100%;
+  height:100%;
+  border:0;
+  border-radius:14px;
+  background:#000;
+}
+.player-wrap{
+  width:min(980px, 95%);
+  aspect-ratio:16/9;
+  margin:0 auto;
+}
+
+/* =========================
+   햄버거 드로어 메뉴
+========================= */
+.hamburger{
+  position:fixed;
+  top:14px;
+  left:14px;
+  z-index:100000;
+  background:#b32647;
+  color:#fff;
+  border:none;
+  border-radius:14px;
+  padding:10px 12px;
+  cursor:pointer;
+  font-size:18px;
+}
+.hamburger:hover{ background:#87142e; }
+
+.drawer-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.3);
+  z-index:99998;
+  display:none;
+}
+.drawer-overlay.open{ display:block; }
+
+.drawer{
+  position:fixed;
+  top:0;
+  left:0;
+  width:300px;
+  max-width:85vw;
+  height:100vh;
+  background:#fff;
+  z-index:99999;
+  transform:translateX(-110%);
+  transition:transform 0.25s ease;
+  padding:18px;
+  box-shadow:12px 0 30px rgba(0,0,0,0.15);
+  text-align:left !important;
+}
+.drawer.open{ transform:translateX(0); }
+
+.drawer-header{
   display:flex;
-  gap:10px;
-  padding:10px 16px 6px;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:14px;
+}
+.drawer-title{ font-size:18px; font-weight:800; color:#222; }
+
+.drawer-section{
+  margin-top:14px;
+  padding-top:12px;
+  border-top:1px solid #eee;
+}
+.drawer-section h3{
+  margin:0 0 10px 0;
+  font-size:13px;
+  opacity:0.7;
+  color:#555;
+}
+
+.drawer a{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  background:#fff;
+  color:#222;
+  text-decoration:none;
+  padding:10px 12px;
+  border-radius:14px;
+  margin:8px 0;
+  border:1px solid #eee;
+}
+.drawer a:hover{
+  background:#f7e9ee;
+  border-color:#b32647;
+}
+
+/* =========================
+   플레이리스트
+========================= */
+.playlist{
+  width:min(980px, 95%);
+  margin:10px auto 20px;
+  background:#fff;
+  border:1px solid #e6e6e6;
+  border-radius:16px;
+  max-height:var(--pl-max-h);
+  overflow-y:auto;
+}
+.pl-item{
+  height:var(--pl-row-h);
+  display:grid;
+  grid-template-columns:78px 120px 1fr;
+  gap:12px;
+  align-items:center;
+  padding:10px 12px;
+  border-bottom:1px solid #eee;
+  cursor:pointer;
+  background:#fff;
+}
+.pl-item:hover{ background:#f3f3f3; }
+.pl-item.active{ background:#efe7ff; }
+
+.pl-thumb img{
+  width:120px;
+  height:68px;
+  object-fit:cover;
+  border-radius:10px;
+  display:block;
+}
+.pl-title{
+  font-weight:800;
+  color:#111;
+  font-size:15px;
+}
+.pl-sub{
+  margin-top:4px;
+  font-size:13px;
+  color:#666;
+}
+
+/* =========================
+   컨트롤 버튼
+========================= */
+.controls{
+  width:min(980px, 95%);
+  margin:10px auto 0;
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  justify-content:center;
+}
+.controls button{
+  padding:10px 12px;
+  border-radius:12px;
+  font-weight:800;
+}
+
+#btnSeq{ background:#1f9d55; }
+#btnRandOne,#btnRand10,#btnRandAuto{ background:#3aa0ff; }
+#btnLoop5,#btnLoop10,#btnLoopInf{ background:#7a3cff; }
+#btnEdit{ background:#f5c400; color:#222; }
+#btnDelete{ background:#e53935; }
+
+#btnSeq:hover{ background:#157a41; }
+#btnRandOne:hover,#btnRand10:hover,#btnRandAuto:hover{ background:#2d7fd1; }
+#btnLoop5:hover,#btnLoop10:hover,#btnLoopInf:hover{ background:#5f2fd1; }
+#btnEdit:hover{ background:#d8ab00; }
+#btnDelete:hover{ background:#c62828; }
+
+/* =========================
+   가사 패널
+========================= */
+.lyrics-drawer{
+  position:fixed;
+  top:0;
+  right:0;
+  width:420px;
+  max-width:92vw;
+  height:100vh;
+  background:#f8f8f8;
+  border-left:1px solid #ddd;
+  transform:translateX(110%);
+  transition:transform 0.25s ease;
+  z-index:99999;
+  display:flex;
+  flex-direction:column;
+  text-align:left;
+}
+body.lyrics-open .lyrics-drawer{ transform:translateX(0); }
+
+.lyrics-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:14px 16px;
   border-bottom:1px solid #e6e6e6;
   background:#fff;
 }
-.tab-link{
-  flex:1;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  height:42px;
-  border-radius:14px;
+.lyrics-now-title{
+  padding:12px 16px 0;
   font-weight:900;
-  text-decoration:none;
-  border:1px solid #ddd;
-  user-select:none;
+  color:#111;
 }
-.tab-on{
-  background:#e53935;  /* ✅ 빨강 */
-  color:#fff;
-  border-color:#e53935;
+.lyrics-body{
+  padding:10px 16px 16px;
+  overflow:auto;
 }
-.tab-disabled{
-  background:#eee;      /* ✅ 회색 */
-  color:#999;
-  border-color:#e3e3e3;
-  pointer-events:none;  /* ✅ 클릭 불가 */
-  opacity:0.95;
+.lyrics-body pre{
+  margin:0;
+  white-space:pre-wrap;
+  line-height:1.6;
 }
-420: /* =========================
-421:    모달(수정창)
-422: ========================= */
-423: .modal-overlay{
-424:   position:fixed;
-425:   inset:0;
-426:   background:rgba(0,0,0,0.25);
-427:   z-index:99998;
-428: }
-429: .modal{
-430:   position:fixed;
-431:   top:50%;
-432:   left:50%;
-433:   transform:translate(-50%,-50%);
-434:   width:min(640px, 92vw);
-435:   max-height:85vh;
-436:   overflow:auto;
-437:   background:#fff;
-438:   border:1px solid #e6e6e6;
-439:   border-radius:16px;
-440:   box-shadow:0 20px 60px rgba(0,0,0,0.18);
-441:   z-index:99999;
-442:   text-align:left;
-443: }
-444: .modal-head{
-445:   display:flex;
-446:   align-items:center;
-447:   justify-content:space-between;
-448:   padding:14px 16px;
-449:   border-bottom:1px solid #eee;
-450: }
-451: .modal-title{ font-weight:900; color:#111; }
-452: .modal-close{
-453:   background:#eee;
-454:   color:#111;
-455:   border:none;
-456:   border-radius:10px;
-457:   padding:6px 10px;
-458:   cursor:pointer;
-459: }
-460: .modal-body{
-461:   padding:14px 16px;
-462:   display:flex;
-463:   flex-direction:column;
-464:   gap:10px;
-465: }
-466: .modal-label{ font-size:12px; opacity:0.75; margin-top:6px; }
-467: .modal-body input,.modal-body textarea{ width:100%; box-sizing:border-box; }
-468: .modal-actions{
-469:   padding:14px 16px;
-470:   border-top:1px solid #eee;
-471:   display:flex;
-472:   gap:10px;
-473:   justify-content:flex-end;
-474: }
-475: .btn-ghost{ background:#eee !important; color:#111 !important; }
-476: .btn-ghost:hover{ background:#ddd !important; }
-477: 
-478: /* =========================
-479:    모바일에서 목록 레이아웃 정리
-480: ========================= */
-481: @media (max-width:720px){
-482:   .pl-item{
-483:     grid-template-columns:78px 110px 1fr;
-484:     height:auto;
-485:     padding:10px 12px 12px;
-486:   }
-487:   .pl-thumb img{ width:110px; height:62px; }
-488:   .pl-right{
-489:     grid-column:1 / -1;
-490:     justify-content:flex-start;
-491:     max-width:none;
-492:     margin-top:8px;
-493:   }
-494: }
+
+/* =========================
+   모바일
+========================= */
+@media (max-width:720px){
+  .pl-item{
+    grid-template-columns:78px 110px 1fr;
+    height:auto;
+  }
+  .pl-thumb img{
+    width:110px;
+    height:62px;
+  }
+}
