@@ -10,7 +10,7 @@
 <body class="light-page" data-store="jpBright">
 
   <!-- ✅ 햄버거 -->
-  <button id="hamburgerBtn" class="hamburger" type="button">☰</button>
+  <button id="hamburgerBtn" class="hamburger">☰</button>
   <div id="drawerOverlay" class="drawer-overlay"></div>
 
   <nav id="drawer" class="drawer">
@@ -21,11 +21,7 @@
 
     <div class="drawer-section">
       <h3>일본노래</h3>
-      <a href="../japan/index.html">
-        <span>🇯🇵 일본노래</span>
-        <span>›</span>
-      </a>
-
+      <a href="../japan/index.html"><span>🇯🇵 일본노래</span><span>›</span></a>
       <a class="sub" href="../japan/bright.html">
         <span>밝은노래</span>
         <span class="count-pill">(<span id="count-jp-bright">0</span>)</span>
@@ -34,11 +30,7 @@
 
     <div class="drawer-section">
       <h3>중국노래</h3>
-      <a href="../china/index.html">
-        <span>🇨🇳 중국노래</span>
-        <span>›</span>
-      </a>
-
+      <a href="../china/index.html"><span>🇨🇳 중국노래</span><span>›</span></a>
       <a class="sub" href="../china/bright.html">
         <span>밝은노래</span>
         <span class="count-pill">(<span id="count-cn-bright">0</span>)</span>
@@ -46,30 +38,22 @@
     </div>
 
     <div class="drawer-section">
-      <a href="../index.html">
-        <span>🏠 메인으로</span>
-        <span>›</span>
-      </a>
+      <a href="../index.html"><span>🏠 메인으로</span><span>›</span></a>
     </div>
   </nav>
 
   <!-- ✅ 오른쪽 위: 가사 드로어 토글 -->
   <button id="lyricsBtn" class="lyrics-toggle" title="가사 패널" type="button">≡</button>
 
-  <!-- ✅ 본문(드로어 열리면 CSS가 이걸 밀어줌) -->
+  <!-- ✅ 본문 -->
   <div id="mainContent">
     <h1>🇯🇵 일본 밝은 노래</h1>
 
-    <!-- 플레이어 -->
-    <iframe
-      id="player"
-      allow="autoplay; encrypted-media"
-      allowfullscreen
-    ></iframe>
+    <!-- ✅ 플레이어 래퍼(스케일 애니메이션용) -->
+    <div class="player-wrap">
+      <iframe id="player" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+    </div>
 
-    <br />
-
-    <!-- ✅ 상단 컨트롤 -->
     <div class="controls">
       <button id="btnSeq" type="button">순서대로</button>
 
@@ -91,14 +75,11 @@
     <hr />
     <h2>🎵 노래 추가</h2>
 
-    <!-- ✅ 유튜브/MR/악보 입력 그대로 -->
     <input id="yt" placeholder="유튜브 링크" />
     <textarea id="lyrics" placeholder="가사 입력 (복붙 가능)" rows="6"></textarea>
     <input id="mr" placeholder="MR 링크(선택)" />
     <input id="score" placeholder="악보 링크(선택)" />
-
-    <!-- ✅ onclick 제거! -->
-    <button id="btnAdd" type="button">추가</button>
+    <button type="button" onclick="addSong()">추가</button>
   </div>
 
   <!-- ✅ 오른쪽 가사 드로어 -->
@@ -107,25 +88,20 @@
       <div class="lyrics-head-title">가사</div>
       <button id="lyricsCloseBtn" class="lyrics-close" type="button">✕</button>
     </div>
-
     <div id="lyricsNowTitle" class="lyrics-now-title">재생중인 곡이 없어</div>
-
     <div class="lyrics-body">
       <pre id="lyricsNowText">노래를 재생하면 여기서 가사를 볼 수 있어.</pre>
     </div>
   </aside>
 
-  <!-- ✅ 바깥 클릭 닫기용 -->
   <div id="lyricsOverlay" class="lyrics-overlay"></div>
 
-  <!-- ✅ scripts (한 번씩만) -->
+  <!-- ✅ scripts (중복 없이 1번씩만) -->
   <script src="../nav.js"></script>
 
-  <!-- ✅ 폴더 구조가 루트/js 이므로 ../js 맞음 -->
   <script src="../js/app-state.js"></script>
   <script src="../js/app-ui.js"></script>
   <script src="../js/app-player.js"></script>
   <script src="../js/app-modal.js"></script>
-
 </body>
 </html>
