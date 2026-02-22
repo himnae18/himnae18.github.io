@@ -10,13 +10,13 @@
 <body class="light-page" data-store="jpBright">
 
   <!-- ✅ 햄버거 -->
-  <button id="hamburgerBtn" class="hamburger">☰</button>
+  <button id="hamburgerBtn" class="hamburger" type="button">☰</button>
   <div id="drawerOverlay" class="drawer-overlay"></div>
 
   <nav id="drawer" class="drawer">
     <div class="drawer-header">
       <div class="drawer-title">메뉴</div>
-      <button id="drawerCloseBtn" class="drawer-close">✕</button>
+      <button id="drawerCloseBtn" class="drawer-close" type="button">✕</button>
     </div>
 
     <div class="drawer-section">
@@ -54,7 +54,7 @@
   </nav>
 
   <!-- ✅ 오른쪽 위: 가사 드로어 토글 -->
-  <button id="lyricsBtn" class="lyrics-toggle" title="가사 패널">≡</button>
+  <button id="lyricsBtn" class="lyrics-toggle" title="가사 패널" type="button">≡</button>
 
   <!-- ✅ 본문(드로어 열리면 CSS가 이걸 밀어줌) -->
   <div id="mainContent">
@@ -71,18 +71,18 @@
 
     <!-- ✅ 상단 컨트롤 -->
     <div class="controls">
-      <button id="btnSeq">순서대로</button>
+      <button id="btnSeq" type="button">순서대로</button>
 
-      <button id="btnRandOne">랜덤곡</button>
-      <button id="btnRand10">랜덤곡 10회</button>
-      <button id="btnRandAuto">랜덤자동재생</button>
+      <button id="btnRandOne" type="button">랜덤곡</button>
+      <button id="btnRand10" type="button">랜덤곡 10회</button>
+      <button id="btnRandAuto" type="button">랜덤자동재생</button>
 
-      <button id="btnLoop5">5회반복</button>
-      <button id="btnLoop10">10회반복</button>
-      <button id="btnLoopInf">무한반복</button>
+      <button id="btnLoop5" type="button">5회반복</button>
+      <button id="btnLoop10" type="button">10회반복</button>
+      <button id="btnLoopInf" type="button">무한반복</button>
 
-      <button id="btnEdit">수정</button>
-      <button id="btnDelete">삭제</button>
+      <button id="btnEdit" type="button">수정</button>
+      <button id="btnDelete" type="button">삭제</button>
     </div>
 
     <hr />
@@ -96,7 +96,9 @@
     <textarea id="lyrics" placeholder="가사 입력 (복붙 가능)" rows="6"></textarea>
     <input id="mr" placeholder="MR 링크(선택)" />
     <input id="score" placeholder="악보 링크(선택)" />
-    <button type="button" onclick="addSong()">추가</button>
+
+    <!-- ✅ onclick 제거! -->
+    <button id="btnAdd" type="button">추가</button>
   </div>
 
   <!-- ✅ 오른쪽 가사 드로어 -->
@@ -119,6 +121,7 @@
   <!-- ✅ scripts (한 번씩만) -->
   <script src="../nav.js"></script>
 
+  <!-- ✅ 폴더 구조가 루트/js 이므로 ../js 맞음 -->
   <script src="../js/app-state.js"></script>
   <script src="../js/app-ui.js"></script>
   <script src="../js/app-player.js"></script>
