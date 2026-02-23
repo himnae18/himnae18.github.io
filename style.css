@@ -256,23 +256,25 @@ button:hover{ background:#87142e; }
 #btnDelete:hover{ background:#c62828; }
 
 /* =========================
-   가사 패널
+   가사 버튼 (오른쪽 위)
 ========================= */
-.lyrics-drawer{
+.lyrics-toggle{
   position:fixed;
-  top:0;
-  right:0;
-  width:420px;
-  max-width:92vw;
-  height:100vh;
-  background:#f8f8f8;
-  border-left:1px solid #ddd;
-  transform:translateX(110%);
-  transition:transform 0.25s ease;
-  z-index:99999;
-  display:flex;
-  flex-direction:column;
-  text-align:left;
+  top:14px;
+  right:14px;     /* ✅ 오른쪽 끝 */
+  z-index:100000;
+  background:#b32647;
+  color:#fff;
+  border:none;
+  border-radius:14px;
+  padding:10px 12px;
+  cursor:pointer;
+  font-size:18px;
+}
+
+.lyrics-toggle:hover{
+  background:#87142e;
+}
    /* =========================
    ✅ (추가) 가사 패널 탭(가사/MR/악보)
    - tab-ready : 링크 있음(빨강)
