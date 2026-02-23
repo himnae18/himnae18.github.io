@@ -255,12 +255,8 @@ button:hover{
 /* =========================
    가사 패널
 ========================= */
-.lyrics-drawer{
-  position:fixed;
-  top:0;
-  right:0;
-  width:var(--lyrics-w);
-  height:100vh;
+height:calc(100vh - 140px);
+top:90px;
   background:#f8f8f8;
   border-left:1px solid #ddd;
   transform:translateX(110%);
