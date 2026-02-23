@@ -10,8 +10,7 @@
 <body class="light-page" data-store="jpBright">
 
   <!-- =========================
-       ✅ 햄버거 + 드로어(토글)
-       - X 버튼 제거(요청)
+       햄버거 + 드로어
   ========================= -->
   <button id="hamburgerBtn" class="hamburger" type="button">☰</button>
   <div id="drawerOverlay" class="drawer-overlay"></div>
@@ -19,7 +18,6 @@
   <nav id="drawer" class="drawer" aria-label="메뉴">
     <div class="drawer-header">
       <div class="drawer-title">메뉴</div>
-      <!-- ✅ X 버튼 제거 -->
     </div>
 
     <div class="drawer-section">
@@ -46,104 +44,99 @@
   </nav>
 
   <!-- =========================
-       ✅ 오른쪽 위: 가사 드로어 토글
+       가사 버튼
   ========================= -->
-  <button id="lyricsBtn" class="lyrics-toggle" title="가사 패널" type="button">≡</button>
+  <button id="lyricsBtn" class="lyrics-toggle" type="button">≡</button>
 
   <!-- =========================
-       ✅ 본문
+       메인 콘텐츠
   ========================= -->
   <div id="mainContent">
-<h1>🇯🇵 일본 밝은 노래</h1>
 
-<div class="top-split">
+    <h1>🇯🇵 일본 밝은 노래</h1>
 
-  <div class="player-wrap">
-    <div id="player"></div>
-  </div>
+    <!-- 영상 -->
+    <div class="player-wrap">
+      <div id="player"></div>
+    </div>
 
+    <!-- 컨트롤 -->
     <div class="controls">
       <button id="btnSeq" type="button">순서대로</button>
-
       <button id="btnRandOne" type="button">랜덤곡</button>
       <button id="btnRand10" type="button">랜덤곡 10회</button>
       <button id="btnRandAuto" type="button">랜덤자동재생</button>
-
       <button id="btnLoop5" type="button">5회반복</button>
       <button id="btnLoop10" type="button">10회반복</button>
       <button id="btnLoopInf" type="button">무한반복</button>
-
       <button id="btnEdit" type="button">수정</button>
       <button id="btnDelete" type="button">삭제</button>
     </div>
 
-    <!-- ✅ 가사창 높이 제한에 쓸 선(id 추가) -->
     <hr id="topDivider" />
 
+    <!-- 재생목록 -->
     <div id="list"></div>
 
     <hr />
-    <h2>🎵 노래 추가</h2>
 
+    <!-- 노래 추가 -->
+    <h2>🎵 노래 추가</h2>
     <input id="yt" placeholder="유튜브 링크" />
     <textarea id="lyrics" placeholder="가사 입력 (복붙 가능)" rows="6"></textarea>
     <input id="mr" placeholder="MR 링크(선택)" />
     <input id="score" placeholder="악보 링크(선택)" />
     <button type="button" onclick="addSong()">추가</button>
+
   </div>
 
   <!-- =========================
-       ✅ 오른쪽 가사 패널
+       가사 패널 (슬라이드형)
   ========================= -->
   <aside id="lyricsDrawer" class="lyrics-drawer">
+
     <div class="lyrics-head">
       <div class="lyrics-head-title">가사</div>
       <button id="lyricsCloseBtn" class="lyrics-close" type="button">✕</button>
     </div>
 
-    <!-- =========================
-         ✅ 탭 3개: 가사 / MR / 악보
-         - 가사: 텍스트 표시
-         - MR: 가사창 안에 iframe 표시(링크 없으면 비활성)
-         - 악보: PNG 링크 새탭 이동(링크 없으면 비활성)
-    ========================= -->
     <div class="lyrics-tabs">
       <button id="tabLyrics" class="tab-link tab-active" type="button">가사</button>
       <button id="tabMr" class="tab-link tab-disabled" type="button">MR</button>
-      <a id="tabScore" class="tab-link tab-disabled" href="#" target="_blank" rel="noopener">악보</a>
+      <a id="tabScore" class="tab-link tab-disabled" href="#" target="_blank">악보</a>
     </div>
 
-    <div id="lyricsNowTitle" class="lyrics-now-title">재생중인 곡이 없어</div>
+    <div id="lyricsNowTitle" class="lyrics-now-title">
+      재생중인 곡이 없어
+    </div>
 
     <div class="lyrics-body">
-      <pre id="lyricsNowText">노래를 재생하면 여기서 가사를 볼 수 있어.</pre>
+      <pre id="lyricsNowText">
+노래를 재생하면 여기서 가사를 볼 수 있어.
+      </pre>
 
-      <!-- ✅ MR iframe이 들어갈 영역 (가사 탭이면 숨김, MR 탭이면 표시) -->
       <div id="lyricsNowMedia" class="lyrics-media" style="display:none;"></div>
     </div>
+
   </aside>
 
   <div id="lyricsOverlay" class="lyrics-overlay"></div>
 
   <!-- =========================
-       ✅ scripts (중복 없이 1번씩만)
+       스크립트
   ========================= -->
   <script src="../nav.js"></script>
-
   <script src="../js/app-state.js"></script>
   <script src="../js/app-ui.js"></script>
   <script src="../js/app-player.js"></script>
   <script src="../js/app-modal.js"></script>
 
-  <!-- =========================
-     ✅ 수정 모달 팝업 영역
-========================= -->
-<div id="editModal" class="modal-overlay">
-  <div class="modal-box" onclick="event.stopPropagation();">
-    <div id="editModalContent"></div>
+  <!-- 수정 모달 -->
+  <div id="editModal" class="modal-overlay">
+    <div class="modal-box" onclick="event.stopPropagation();">
+      <div id="editModalContent"></div>
+    </div>
   </div>
-</div>
 
-  
 </body>
 </html>
