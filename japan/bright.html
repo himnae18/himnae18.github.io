@@ -43,9 +43,7 @@
     </div>
   </nav>
 
-  <!-- =========================
-       가사 버튼
-  ========================= -->
+  <!-- 가사 버튼 -->
   <button id="lyricsBtn" class="lyrics-toggle" type="button">≡</button>
 
   <!-- =========================
@@ -55,43 +53,51 @@
 
     <h1>🇯🇵 일본 밝은 노래</h1>
 
-    <!-- 영상 -->
-    <div class="player-wrap">
-      <div id="player"></div>
-    </div>
+    <!-- =========================
+         A구역 (영상 영역)
+    ========================= -->
+    <section class="area-a">
+      <div class="player-wrap">
+        <div id="player"></div>
+      </div>
+    </section>
 
-    <!-- 컨트롤 -->
-    <div class="controls">
-      <button id="btnSeq" type="button">순서대로</button>
-      <button id="btnRandOne" type="button">랜덤곡</button>
-      <button id="btnRand10" type="button">랜덤곡 10회</button>
-      <button id="btnRandAuto" type="button">랜덤자동재생</button>
-      <button id="btnLoop5" type="button">5회반복</button>
-      <button id="btnLoop10" type="button">10회반복</button>
-      <button id="btnLoopInf" type="button">무한반복</button>
-      <button id="btnEdit" type="button">수정</button>
-      <button id="btnDelete" type="button">삭제</button>
-    </div>
+    <!-- =========================
+         B구역 (목록 영역)
+    ========================= -->
+    <section class="area-b">
 
-    <hr id="topDivider" />
+      <div class="controls">
+        <button id="btnSeq" type="button">순서대로</button>
+        <button id="btnRandOne" type="button">랜덤곡</button>
+        <button id="btnRand10" type="button">랜덤곡 10회</button>
+        <button id="btnRandAuto" type="button">랜덤자동재생</button>
+        <button id="btnLoop5" type="button">5회반복</button>
+        <button id="btnLoop10" type="button">10회반복</button>
+        <button id="btnLoopInf" type="button">무한반복</button>
+        <button id="btnEdit" type="button">수정</button>
+        <button id="btnDelete" type="button">삭제</button>
+      </div>
 
-    <!-- 재생목록 -->
-    <div id="list"></div>
+      <hr />
 
-    <hr />
+      <div id="list"></div>
 
-    <!-- 노래 추가 -->
-    <h2>🎵 노래 추가</h2>
-    <input id="yt" placeholder="유튜브 링크" />
-    <textarea id="lyrics" placeholder="가사 입력 (복붙 가능)" rows="6"></textarea>
-    <input id="mr" placeholder="MR 링크(선택)" />
-    <input id="score" placeholder="악보 링크(선택)" />
-    <button type="button" onclick="addSong()">추가</button>
+      <hr />
+
+      <h2>🎵 노래 추가</h2>
+      <input id="yt" placeholder="유튜브 링크" />
+      <textarea id="lyrics" placeholder="가사 입력 (복붙 가능)" rows="6"></textarea>
+      <input id="mr" placeholder="MR 링크(선택)" />
+      <input id="score" placeholder="악보 링크(선택)" />
+      <button type="button" onclick="addSong()">추가</button>
+
+    </section>
 
   </div>
 
   <!-- =========================
-       가사 패널 (슬라이드형)
+       가사 패널
   ========================= -->
   <aside id="lyricsDrawer" class="lyrics-drawer">
 
@@ -114,7 +120,6 @@
       <pre id="lyricsNowText">
 노래를 재생하면 여기서 가사를 볼 수 있어.
       </pre>
-
       <div id="lyricsNowMedia" class="lyrics-media" style="display:none;"></div>
     </div>
 
@@ -122,9 +127,7 @@
 
   <div id="lyricsOverlay" class="lyrics-overlay"></div>
 
-  <!-- =========================
-       스크립트
-  ========================= -->
+  <!-- 스크립트 -->
   <script src="../nav.js"></script>
   <script src="../js/app-state.js"></script>
   <script src="../js/app-ui.js"></script>
