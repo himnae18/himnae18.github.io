@@ -106,7 +106,7 @@ button:hover{ background:#87142e; }
 .hamburger{
   position:fixed;
   top:14px;
-  right:70px;
+  left:14px;
   z-index:100000;
   background:#b32647;
   color:#fff;
