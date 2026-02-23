@@ -1,5 +1,5 @@
 /* =========================
-   기본 설정 (화이트톤)
+   기본 설정
 ========================= */
 :root{
   --pl-row-h: 72px;
@@ -19,23 +19,23 @@ body{
 h1{ margin-top:18px; }
 
 /* =========================
-   가사 패널 열릴 때 화면 분할
+   A / B 영역 분리 구조
 ========================= */
-#mainContent{
-  transition:padding 0.25s ease;
+.area-a{
+  width:min(980px,95%);
+  margin:0 auto;
+  transition:width 0.25s ease;
 }
 
-/* 데스크탑에서 가사 열리면 오른쪽 공간 확보 */
+.area-b{
+  width:min(980px,95%);
+  margin:0 auto 40px;
+}
+
+/* 데스크탑에서 가사 열리면 A영역만 줄어듦 */
 @media (min-width:980px){
-  body.lyrics-open #mainContent{
-    padding-right:420px;
-  }
-}
-
-/* 모바일에서는 밀지 않음 */
-@media (max-width:979px){
-  body.lyrics-open #mainContent{
-    padding-right:0;
+  body.lyrics-open .area-a{
+    width:calc(min(980px,95%) - var(--lyrics-w));
   }
 }
 
@@ -102,7 +102,7 @@ button:hover{
 }
 
 .player-wrap{
-  width:min(980px, 95%);
+  width:100%;
   aspect-ratio:16/9;
   margin:0 auto;
 }
@@ -184,7 +184,7 @@ button:hover{
    플레이리스트
 ========================= */
 .playlist{
-  width:min(980px, 95%);
+  width:100%;
   margin:10px auto 20px;
   background:#fff;
   border:1px solid #e6e6e6;
@@ -218,7 +218,7 @@ button:hover{
    컨트롤 버튼
 ========================= */
 .controls{
-  width:min(980px, 95%);
+  width:100%;
   margin:10px auto 0;
   display:flex;
   gap:8px;
@@ -250,8 +250,7 @@ button:hover{
   position:fixed;
   top:0;
   right:0;
-  width:420px;
-  max-width:420px;
+  width:var(--lyrics-w);
   height:100vh;
   background:#f8f8f8;
   border-left:1px solid #ddd;
@@ -304,14 +303,6 @@ body.lyrics-open .lyrics-drawer{
   color:#999;
   border-color:#e3e3e3;
   pointer-events:none;
-}
-
-.lyrics-media iframe{
-  width:100%;
-  aspect-ratio:16/9;
-  border:0;
-  border-radius:14px;
-  background:#000;
 }
 
 /* =========================
