@@ -19,26 +19,24 @@ body{
 h1{ margin-top:18px; }
 
 /* =========================
-   A / B 영역 분리
+   영상 / 목록 구분
 ========================= */
 .area-a{
   width:min(980px,95%);
   margin:0 auto;
-  transition:transform 0.25s ease;
-  padding-bottom:20px;
-  margin-bottom:20px;
-  border-bottom:1px solid #dcdcdc;
+  padding-bottom:25px;
+  border-bottom:2px solid #e2e2e2;
 }
 
 .area-b{
   width:min(980px,95%);
-  margin:0 auto 40px;
+  margin:25px auto 40px;
 }
 
-/* 영상만 왼쪽으로 밀기 */
 @media (min-width:980px){
   body.lyrics-open .area-a{
     transform:translateX(-210px);
+    transition:transform 0.25s ease;
   }
 }
 
@@ -247,17 +245,15 @@ button:hover{
 #btnDelete:hover{ background:#c62828; }
 
 /* =========================
-   가사 패널 (영상 아래부터 시작)
+   가사 패널 (상단부터 시작)
 ========================= */
 .lyrics-drawer{
   position:fixed;
+  top:0;
   right:0;
-
-  /* 🔥 영상 높이만큼 아래로 내림 */
-  top:360px;            /* ← 영상 높이에 맞게 조절 가능 */
-  height:calc(100vh - 360px);
-
   width:var(--lyrics-w);
+  height:100vh;
+
   background:#f8f8f8;
   border-left:1px solid #ddd;
 
