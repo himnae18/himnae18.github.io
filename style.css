@@ -31,12 +31,21 @@ h1{ margin-top:18px; }
   width:min(980px,95%);
   margin:0 auto 40px;
 }
-
-/* 데스크탑에서 가사 열리면 A영역만 줄어듦 */
+/* =========================
+   영상만 왼쪽으로 밀기
+========================= */
 @media (min-width:980px){
-  body.lyrics-open .area-a{
-    width:calc(min(980px,95%) - var(--lyrics-w));
+
+  .area-a{
+    width:min(980px,95%);
+    margin:0 auto;
+    transition:transform 0.25s ease;
   }
+
+  body.lyrics-open .area-a{
+    transform:translateX(-210px);
+  }
+
 }
 
 /* =========================
