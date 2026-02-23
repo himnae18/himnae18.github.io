@@ -106,8 +106,7 @@ button:hover{ background:#87142e; }
 .hamburger{
   position:fixed;
   top:14px;
-  right:14px;   /* ✅ 오른쪽으로 이동 */
-  left:auto;    /* ✅ 추가 */
+  left:14px;      /* 🔥 다시 왼쪽 */
   z-index:100000;
   background:#b32647;
   color:#fff;
