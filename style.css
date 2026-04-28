@@ -1,12 +1,11 @@
 /* =========================
-   기본 설정
+   기본 설정 (화이트톤)
 ========================= */
 :root{
   --pl-row-h: 72px;
   --pl-max-h: 540px;
-  --lyrics-w: 420px;
+  --lyrics-w: 420px; /* ✅ 오른쪽 가사 패널 폭 */
 }
-
 body{
   background:#f5f6f8;
   color:#222;
@@ -14,31 +13,35 @@ body{
   text-align:center;
   margin:0;
   padding:0;
-}
-
-h1{ margin-top:18px; }
-
-/* =========================
-   영상 / 목록 완전 분리
+   /* =========================
+   ✅ (추가) 가사 패널 열릴 때: 화면 딱 반(50%) 분할
+   - mainContent는 오른쪽 50vw 공간을 비워서 "영상이 밀린 것처럼" 보이게
 ========================= */
-.area-a{
-  width:min(980px,95%);
-  margin:0 auto;
-  padding-bottom:30px;
-  border-bottom:4px solid #000;   /* 🔥 두껍게 */
-}
-
-.area-b{
-  width:min(1200px,95%);
-  margin:30px auto 40px;
+#mainContent{
+  transition:padding 0.25s ease;
 }
 
 @media (min-width:980px){
-  body.lyrics-open .area-a{
-    transform:translateX(-220px);
-    transition:transform 0.25s ease;
+  /* ✅ 가사 패널 열리면 본문이 오른쪽 절반(50vw)을 비움 */
+  body.lyrics-open #mainContent{
+    padding-right:50vw;
+  }
+
+  /* ✅ 가사 패널은 오른쪽 절반(50vw) 고정 */
+  body.lyrics-open .lyrics-drawer{
+    width:50vw;
+    max-width:50vw;
   }
 }
+
+@media (max-width:979px){
+  /* 모바일에서는 기존처럼 슬라이드만 */
+  body.lyrics-open #mainContent{
+    padding-right:0;
+  }
+}
+}
+h1{ margin-top:18px; }
 
 /* =========================
    메인 메뉴 버튼
@@ -55,13 +58,10 @@ h1{ margin-top:18px; }
   font-size:18px;
   transition:0.2s;
 }
-.menu:hover{
-  background:#f7e9ee;
-  border-color:#b32647;
-}
+.menu:hover{ background:#f7e9ee; border-color:#b32647; }
 
 /* =========================
-   입력 & 버튼
+   입력 & 버튼 (공통)
 ========================= */
 input,textarea{
   padding:8px;
@@ -71,12 +71,7 @@ input,textarea{
   background:#fff;
   color:#222;
 }
-
-textarea{
-  width:min(520px,95%);
-  resize:vertical;
-}
-
+textarea{ width:min(520px, 95%); resize:vertical; }
 button{
   padding:8px 14px;
   border-radius:8px;
@@ -87,12 +82,10 @@ button{
   cursor:pointer;
   transition:0.2s;
 }
-button:hover{
-  background:#87142e;
-}
+button:hover{ background:#87142e; }
 
 /* =========================
-   플레이어
+   플레이어 반응형
 ========================= */
 #player{
   width:100%;
@@ -101,15 +94,14 @@ button:hover{
   border-radius:14px;
   background:#000;
 }
-
 .player-wrap{
-  width:100%;
+  width:min(980px, 95%);
   aspect-ratio:16/9;
   margin:0 auto;
 }
 
 /* =========================
-   햄버거 메뉴
+   햄버거 드로어 메뉴
 ========================= */
 .hamburger{
   position:fixed;
@@ -124,33 +116,8 @@ button:hover{
   cursor:pointer;
   font-size:18px;
 }
-.hamburger:hover{
-  background:#87142e;
-}
+.hamburger:hover{ background:#87142e; }
 
-/* =========================
-   가사 버튼
-========================= */
-.lyrics-toggle{
-  position:fixed;
-  top:14px;
-  right:14px;
-  z-index:100000;
-  background:#b32647;
-  color:#fff;
-  border:none;
-  border-radius:14px;
-  padding:10px 12px;
-  cursor:pointer;
-  font-size:18px;
-}
-.lyrics-toggle:hover{
-  background:#87142e;
-}
-
-/* =========================
-   드로어 메뉴
-========================= */
 .drawer-overlay{
   position:fixed;
   inset:0;
@@ -158,9 +125,7 @@ button:hover{
   z-index:99998;
   display:none;
 }
-.drawer-overlay.open{
-  display:block;
-}
+.drawer-overlay.open{ display:block; }
 
 .drawer{
   position:fixed;
@@ -177,15 +142,50 @@ button:hover{
   box-shadow:12px 0 30px rgba(0,0,0,0.15);
   text-align:left !important;
 }
-.drawer.open{
-  transform:translateX(0);
+.drawer.open{ transform:translateX(0); }
+
+.drawer-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:14px;
+}
+.drawer-title{ font-size:18px; font-weight:800; color:#222; }
+
+.drawer-section{
+  margin-top:14px;
+  padding-top:12px;
+  border-top:1px solid #eee;
+}
+.drawer-section h3{
+  margin:0 0 10px 0;
+  font-size:13px;
+  opacity:0.7;
+  color:#555;
+}
+
+.drawer a{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  background:#fff;
+  color:#222;
+  text-decoration:none;
+  padding:10px 12px;
+  border-radius:14px;
+  margin:8px 0;
+  border:1px solid #eee;
+}
+.drawer a:hover{
+  background:#f7e9ee;
+  border-color:#b32647;
 }
 
 /* =========================
    플레이리스트
 ========================= */
 .playlist{
-  width:100%;
+  width:min(980px, 95%);
   margin:10px auto 20px;
   background:#fff;
   border:1px solid #e6e6e6;
@@ -193,7 +193,6 @@ button:hover{
   max-height:var(--pl-max-h);
   overflow-y:auto;
 }
-
 .pl-item{
   height:var(--pl-row-h);
   display:grid;
@@ -213,13 +212,24 @@ button:hover{
   height:68px;
   object-fit:cover;
   border-radius:10px;
+  display:block;
+}
+.pl-title{
+  font-weight:800;
+  color:#111;
+  font-size:15px;
+}
+.pl-sub{
+  margin-top:4px;
+  font-size:13px;
+  color:#666;
 }
 
 /* =========================
    컨트롤 버튼
 ========================= */
 .controls{
-  width:100%;
+  width:min(980px, 95%);
   margin:10px auto 0;
   display:flex;
   gap:8px;
@@ -245,37 +255,151 @@ button:hover{
 #btnDelete:hover{ background:#c62828; }
 
 /* =========================
-   가사 패널 (영상 영역까지만)
+   가사 패널
 ========================= */
 .lyrics-drawer{
   position:fixed;
   top:0;
   right:0;
-
-  /* 🔥 영상+버튼 높이만큼만 */
-  height:420px;   /* 필요하면 400~450 사이 조절 */
-
-  width:var(--lyrics-w);
+  width:420px;
+  max-width:92vw;
+  height:100vh;
   background:#f8f8f8;
   border-left:1px solid #ddd;
-
   transform:translateX(110%);
   transition:transform 0.25s ease;
-
   z-index:99999;
   display:flex;
   flex-direction:column;
   text-align:left;
-  box-shadow:-8px 0 30px rgba(0,0,0,0.08);
+   /* =========================
+   ✅ (추가) 가사 패널 탭(가사/MR/악보)
+   - tab-ready : 링크 있음(빨강)
+   - tab-active: 현재 선택(진한 포인트)
+   - tab-disabled: 링크 없음(회색/비활성)
+========================= */
+.lyrics-tabs{
+  display:flex;
+  gap:10px;
+  padding:10px 16px 6px;
+  border-bottom:1px solid #e6e6e6;
+  background:#fff;
 }
 
-body.lyrics-open .lyrics-drawer{
-  transform:translateX(0);
+.tab-link{
+  flex:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  height:42px;
+  border-radius:14px;
+  font-weight:900;
+  text-decoration:none;
+  border:1px solid #ddd;
+  user-select:none;
+  background:#fff;
+  color:#222;
+  cursor:pointer;
+}
+
+/* ✅ 링크/버튼 동일 스타일 */
+button.tab-link{
+  appearance:none;
+  -webkit-appearance:none;
+  border:1px solid #ddd;
+}
+
+/* ✅ 사용 가능(링크 있음) = 빨강 */
+.tab-ready{
+  background:#e53935;
+  color:#fff;
+  border-color:#e53935;
+}
+
+/* ✅ 현재 선택(활성 탭) = 진한 포인트 */
+.tab-active{
+  background:#b32647;
+  color:#fff;
+  border-color:#b32647;
+}
+
+/* ✅ 비활성(링크 없음) = 회색 + 클릭 불가 */
+.tab-disabled{
+  background:#eee;
+  color:#999;
+  border-color:#e3e3e3;
+  pointer-events:none;
+  opacity:0.95;
 }
 
 /* =========================
-   수정 모달
+   ✅ (추가) MR iframe 영역
 ========================= */
+.lyrics-media{
+  margin-top:10px;
+}
+.lyrics-media iframe{
+  width:100%;
+  aspect-ratio:16/9;
+  border:0;
+  border-radius:14px;
+  background:#000;
+}
+.lyrics-media .media-link{
+  display:inline-block;
+  padding:10px 12px;
+  border-radius:12px;
+  background:#fff;
+  border:1px solid #ddd;
+  color:#222;
+  text-decoration:none;
+  font-weight:900;
+}
+}
+body.lyrics-open .lyrics-drawer{ transform:translateX(0); }
+
+.lyrics-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:14px 16px;
+  border-bottom:1px solid #e6e6e6;
+  background:#fff;
+}
+.lyrics-now-title{
+  padding:12px 16px 0;
+  font-weight:900;
+  color:#111;
+}
+.lyrics-body{
+  padding:10px 16px 16px;
+  overflow:auto;
+}
+.lyrics-body pre{
+  margin:0;
+  white-space:pre-wrap;
+  line-height:1.6;
+}
+
+/* =========================
+   모바일
+========================= */
+@media (max-width:720px){
+  .pl-item{
+    grid-template-columns:78px 110px 1fr;
+    height:auto;
+  }
+  .pl-thumb img{
+    width:110px;
+    height:62px;
+  }
+}
+
+/* =========================
+   ✅ 수정 모달 팝업
+========================= */
+
+/* 어두운 배경 */
 .modal-overlay{
   position:fixed;
   inset:0;
@@ -285,13 +409,26 @@ body.lyrics-open .lyrics-drawer{
   justify-content:center;
   z-index:100000;
 }
+
+/* 열렸을 때 */
 .modal-overlay.open{
   display:flex;
 }
+
+/* 모달 박스 */
 .modal-box{
-  width:min(520px,95%);
+  width:min(520px, 95%);
+  max-height:90vh;
+  overflow:auto;
   background:#fff;
   border-radius:18px;
   padding:20px;
   box-shadow:0 20px 50px rgba(0,0,0,0.25);
+  text-align:center;
+  animation:modalPop 0.2s ease;
+}
+
+@keyframes modalPop{
+  from{ transform:scale(0.95); opacity:0; }
+  to{ transform:scale(1); opacity:1; }
 }
