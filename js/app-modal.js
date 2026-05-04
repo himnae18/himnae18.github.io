@@ -1,6 +1,6 @@
 /* =========================
    app-player.js
-   - 유튜브 플레이어 + 랜덤/반복 로직 + 버튼 이벤트 + add/delete
+   - 유튜브 플레이어 + 랜덤/반복 로직 + 버튼 이벤트 + add/delete/edit
 ========================= */
 
 /* 노래 추가 */
@@ -72,6 +72,91 @@ function deleteSong(index) {
   }
 }
 
+/* =========================
+   수정 모달 기능
+========================= */
+
+function editEscapeHTML(str) {
+  return String(str ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;");
+}
+
+function openEditModal() {
+  if (!songs[current]) {
+    alert("먼저 수정할 노래를 하나 선택해줘!");
+    return;
+  }
+
+  const modal = document.getElementById("editModal");
+  const content = document.getElementById("editModalContent");
+
+  if (!modal || !content) {
+    alert("수정 모달 HTML을 찾을 수 없어!");
+    return;
+  }
+
+  const s = songs[current];
+
+  content.innerHTML = `
+    <h2>노래 수정</h2>
+
+    <input id="editTitle" placeholder="제목" value="${editEscapeHTML(s.title)}" />
+    <input id="editAuthor" placeholder="채널/가수" value="${editEscapeHTML(s.author)}" />
+
+    <input id="editYt" placeholder="유튜브 링크" value="${editEscapeHTML(s.ytUrl)}" />
+    <textarea id="editLyrics" placeholder="가사" rows="8">${editEscapeHTML(s.lyrics)}</textarea>
+
+    <input id="editMr" placeholder="MR 링크" value="${editEscapeHTML(s.mr)}" />
+    <input id="editScore" placeholder="악보 링크" value="${editEscapeHTML(s.score)}" />
+
+    <div style="margin-top:12px;">
+      <button id="saveEditBtn" type="button">저장</button>
+      <button id="cancelEditBtn" type="button">취소</button>
+    </div>
+  `;
+
+  modal.classList.add("open");
+
+  document.getElementById("saveEditBtn")?.addEventListener("click", saveEditModal);
+  document.getElementById("cancelEditBtn")?.addEventListener("click", closeEditModal);
+}
+
+function closeEditModal() {
+  document.getElementById("editModal")?.classList.remove("open");
+}
+
+function saveEditModal() {
+  if (!songs[current]) return;
+
+  const ytUrl = safeLink(document.getElementById("editYt")?.value);
+  const id = extractID(ytUrl);
+
+  if (!ytUrl || !id) {
+    alert("유튜브 링크가 올바르지 않아!");
+    return;
+  }
+
+  songs[current] = {
+    ...songs[current],
+    title: safeText(document.getElementById("editTitle")?.value) || "제목 없음",
+    author: safeText(document.getElementById("editAuthor")?.value),
+    ytUrl,
+    id,
+    lyrics: safeText(document.getElementById("editLyrics")?.value),
+    mr: safeLink(document.getElementById("editMr")?.value),
+    score: safeLink(document.getElementById("editScore")?.value)
+  };
+
+  save();
+  showList();
+  updateLyricsDrawer();
+
+  closeEditModal();
+}
+
 /* ✅ YouTube IFrame Player API */
 let ytPlayer = null;
 let apiLoading = false;
@@ -90,7 +175,10 @@ let loopInfinite = false;
 let lastRandomIndex = -1;
 
 function ensurePlayerReady(cb) {
-  if (ytPlayer && apiReady) { cb(); return; }
+  if (ytPlayer && apiReady) {
+    cb();
+    return;
+  }
 
   apiReadyQueue.push(cb);
 
@@ -106,25 +194,33 @@ function ensurePlayerReady(cb) {
 
   const prev = window.onYouTubeIframeAPIReady;
   window.onYouTubeIframeAPIReady = () => {
-    try { if (typeof prev === "function") prev(); } catch {}
+    try {
+      if (typeof prev === "function") prev();
+    } catch {}
 
-ytPlayer = new YT.Player("player", {
-  width: "100%",
-  height: "100%",
-  playerVars: {
-    autoplay: 1,
-    rel: 0,
-    playsinline: 1
-  },
-  events: { onStateChange: onPlayerStateChange }
-});
+    ytPlayer = new YT.Player("player", {
+      width: "100%",
+      height: "100%",
+      playerVars: {
+        autoplay: 1,
+        rel: 0,
+        playsinline: 1
+      },
+      events: {
+        onStateChange: onPlayerStateChange
+      }
+    });
 
     apiReady = true;
     apiLoading = false;
 
     const q = [...apiReadyQueue];
     apiReadyQueue = [];
-    q.forEach(fn => { try { fn(); } catch {} });
+    q.forEach(fn => {
+      try {
+        fn();
+      } catch {}
+    });
   };
 }
 
@@ -162,6 +258,7 @@ function onPlayerStateChange(e) {
       ytPlayer.playVideo();
       return;
     }
+
     playMode = "seq";
     remainingLoops = 0;
     totalLoops = 0;
@@ -176,6 +273,7 @@ function onPlayerStateChange(e) {
       playRandomPickAndPlay(true);
       return;
     }
+
     playMode = "seq";
     remainingRandom = 0;
     totalRandom = 0;
@@ -221,6 +319,7 @@ function pickRandomIndex(excludeConsecutive = true) {
     idx = Math.floor(Math.random() * n);
     tries++;
   }
+
   return idx;
 }
 
@@ -233,9 +332,19 @@ function playRandomPickAndPlay(excludeConsecutive = true) {
 
 /* 컨트롤 버튼(상단) */
 function setActiveControl(activeId) {
-  const ids = ["btnSeq","btnRandOne","btnRand10","btnRandAuto","btnLoop5","btnLoop10","btnLoopInf"];
+  const ids = [
+    "btnSeq",
+    "btnRandOne",
+    "btnRand10",
+    "btnRandAuto",
+    "btnLoop5",
+    "btnLoop10",
+    "btnLoopInf"
+  ];
+
   ids.forEach(id => document.getElementById(id)?.classList.remove("active-control"));
   document.getElementById(activeId)?.classList.add("active-control");
+
   updateControlLabels();
 }
 
@@ -267,6 +376,7 @@ function updateControlLabels() {
       const el = $("btnLoop5");
       if (el) el.textContent = `5회반복 (${remainingLoops}/${totalLoops})`;
     }
+
     if (totalLoops === 10) {
       const el = $("btnLoop10");
       if (el) el.textContent = `10회반복 (${remainingLoops}/${totalLoops})`;
@@ -277,15 +387,16 @@ function updateControlLabels() {
     const el = $("btnRandAuto");
     if (el) el.textContent = `랜덤자동재생 (ON)`;
   }
+
   if (playMode === "loop_inf") {
     const el = $("btnLoopInf");
     if (el) el.textContent = `무한반복 (ON)`;
   }
 }
 
-/* DOMContentLoaded (플레이 관련 버튼 연결) */
+/* DOMContentLoaded */
 document.addEventListener("DOMContentLoaded", () => {
-  // 가사 드로어 (버튼 자체는 UI지만 여기서 연결해도 OK)
+  // 가사 드로어
   document.getElementById("lyricsBtn")?.addEventListener("click", toggleLyricsDrawer);
   document.getElementById("lyricsCloseBtn")?.addEventListener("click", closeLyricsDrawer);
   document.getElementById("lyricsOverlay")?.addEventListener("click", closeLyricsDrawer);
@@ -293,7 +404,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
       closeLyricsDrawer();
-      // 모달은 app-modal.js에서 닫힘 처리도 해줌
+      closeEditModal();
     }
   });
 
@@ -303,8 +414,10 @@ document.addEventListener("DOMContentLoaded", () => {
   qs("btnSeq")?.addEventListener("click", () => {
     playMode = "seq";
     loopInfinite = false;
-    remainingLoops = 0; totalLoops = 0;
-    remainingRandom = 0; totalRandom = 0;
+    remainingLoops = 0;
+    totalLoops = 0;
+    remainingRandom = 0;
+    totalRandom = 0;
     setActiveControl("btnSeq");
   });
 
@@ -312,8 +425,10 @@ document.addEventListener("DOMContentLoaded", () => {
   qs("btnRandOne")?.addEventListener("click", () => {
     playMode = "rand_once";
     loopInfinite = false;
-    remainingLoops = 0; totalLoops = 0;
-    remainingRandom = 0; totalRandom = 0;
+    remainingLoops = 0;
+    totalLoops = 0;
+    remainingRandom = 0;
+    totalRandom = 0;
     setActiveControl("btnRandOne");
     playRandomPickAndPlay(true);
   });
@@ -324,7 +439,8 @@ document.addEventListener("DOMContentLoaded", () => {
     totalRandom = 10;
     remainingRandom = 10;
     loopInfinite = false;
-    remainingLoops = 0; totalLoops = 0;
+    remainingLoops = 0;
+    totalLoops = 0;
     setActiveControl("btnRand10");
     playRandomPickAndPlay(true);
   });
@@ -335,48 +451,65 @@ document.addEventListener("DOMContentLoaded", () => {
     totalRandom = 0;
     remainingRandom = 0;
     loopInfinite = false;
-    remainingLoops = 0; totalLoops = 0;
+    remainingLoops = 0;
+    totalLoops = 0;
     setActiveControl("btnRandAuto");
+
     if (!songs[current]) playRandomPickAndPlay(true);
   });
 
   // 5회 반복
   qs("btnLoop5")?.addEventListener("click", () => {
     if (!songs[current]) return alert("먼저 노래를 하나 재생해줘!");
+
     playMode = "loop_n";
     totalLoops = 5;
     remainingLoops = 5;
     loopInfinite = false;
-    remainingRandom = 0; totalRandom = 0;
+    remainingRandom = 0;
+    totalRandom = 0;
     setActiveControl("btnLoop5");
   });
 
   // 10회 반복
   qs("btnLoop10")?.addEventListener("click", () => {
     if (!songs[current]) return alert("먼저 노래를 하나 재생해줘!");
+
     playMode = "loop_n";
     totalLoops = 10;
     remainingLoops = 10;
     loopInfinite = false;
-    remainingRandom = 0; totalRandom = 0;
+    remainingRandom = 0;
+    totalRandom = 0;
     setActiveControl("btnLoop10");
   });
 
   // 무한 반복
   qs("btnLoopInf")?.addEventListener("click", () => {
     if (!songs[current]) return alert("먼저 노래를 하나 재생해줘!");
+
     playMode = "loop_inf";
     loopInfinite = true;
-    remainingLoops = 0; totalLoops = 0;
-    remainingRandom = 0; totalRandom = 0;
+    remainingLoops = 0;
+    totalLoops = 0;
+    remainingRandom = 0;
+    totalRandom = 0;
     setActiveControl("btnLoopInf");
   });
 
-  // 삭제(현재 재생중 곡)
+  // 수정
+  qs("btnEdit")?.addEventListener("click", () => {
+    openEditModal();
+  });
+
+  // 삭제
   qs("btnDelete")?.addEventListener("click", () => {
     if (!songs[current]) return alert("먼저 노래를 하나 재생해줘!");
     deleteSong(current);
   });
+
+  // 모달 바깥 클릭하면 닫기
+  qs("editModal")?.addEventListener("click", closeEditModal);
 
   // 첫 렌더
   showList();
@@ -384,11 +517,12 @@ document.addEventListener("DOMContentLoaded", () => {
   updateControlLabels();
 });
 
-/* (선택) 예전 버튼 호환 */
+/* 예전 버튼 호환 */
 function nextSong() {
   if (songs.length === 0) return;
   playNextSequential();
 }
+
 function randomSong() {
   if (songs.length === 0) return;
   playRandomPickAndPlay(true);
