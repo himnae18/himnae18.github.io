@@ -4,6 +4,10 @@
 :root{
   --main:#b32647;
   --main-dark:#87142e;
+  --purple-dark:#6d35d8;
+  --purple-light:#d9c6ff;
+  --purple-soft:#efe7ff;
+  --disabled:#e3e3e3;
   --bg:#f5f6f8;
   --card:#ffffff;
   --line:#e6e6e6;
@@ -36,9 +40,9 @@ body.lyrics-open #mainContent{ padding-right:0; }
 /* PC에서는 가사/MR/악보 패널이 화면 오른쪽 약 5분의 1만 차지 */
 @media (min-width:980px){
   body.lyrics-open .lyrics-drawer{
-    width:20vw;
-    max-width:20vw;
-    min-width:320px;
+    width:22vw;
+    max-width:430px;
+    min-width:360px;
   }
 }
 @media (max-width:979px){
@@ -225,7 +229,7 @@ button:hover{ background:var(--main-dark); }
 .pl-item{
   min-height:var(--pl-row-h);
   display:grid;
-  grid-template-columns:78px 120px 1fr;
+  grid-template-columns:78px 120px 1fr 86px;
   gap:12px;
   align-items:center;
   padding:10px 12px;
@@ -235,7 +239,7 @@ button:hover{ background:var(--main-dark); }
   text-align:left;
 }
 .pl-item:hover{ background:#f3f3f3; }
-.pl-item.active{ background:#efe7ff; }
+.pl-item.active{ background:var(--purple-soft); }
 .pl-left{ display:flex; align-items:center; gap:8px; }
 .pl-index{ width:24px; text-align:center; color:#666; font-weight:700; }
 .pl-handle{ width:18px; display:flex; flex-direction:column; gap:4px; opacity:.5; }
@@ -244,6 +248,38 @@ button:hover{ background:var(--main-dark); }
 .pl-thumb img{ width:120px; height:68px; object-fit:cover; border-radius:10px; display:block; }
 .pl-title{ font-weight:800; color:#111; font-size:15px; line-height:1.35; }
 .pl-sub{ margin-top:4px; font-size:13px; color:#666; }
+
+
+.pl-mr-status{
+  width:72px;
+  min-width:72px;
+  height:42px;
+  margin:0;
+  border-radius:12px;
+  font-size:12px;
+  font-weight:900;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:none;
+}
+.pl-mr-status.status-current-has-mr{
+  background:var(--purple-dark);
+  color:#fff;
+}
+.pl-mr-status.status-current-no-mr{
+  background:#8f8f8f;
+  color:#fff;
+}
+.pl-mr-status.status-has-mr{
+  background:var(--purple-light);
+  color:#3d218a;
+}
+.pl-mr-status.status-no-mr{
+  background:var(--disabled);
+  color:#888;
+}
+.pl-mr-status:hover{ filter:brightness(0.96); }
 
 /* =========================
    컨트롤 버튼
@@ -329,15 +365,89 @@ body.lyrics-open .lyrics-drawer{ transform:translateX(0); }
   cursor:pointer;
 }
 button.tab-link{ appearance:none; -webkit-appearance:none; border:1px solid #ddd; }
-.tab-ready{ background:#e53935; color:#fff; border-color:#e53935; }
-.tab-active{ background:var(--main); color:#fff; border-color:var(--main); }
+.tab-ready{ background:#f23b34; color:#fff; border-color:#f23b34; }
+.tab-active{ background:var(--main); color:#fff; border-color:var(--main); outline:4px solid rgba(132,82,238,.18); }
 .tab-disabled{ background:#eee; color:#999; border-color:#e3e3e3; pointer-events:none; opacity:0.95; }
+.tab-disabled-soft{ background:#eee; color:#999; border-color:#e3e3e3; opacity:0.95; }
 .lyrics-now-title{ padding:12px 16px 0; font-weight:900; color:#111; }
 .lyrics-body{ padding:10px 16px 16px; overflow:auto; flex:1; }
 .lyrics-body pre{ margin:0; white-space:pre-wrap; line-height:1.6; font-family:inherit; }
 .lyrics-media{ margin-top:10px; }
 .lyrics-media iframe{ width:100%; aspect-ratio:16/9; border:0; border-radius:14px; background:#000; }
 .lyrics-media .media-link{ display:inline-block; padding:10px 12px; border-radius:12px; background:#fff; border:1px solid #ddd; color:#222; text-decoration:none; font-weight:900; }
+
+
+.mr-empty{
+  background:#fff;
+  border:1px dashed #d8d8d8;
+  border-radius:14px;
+  padding:12px;
+  color:#666;
+  line-height:1.45;
+  font-size:13px;
+}
+.download-panel{
+  margin-top:14px;
+  padding:14px;
+  border-radius:16px;
+  background:#fff;
+  border:1px solid #e4e4e4;
+}
+.download-panel h3{
+  margin:0 0 6px;
+  font-size:16px;
+  color:#222;
+}
+.download-help{
+  margin:0 0 12px;
+  color:#777;
+  font-size:12px;
+  line-height:1.45;
+}
+.download-group-title{
+  margin:12px 0 7px;
+  font-size:13px;
+  font-weight:900;
+  color:#4a4a4a;
+}
+.download-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+}
+.download-btn,
+.download-link-btn{
+  width:100%;
+  min-height:42px;
+  margin:0;
+  border-radius:12px;
+  font-weight:900;
+  background:var(--purple-dark);
+  color:#fff;
+  line-height:1.25;
+}
+.download-btn span{
+  font-size:11px;
+  opacity:.9;
+}
+.download-btn:hover,
+.download-link-btn:hover{ background:#5529ad; }
+.download-btn:disabled,
+.download-disabled{
+  background:#e2e2e2 !important;
+  color:#999 !important;
+  cursor:not-allowed;
+}
+.download-link-row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-top:12px;
+}
+.download-link-btn{
+  background:#333;
+}
+.download-link-btn:hover{ background:#111; }
 
 /* =========================
    수정 모달
@@ -376,11 +486,13 @@ button.tab-link{ appearance:none; -webkit-appearance:none; border:1px solid #ddd
   .add-song-row{ grid-template-columns:1fr; }
   .add-song-row textarea{ min-height:120px; height:auto; }
   .add-song-btn{ width:100%; }
-  .pl-item{ grid-template-columns:58px 96px 1fr; gap:8px; }
+  .pl-item{ grid-template-columns:58px 96px 1fr 64px; gap:8px; }
   .pl-thumb img{ width:96px; height:54px; }
   .pl-title{ font-size:14px; }
+  .pl-mr-status{ width:56px; min-width:56px; font-size:11px; }
   .controls{ gap:4px; }
   .controls button{ font-size:13px; padding:9px 10px; }
+  .download-grid{ grid-template-columns:1fr 1fr; }
 }
 
 
