@@ -86,6 +86,220 @@ let playHistoryBack = [];
 let playHistoryForward = [];
 const MAX_PLAY_HISTORY = 100;
 
+// 전역 영상 단축키 / 배속 조절
+const DEFAULT_PLAYBACK_RATE = 1;
+const MIN_PLAYBACK_RATE = 0.25;
+const MAX_PLAYBACK_RATE = 2;
+const FALLBACK_PLAYBACK_RATES = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
+let desiredPlaybackRate = DEFAULT_PLAYBACK_RATE;
+let shiftOnlySpeedResetCandidate = false;
+let shiftShortcutWasUsed = false;
+let playbackSpeedToastTimer = null;
+
+function roundPlaybackRate(rate) {
+  return Math.round(Number(rate || DEFAULT_PLAYBACK_RATE) * 100) / 100;
+}
+
+function clampPlaybackRate(rate) {
+  const n = roundPlaybackRate(rate);
+  if (!Number.isFinite(n)) return DEFAULT_PLAYBACK_RATE;
+  return Math.min(MAX_PLAYBACK_RATE, Math.max(MIN_PLAYBACK_RATE, n));
+}
+
+function getAvailablePlaybackRates() {
+  try {
+    const rates = ytPlayer?.getAvailablePlaybackRates?.();
+    if (Array.isArray(rates) && rates.length > 0) {
+      return [...new Set(rates.map(Number).filter(Number.isFinite))].sort((a, b) => a - b);
+    }
+  } catch {}
+  return FALLBACK_PLAYBACK_RATES;
+}
+
+function getCurrentPlaybackRate() {
+  try {
+    const rate = Number(ytPlayer?.getPlaybackRate?.());
+    if (Number.isFinite(rate) && rate > 0) return roundPlaybackRate(rate);
+  } catch {}
+  return desiredPlaybackRate || DEFAULT_PLAYBACK_RATE;
+}
+
+function pickSupportedPlaybackRate(target, direction = 0) {
+  const rates = getAvailablePlaybackRates();
+  const wanted = clampPlaybackRate(target);
+  if (!rates.length) return wanted;
+
+  const exact = rates.find((rate) => Math.abs(rate - wanted) < 0.001);
+  if (exact !== undefined) return exact;
+
+  if (direction < 0) {
+    const lower = rates.filter((rate) => rate <= wanted).at(-1);
+    if (lower !== undefined) return lower;
+  }
+
+  if (direction > 0) {
+    const higher = rates.find((rate) => rate >= wanted);
+    if (higher !== undefined) return higher;
+  }
+
+  return rates.reduce((best, rate) => Math.abs(rate - wanted) < Math.abs(best - wanted) ? rate : best, rates[0]);
+}
+
+function showPlaybackSpeedToast(rate, note = "") {
+  let toast = document.getElementById("playbackSpeedToast");
+  if (!toast) {
+    toast = document.createElement("div");
+    toast.id = "playbackSpeedToast";
+    toast.setAttribute("aria-live", "polite");
+    Object.assign(toast.style, {
+      position: "fixed",
+      left: "50%",
+      bottom: "28px",
+      transform: "translateX(-50%)",
+      zIndex: "99999",
+      padding: "10px 14px",
+      borderRadius: "999px",
+      background: "rgba(0, 0, 0, 0.78)",
+      color: "#fff",
+      fontSize: "14px",
+      fontWeight: "700",
+      pointerEvents: "none",
+      opacity: "0",
+      transition: "opacity 0.15s ease"
+    });
+    document.body.appendChild(toast);
+  }
+
+  toast.textContent = `배속 ${Number(rate).toFixed(2)}x${note}`;
+  toast.style.opacity = "1";
+  clearTimeout(playbackSpeedToastTimer);
+  playbackSpeedToastTimer = setTimeout(() => {
+    toast.style.opacity = "0";
+  }, 900);
+}
+
+function setPlayerPlaybackRate(rate, direction = 0, options = {}) {
+  if (!ytPlayer || typeof ytPlayer.setPlaybackRate !== "function") return false;
+
+  const wanted = clampPlaybackRate(rate);
+  const next = pickSupportedPlaybackRate(wanted, direction);
+  const roundedNext = roundPlaybackRate(next);
+
+  try {
+    ytPlayer.setPlaybackRate(roundedNext);
+    desiredPlaybackRate = roundedNext;
+    if (!options.silent) {
+      const roundedWanted = roundPlaybackRate(wanted);
+      const note = Math.abs(roundedWanted - roundedNext) > 0.001 ? " (유튜브 가능 배속)" : "";
+      showPlaybackSpeedToast(roundedNext, note);
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function changePlayerPlaybackRate(amount) {
+  const currentRate = getCurrentPlaybackRate();
+  return setPlayerPlaybackRate(currentRate + amount, amount);
+}
+
+function resetPlayerPlaybackRate() {
+  return setPlayerPlaybackRate(DEFAULT_PLAYBACK_RATE, 0);
+}
+
+function focusPlayerArea() {
+  const playerArea = document.querySelector(".player-wrap") || document.getElementById("player");
+  if (!playerArea) return;
+  if (!playerArea.hasAttribute("tabindex")) playerArea.setAttribute("tabindex", "-1");
+  try { playerArea.focus({ preventScroll: true }); } catch {}
+}
+
+function togglePlayerPlayPause() {
+  if (!ytPlayer || typeof ytPlayer.getPlayerState !== "function") return false;
+
+  try {
+    const state = ytPlayer.getPlayerState();
+    const YTP = window.YT?.PlayerState || {};
+    if (state === YTP.PLAYING || state === YTP.BUFFERING) {
+      ytPlayer.pauseVideo();
+    } else {
+      ytPlayer.playVideo();
+    }
+    focusPlayerArea();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function isAnyModalOpen() {
+  return Boolean(document.querySelector(".modal-overlay.open"));
+}
+
+function isPlainSpaceKey(e) {
+  return e.code === "Space" || e.key === " " || e.key === "Spacebar";
+}
+
+function setupGlobalPlayerShortcuts() {
+  focusPlayerArea();
+
+  document.addEventListener("keydown", (e) => {
+    if (e.defaultPrevented) return;
+    if (isAnyModalOpen()) return;
+    if (isShortcutTypingTarget(e.target)) return;
+
+    const code = e.code || "";
+    const plainShiftCombo = e.shiftKey && !e.ctrlKey && !e.metaKey && !e.altKey;
+
+    if ((code === "ShiftLeft" || code === "ShiftRight" || e.key === "Shift") && !e.repeat && !e.ctrlKey && !e.metaKey && !e.altKey) {
+      shiftOnlySpeedResetCandidate = true;
+      shiftShortcutWasUsed = false;
+      return;
+    }
+
+    if (plainShiftCombo) {
+      const speedShortcuts = {
+        Comma: -0.25,      // Shift + ,
+        Period: 0.25,      // Shift + .
+        Semicolon: -0.10,  // Shift + ;
+        Quote: -0.50       // Shift + '
+      };
+
+      if (Object.prototype.hasOwnProperty.call(speedShortcuts, code)) {
+        e.preventDefault();
+        e.stopPropagation();
+        shiftShortcutWasUsed = true;
+        changePlayerPlaybackRate(speedShortcuts[code]);
+        focusPlayerArea();
+        return;
+      }
+    }
+
+    if (!e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey && isPlainSpaceKey(e)) {
+      if (togglePlayerPlayPause()) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+    }
+  }, true);
+
+  document.addEventListener("keyup", (e) => {
+    const isShiftUp = e.code === "ShiftLeft" || e.code === "ShiftRight" || e.key === "Shift";
+    if (!isShiftUp || !shiftOnlySpeedResetCandidate) return;
+
+    if (!shiftShortcutWasUsed && !isAnyModalOpen() && !isShortcutTypingTarget(e.target)) {
+      e.preventDefault();
+      e.stopPropagation();
+      resetPlayerPlaybackRate();
+      focusPlayerArea();
+    }
+
+    shiftOnlySpeedResetCandidate = false;
+    shiftShortcutWasUsed = false;
+  }, true);
+}
+
 function trimPlayHistory() {
   if (playHistoryBack.length > MAX_PLAY_HISTORY) playHistoryBack = playHistoryBack.slice(-MAX_PLAY_HISTORY);
   if (playHistoryForward.length > MAX_PLAY_HISTORY) playHistoryForward = playHistoryForward.slice(-MAX_PLAY_HISTORY);
@@ -171,6 +385,7 @@ function play(i, options = {}) {
 
   ensurePlayerReady(() => {
     ytPlayer.loadVideoById(songs[nextIndex].id);
+    setTimeout(() => setPlayerPlaybackRate(desiredPlaybackRate, 0, { silent: true }), 350);
   });
 
   showList();
@@ -222,6 +437,7 @@ function playMr(i) {
   current = i;
   ensurePlayerReady(() => {
     ytPlayer.loadVideoById(mrId);
+    setTimeout(() => setPlayerPlaybackRate(desiredPlaybackRate, 0, { silent: true }), 350);
   });
 
   showList();
@@ -376,6 +592,8 @@ document.addEventListener("DOMContentLoaded", () => {
     addSong();
   });
 
+  setupGlobalPlayerShortcuts();
+
   document.addEventListener("keydown", (e) => {
     if (e.defaultPrevented) return;
     if (document.querySelector(".modal-overlay.open")) return;
@@ -505,3 +723,6 @@ function randomSong() {
 
 window.goBackSong = goBackSong;
 window.goForwardSong = goForwardSong;
+window.changePlayerPlaybackRate = changePlayerPlaybackRate;
+window.resetPlayerPlaybackRate = resetPlayerPlaybackRate;
+window.togglePlayerPlayPause = togglePlayerPlayPause;
