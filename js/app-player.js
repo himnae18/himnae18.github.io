@@ -5,6 +5,7 @@ async function addSong() {
   const lyrics = safeText(document.getElementById("lyrics")?.value);
   const mr = safeLink(document.getElementById("mr")?.value);
   const score = safeLink(document.getElementById("score")?.value);
+  const original = safeLink(document.getElementById("original")?.value);
 
   const id = extractID(ytUrl);
   if (!ytUrl || !id) {
@@ -22,6 +23,7 @@ async function addSong() {
     lyrics,
     mr,
     score,
+    original,
     memo: "",
     tags: []
   });
@@ -29,7 +31,7 @@ async function addSong() {
   save();
   showList();
 
-  ["yt", "lyrics", "mr", "score"].forEach((id) => {
+  ["yt", "lyrics", "mr", "score", "original"].forEach((id) => {
     const el = document.getElementById(id);
     if (el) el.value = "";
   });
@@ -79,6 +81,35 @@ let totalLoops = 0;
 let loopInfinite = false;
 let lastRandomIndex = -1;
 
+// 재생 위치 되돌아가기/앞으로가기 기록
+let playHistoryBack = [];
+let playHistoryForward = [];
+const MAX_PLAY_HISTORY = 100;
+
+function trimPlayHistory() {
+  if (playHistoryBack.length > MAX_PLAY_HISTORY) playHistoryBack = playHistoryBack.slice(-MAX_PLAY_HISTORY);
+  if (playHistoryForward.length > MAX_PLAY_HISTORY) playHistoryForward = playHistoryForward.slice(-MAX_PLAY_HISTORY);
+}
+
+function updateHistoryButtons() {
+  const backBtn = document.getElementById("btnHistoryBack");
+  const forwardBtn = document.getElementById("btnHistoryForward");
+  if (backBtn) {
+    backBtn.disabled = playHistoryBack.length === 0;
+    backBtn.title = playHistoryBack.length === 0 ? "되돌아갈 노래가 없어." : "이전에 들었던 노래로 이동 (Ctrl+Z)";
+  }
+  if (forwardBtn) {
+    forwardBtn.disabled = playHistoryForward.length === 0;
+    forwardBtn.title = playHistoryForward.length === 0 ? "앞으로 갈 노래가 없어." : "되돌아간 노래에서 다시 앞으로 이동 (Ctrl+X)";
+  }
+}
+
+function prunePlayHistory() {
+  playHistoryBack = playHistoryBack.filter((idx) => songs[idx]);
+  playHistoryForward = playHistoryForward.filter((idx) => songs[idx]);
+  updateHistoryButtons();
+}
+
 function ensurePlayerReady(cb) {
   if (ytPlayer && apiReady) {
     cb();
@@ -126,18 +157,50 @@ function ensurePlayerReady(cb) {
   };
 }
 
-function play(i) {
-  if (!songs[i] || !songs[i].id) return;
-  current = i;
+function play(i, options = {}) {
+  const nextIndex = Number(i);
+  if (!Number.isFinite(nextIndex) || !songs[nextIndex] || !songs[nextIndex].id) return;
+
+  if (!options.fromHistory && songs[current] && nextIndex !== current) {
+    playHistoryBack.push(current);
+    playHistoryForward = [];
+    trimPlayHistory();
+  }
+
+  current = nextIndex;
 
   ensurePlayerReady(() => {
-    ytPlayer.loadVideoById(songs[i].id);
+    ytPlayer.loadVideoById(songs[nextIndex].id);
   });
 
   showList();
   updateLyricsDrawer();
   updateControlLabels();
   if (typeof renderTagTools === "function") renderTagTools();
+}
+
+function goBackSong() {
+  prunePlayHistory();
+  const prev = playHistoryBack.pop();
+  if (prev === undefined || !songs[prev]) {
+    updateHistoryButtons();
+    return;
+  }
+  if (songs[current]) playHistoryForward.push(current);
+  trimPlayHistory();
+  play(prev, { fromHistory: true });
+}
+
+function goForwardSong() {
+  prunePlayHistory();
+  const next = playHistoryForward.pop();
+  if (next === undefined || !songs[next]) {
+    updateHistoryButtons();
+    return;
+  }
+  if (songs[current]) playHistoryBack.push(current);
+  trimPlayHistory();
+  play(next, { fromHistory: true });
 }
 
 function playMr(i) {
@@ -275,6 +338,8 @@ function updateControlLabels() {
     if (el) el.textContent = text;
   });
 
+  updateHistoryButtons();
+
   if (playMode === "rand_n" && totalRandom > 0) {
     const el = document.getElementById("btnRand10");
     if (el) el.textContent = `랜덤곡 10회 (${remainingRandom}/${totalRandom})`;
@@ -297,7 +362,49 @@ function updateControlLabels() {
   }
 }
 
+function isShortcutTypingTarget(target) {
+  const tagName = target?.tagName?.toLowerCase();
+  return target?.isContentEditable || tagName === "input" || tagName === "textarea" || tagName === "select";
+}
+
 document.addEventListener("DOMContentLoaded", () => {
+  const ytInput = document.getElementById("yt");
+
+  ytInput?.addEventListener("keydown", (e) => {
+    if (e.key !== "Enter" || e.isComposing) return;
+    e.preventDefault();
+    addSong();
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.defaultPrevented) return;
+    if (document.querySelector(".modal-overlay.open")) return;
+
+    if (!isShortcutTypingTarget(e.target)) {
+      const key = String(e.key || "").toLowerCase();
+      if ((e.ctrlKey || e.metaKey) && !e.altKey && key === "z") {
+        e.preventDefault();
+        goBackSong();
+        return;
+      }
+      if ((e.ctrlKey || e.metaKey) && !e.altKey && key === "x") {
+        e.preventDefault();
+        goForwardSong();
+        return;
+      }
+    }
+
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    if (isShortcutTypingTarget(e.target)) return;
+    if (String(e.key || "").toLowerCase() !== "q") return;
+
+    const input = document.getElementById("yt");
+    if (!input) return;
+    e.preventDefault();
+    input.focus();
+    input.select?.();
+  });
+
   document.getElementById("lyricsBtn")?.addEventListener("click", toggleLyricsDrawer);
   document.getElementById("lyricsCloseBtn")?.addEventListener("click", closeLyricsDrawer);
   document.getElementById("lyricsOverlay")?.addEventListener("click", closeLyricsDrawer);
@@ -363,17 +470,22 @@ document.addEventListener("DOMContentLoaded", () => {
     setActiveControl("btnLoopInf");
   });
 
+  qs("btnHistoryBack")?.addEventListener("click", goBackSong);
+  qs("btnHistoryForward")?.addEventListener("click", goForwardSong);
+
   qs("btnEdit")?.addEventListener("click", () => openEditModal());
 
   qs("btnDelete")?.addEventListener("click", () => {
     if (!songs[current]) return alert("먼저 노래를 하나 재생해줘!");
     deleteSong(current);
+    prunePlayHistory();
   });
 
   showList();
   updateLyricsDrawer();
   updateControlLabels();
   if (typeof renderTagTools === "function") renderTagTools();
+  updateHistoryButtons();
 
   const params = new URLSearchParams(location.search);
   const playId = params.get("play");
@@ -390,3 +502,6 @@ function nextSong() {
 function randomSong() {
   playRandomPickAndPlay(true);
 }
+
+window.goBackSong = goBackSong;
+window.goForwardSong = goForwardSong;

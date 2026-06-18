@@ -14,7 +14,13 @@
 <button id="lyricsBtn" class="lyrics-toggle" title="메모 패널" type="button">≡</button>
 
 <div id="mainContent">
-  <h1>📺 유튜브 영상 3P</h1>
+  <div class="page-title-bar">
+    <div class="title-history-buttons" aria-label="재생 기록 이동">
+      <button id="btnHistoryBack" class="title-history-btn" type="button">되돌아가기</button>
+      <button id="btnHistoryForward" class="title-history-btn" type="button">앞으로가기</button>
+    </div>
+    <h1>📺 유튜브 영상 3P</h1>
+  </div>
   <section id="tagTools" class="tag-tools" aria-label="태그 입력"></section>
 
   <div class="music-page-layout">
@@ -61,7 +67,7 @@
   <div class="lyrics-tabs">
     <button id="tabLyrics" class="tab-link tab-active" type="button">설명</button>
     <button id="tabMr" class="tab-link tab-disabled" type="button">메모</button>
-    <a id="tabScore" class="tab-link tab-disabled" href="#" target="_blank" rel="noopener">자료</a>
+    <button id="tabOriginal" class="tab-link tab-disabled-soft" type="button">원곡</button>
   </div>
 
   <div id="lyricsNowTitle" class="lyrics-now-title">재생중인 영상이 없어</div>

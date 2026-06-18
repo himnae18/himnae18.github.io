@@ -109,6 +109,7 @@
       lyrics: String(song.lyrics || "").trim(),
       mr: String(song.mr || "").trim(),
       score: String(song.score || "").trim(),
+      original: String(song.original || song.origin || song.originalUrl || "").trim(),
       memo: String(song.memo || ""),
       tags: addTags(song.tags, extraTag)
     };

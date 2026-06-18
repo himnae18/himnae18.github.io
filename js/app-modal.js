@@ -30,9 +30,8 @@
       <input id="editTitle" placeholder="제목" value="${editEscapeHTML(s.title)}" />
       <input id="editAuthor" placeholder="채널/가수" value="${editEscapeHTML(s.author)}" />
       <input id="editYt" placeholder="유튜브 링크" value="${editEscapeHTML(s.ytUrl)}" />
-      <textarea id="editLyrics" placeholder="가사" rows="8">${editEscapeHTML(s.lyrics)}</textarea>
       <input id="editMr" placeholder="MR 링크" value="${editEscapeHTML(s.mr)}" />
-      <input id="editScore" placeholder="악보 링크" value="${editEscapeHTML(s.score)}" />
+      <input id="editOriginal" placeholder="원곡 링크" value="${editEscapeHTML(s.original || "")}" />
       <input id="editTags" placeholder="태그 예: 노래, 추천곡" value="${editEscapeHTML((s.tags || []).join(", "))}" />
 
       <div class="modal-actions">
@@ -67,9 +66,8 @@
       author: safeText(document.getElementById("editAuthor")?.value),
       ytUrl,
       id,
-      lyrics: safeText(document.getElementById("editLyrics")?.value),
       mr: safeLink(document.getElementById("editMr")?.value),
-      score: safeLink(document.getElementById("editScore")?.value),
+      original: safeLink(document.getElementById("editOriginal")?.value),
       tags: normalizeTags(document.getElementById("editTags")?.value)
     };
 

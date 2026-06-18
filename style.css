@@ -29,6 +29,55 @@ body{
 }
 
 h1{ margin-top:22px; }
+
+.page-title-bar{
+  position:relative;
+  width:min(980px, 95%);
+  margin:14px auto 8px;
+  min-height:44px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.page-title-bar h1{
+  margin:0;
+}
+.title-history-buttons{
+  position:absolute;
+  left:calc(50% - 330px);
+  top:50%;
+  transform:translateY(-50%);
+  display:flex;
+  align-items:center;
+  gap:8px;
+  white-space:nowrap;
+}
+.title-history-btn{
+  background:#666;
+  padding:9px 12px;
+  border-radius:12px;
+  font-weight:900;
+  box-shadow:0 2px 0 rgba(0,0,0,.18);
+}
+.title-history-btn:hover{ background:#444; }
+.title-history-btn:disabled{
+  background:#d8d8d8 !important;
+  color:#888 !important;
+  cursor:not-allowed;
+  box-shadow:none;
+}
+
+@media (max-width:760px){
+  .page-title-bar{
+    min-height:auto;
+    padding-top:44px;
+  }
+  .title-history-buttons{
+    left:50%;
+    top:0;
+    transform:translateX(-50%);
+  }
+}
 h2{ margin-top:28px; }
 hr{ width:min(980px, 95%); border:0; border-top:1px solid #ddd; margin:24px auto; }
 
@@ -296,13 +345,16 @@ button:hover{ background:var(--main-dark); }
 #btnSeq{ background:#1f9d55; }
 #btnRandOne,#btnRand10,#btnRandAuto{ background:#3aa0ff; }
 #btnLoop5,#btnLoop10,#btnLoopInf{ background:#7a3cff; }
+#btnHistoryBack,#btnHistoryForward{ background:#666; }
 #btnEdit{ background:#f5c400; color:#222; }
 #btnDelete{ background:#e53935; }
 #btnSeq:hover{ background:#157a41; }
 #btnRandOne:hover,#btnRand10:hover,#btnRandAuto:hover{ background:#2d7fd1; }
 #btnLoop5:hover,#btnLoop10:hover,#btnLoopInf:hover{ background:#5f2fd1; }
+#btnHistoryBack:hover,#btnHistoryForward:hover{ background:#444; }
 #btnEdit:hover{ background:#d8ab00; }
 #btnDelete:hover{ background:#c62828; }
+.controls button:disabled{ background:#d8d8d8 !important; color:#888 !important; cursor:not-allowed; box-shadow:none; }
 .active-control{ outline:3px solid rgba(0,0,0,.18); }
 
 /* =========================
@@ -1312,4 +1364,132 @@ button.tab-link{ appearance:none; -webkit-appearance:none; border:1px solid #ddd
 .tag-tools #currentSongTags::-webkit-scrollbar-thumb{
   background:#d7d7d7;
   border-radius:999px;
+}
+
+/* =========================
+   오른쪽 가사/메모장 잠금 편집
+========================= */
+.lyrics-head{
+  gap:8px;
+}
+.lyrics-head-title{
+  flex:1;
+}
+.lyrics-lock-btn{
+  margin:0;
+  padding:8px 10px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:900;
+  white-space:nowrap;
+  background:#555;
+  color:#fff;
+}
+.lyrics-lock-btn.locked{
+  background:#555;
+}
+.lyrics-lock-btn.unlocked{
+  background:#16a05d;
+}
+.lyrics-lock-btn:hover{
+  background:#333;
+}
+.lyrics-lock-btn.unlocked:hover{
+  background:#0f7c47;
+}
+.lyrics-edit-panel{
+  margin-top:0;
+  min-height:100%;
+  display:flex;
+  flex-direction:column;
+}
+.lyrics-edit-textarea{
+  width:100%;
+  min-height:360px;
+  flex:1;
+  margin:0;
+  padding:14px;
+  border-radius:14px;
+  border:1px solid #ddd;
+  background:#fff;
+  color:#222;
+  font-family:inherit;
+  font-size:14px;
+  line-height:1.6;
+  resize:none;
+  outline:none;
+}
+.lyrics-edit-textarea:focus{
+  border-color:var(--main);
+  box-shadow:0 0 0 4px rgba(179,38,71,.12);
+}
+.lyrics-edit-textarea.is-locked,
+.memo-textarea.is-locked{
+  background:#f1f1f1;
+  color:#555;
+  cursor:default;
+  box-shadow:none;
+}
+.lyrics-edit-textarea.is-locked:focus,
+.memo-textarea.is-locked:focus{
+  border-color:#ddd;
+  box-shadow:none;
+}
+.lyrics-body{
+  display:flex;
+  flex-direction:column;
+}
+.lyrics-media{
+  flex:1;
+  min-height:0;
+}
+
+
+/* =========================
+   원곡 탭 / 재생 기록 이동
+========================= */
+.original-panel{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  background:#fff;
+  border:1px solid #e1e1e1;
+  border-radius:16px;
+  padding:14px;
+}
+.original-open-btn{
+  width:100%;
+  min-height:46px;
+  border-radius:14px;
+  background:var(--main);
+  color:#fff;
+  font-weight:900;
+}
+.original-open-btn:hover{
+  filter:brightness(.94);
+}
+.original-open-btn:disabled{
+  background:#e4e4e4;
+  color:#999;
+  cursor:not-allowed;
+}
+.original-help{
+  margin:0;
+  color:#666;
+  font-size:13px;
+  line-height:1.5;
+}
+.original-url-box,
+.original-empty{
+  padding:11px 12px;
+  border-radius:12px;
+  background:#f7f7f7;
+  border:1px solid #e5e5e5;
+  color:#555;
+  font-size:12px;
+  line-height:1.45;
+  word-break:break-all;
+}
+.original-empty{
+  color:#888;
 }

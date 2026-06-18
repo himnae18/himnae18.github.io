@@ -1,4 +1,4 @@
-// js/app-ui.js - 목록 표시 + 가사/메모/악보 패널 + 드래그 정렬 + 링크/태그 패널
+// js/app-ui.js - 목록 표시 + 가사/메모/원곡 패널 + 드래그 정렬 + 링크/태그 패널
 (() => {
   const S = window.AppState;
   if (!S) return;
@@ -11,6 +11,34 @@
   function getPrimaryVideoUrl(song) {
     if (!song) return "";
     return S.safeLink(song.ytUrl);
+  }
+
+  function getOriginalUrl(song) {
+    return S.safeLink(song?.original || song?.origin || song?.originalUrl || "");
+  }
+
+  function getSubPagePrefix() {
+    return location.pathname.includes("/japan/") ||
+      location.pathname.includes("/china/") ||
+      location.pathname.includes("/korea/") ||
+      location.pathname.includes("/youtube/") ? "../" : "";
+  }
+
+  function getCollectionPageHref(collection) {
+    const page = collection?.page || "";
+    return `${getSubPagePrefix()}${page}`;
+  }
+
+  function findSongByUrl(url) {
+    const cleanUrl = S.safeLink(url);
+    const id = S.extractID(cleanUrl);
+    if (!cleanUrl && !id) return null;
+
+    return S.getAllSongs().find((song) => {
+      const songUrl = S.safeLink(song.ytUrl);
+      const songId = song.id || S.extractID(songUrl);
+      return (id && songId === id) || (cleanUrl && songUrl === cleanUrl);
+    }) || null;
   }
 
   async function copyText(text, successMessage = "복사했어!") {
@@ -109,33 +137,135 @@
   }
 
   let activeTab = "lyrics";
+  let editorLocked = localStorage.getItem("lyricsMemoEditorLocked") !== "unlocked";
+
+  function getLyricsLockButton() {
+    let btn = document.getElementById("lyricsLockBtn");
+    if (btn) return btn;
+
+    const head = document.querySelector(".lyrics-head");
+    const closeBtn = document.getElementById("lyricsCloseBtn");
+    if (!head) return null;
+
+    btn = document.createElement("button");
+    btn.id = "lyricsLockBtn";
+    btn.className = "lyrics-lock-btn";
+    btn.type = "button";
+    btn.addEventListener("click", () => setEditorLocked(!editorLocked, true));
+
+    if (closeBtn) head.insertBefore(btn, closeBtn);
+    else head.appendChild(btn);
+    return btn;
+  }
+
+  function updateLockUI() {
+    const btn = getLyricsLockButton();
+    if (btn) {
+      btn.textContent = editorLocked ? "🔒 잠금" : "🔓 수정 가능";
+      btn.title = editorLocked ? "잠금 상태라 내용을 수정할 수 없어." : "잠금 해제 상태라 내용을 수정할 수 있어.";
+      btn.setAttribute("aria-pressed", editorLocked ? "true" : "false");
+      btn.classList.toggle("locked", editorLocked);
+      btn.classList.toggle("unlocked", !editorLocked);
+    }
+
+    document.querySelectorAll(".lyrics-edit-textarea, .memo-textarea").forEach((textarea) => {
+      textarea.readOnly = editorLocked;
+      textarea.classList.toggle("is-locked", editorLocked);
+      textarea.classList.toggle("is-unlocked", !editorLocked);
+    });
+
+    document.querySelectorAll(".editor-lock-help").forEach((help) => {
+      help.textContent = editorLocked
+        ? "잠금 상태야. 위의 잠금 버튼을 풀면 수정할 수 있어."
+        : "수정 가능 상태야. 입력하면 바로 자동 저장돼.";
+    });
+  }
+
+  function setEditorLocked(locked, shouldFocus = false) {
+    editorLocked = !!locked;
+    localStorage.setItem("lyricsMemoEditorLocked", editorLocked ? "locked" : "unlocked");
+    updateLockUI();
+
+    if (!editorLocked && shouldFocus) {
+      const editor = document.querySelector(".lyrics-edit-textarea, .memo-textarea");
+      editor?.focus();
+    }
+  }
 
   function setTab(tab) {
     activeTab = tab;
     updateLyricsDrawer();
   }
 
-  function memoPanelHTML(song) {
-    const memo = S.escapeHTML(song?.memo || "");
+  function editorPanelHTML(song, field, placeholder) {
+    const value = S.escapeHTML(song?.[field] || "");
+    const label = field === "memo" ? "메모" : "가사";
     return `
-      <section class="memo-panel" aria-label="메모장">
-        <textarea id="songMemo" class="memo-textarea" placeholder="여기에 메모를 적어줘. 쓰는 즉시 자동 저장돼." spellcheck="false">${memo}</textarea>
-        <p class="memo-save-help">입력하면 바로 자동 저장돼.</p>
+      <section class="lyrics-edit-panel" aria-label="${label} 메모장">
+        <textarea id="songTextEditor" class="lyrics-edit-textarea ${editorLocked ? "is-locked" : "is-unlocked"}" data-field="${field}" placeholder="${placeholder}" spellcheck="false" ${editorLocked ? "readonly" : ""}>${value}</textarea>
+        <p class="memo-save-help editor-lock-help">${editorLocked ? "잠금 상태야. 위의 잠금 버튼을 풀면 수정할 수 있어." : "수정 가능 상태야. 입력하면 바로 자동 저장돼."}</p>
       </section>
     `;
   }
 
-  function bindMemoAutosave() {
-    const memoEl = document.getElementById("songMemo");
-    if (!memoEl) return;
+  function bindTextEditorAutosave() {
+    const editor = document.getElementById("songTextEditor");
+    if (!editor) return;
 
-    memoEl.addEventListener("input", () => {
+    editor.readOnly = editorLocked;
+    editor.addEventListener("input", () => {
+      if (editorLocked) return;
       const songs = S.songs || [];
       const s = songs[S.current];
+      const field = editor.dataset.field === "memo" ? "memo" : "lyrics";
       if (!s) return;
-      s.memo = memoEl.value;
+      s[field] = editor.value;
       S.save();
     });
+  }
+
+  function originalPanelHTML(song) {
+    const url = getOriginalUrl(song);
+    const found = url ? findSongByUrl(url) : null;
+    const foundText = found
+      ? `웹사이트 안에 같은 노래가 있어. 원곡 버튼을 누르면 ${S.escapeHTML(found.collection?.label || "해당 페이지")}로 이동해.`
+      : (url ? "웹사이트 안에 같은 노래가 없으면 유튜브 링크로 열려." : "수정창에서 원곡 링크를 넣으면 여기 버튼으로 이동할 수 있어.");
+
+    return `
+      <section class="original-panel" aria-label="원곡 이동">
+        <button id="openOriginalBtn" class="original-open-btn" type="button" ${url ? "" : "disabled"}>원곡 버튼</button>
+        <p class="original-help">${foundText}</p>
+        ${url ? `<div class="original-url-box">${S.escapeHTML(url)}</div>` : `<div class="original-empty">원곡 링크가 아직 없어.</div>`}
+      </section>
+    `;
+  }
+
+  function bindOriginalPanel() {
+    document.getElementById("openOriginalBtn")?.addEventListener("click", openOriginalSong);
+  }
+
+  function openOriginalSong() {
+    const s = getCurrentSong();
+    const url = getOriginalUrl(s);
+
+    if (!url) {
+      alert("원곡 링크가 아직 없어. 수정창에서 원곡 링크를 넣어줘.");
+      return;
+    }
+
+    const found = findSongByUrl(url);
+    if (found) {
+      if (found.storeKey === S.storeKey) {
+        if (typeof play === "function") play(found.index);
+        return;
+      }
+
+      const playKey = found.id || found.ytUrl || url;
+      location.href = `${getCollectionPageHref(found.collection)}?play=${encodeURIComponent(playKey)}`;
+      return;
+    }
+
+    window.open(url, "_blank", "noopener");
   }
 
   function updateLyricsDrawer() {
@@ -145,28 +275,34 @@
     const tagEl = document.getElementById("lyricsNowTags");
     const tabLyrics = document.getElementById("tabLyrics");
     const tabMr = document.getElementById("tabMr");
-    const tabScore = document.getElementById("tabScore");
+    const tabOriginal = document.getElementById("tabOriginal");
+    const headTitle = document.querySelector(".lyrics-head-title");
 
-    if (!titleEl || !textEl || !mediaEl || !tabLyrics || !tabMr || !tabScore) return;
+    getLyricsLockButton();
+    updateLockUI();
+
+    if (!titleEl || !textEl || !mediaEl || !tabLyrics || !tabMr || !tabOriginal) return;
 
     const songs = S.songs || [];
     const s = songs[S.current];
 
     tabLyrics.className = "tab-link";
     tabMr.className = "tab-link";
-    tabScore.className = "tab-link";
+    tabOriginal.className = "tab-link";
 
     if (!s) {
-      titleEl.textContent = "재생중인 곡이 없어";
+      if (headTitle) headTitle.textContent = "가사 / 메모";
+      titleEl.textContent = document.body?.dataset?.store?.startsWith("yt") ? "재생중인 영상이 없어" : "재생중인 곡이 없어";
       if (tagEl) tagEl.innerHTML = "";
-      textEl.textContent = "노래를 재생하면 여기서 가사를 볼 수 있어.";
+      textEl.textContent = document.body?.dataset?.store?.startsWith("yt")
+        ? "영상을 재생하면 여기서 설명/메모를 볼 수 있어."
+        : "노래를 재생하면 여기서 가사/메모를 볼 수 있어.";
       textEl.style.display = "block";
       mediaEl.style.display = "none";
       mediaEl.innerHTML = "";
       tabLyrics.classList.add("tab-active");
       tabMr.classList.add("tab-disabled-soft");
-      tabScore.classList.add("tab-disabled");
-      tabScore.href = "#";
+      tabOriginal.classList.add("tab-disabled-soft");
       return;
     }
 
@@ -174,32 +310,37 @@
     titleEl.textContent = author ? `${S.safeText(s.title || "제목 없음")} - ${author}` : S.safeText(s.title || "제목 없음");
     if (tagEl) tagEl.innerHTML = songTagsHTML(s, "drawer");
 
-    const scoreUrl = S.safeLink(s.score);
-    const hasScore = !!scoreUrl;
-
-    if (hasScore) {
-      tabScore.classList.add("tab-ready");
-      tabScore.href = scoreUrl;
-    } else {
-      tabScore.classList.add("tab-disabled");
-      tabScore.href = "#";
-    }
-
     tabMr.classList.add("tab-ready");
+    tabOriginal.classList.add("tab-ready");
+
+    textEl.style.display = "none";
+    mediaEl.style.display = "block";
 
     if (activeTab === "mr") {
+      if (headTitle) headTitle.textContent = "메모";
       tabMr.classList.add("tab-active");
-      textEl.style.display = "none";
-      mediaEl.style.display = "block";
-      mediaEl.innerHTML = memoPanelHTML(s);
-      bindMemoAutosave();
+      mediaEl.innerHTML = editorPanelHTML(s, "memo", "여기에 메모를 적어줘. 쓰는 즉시 자동 저장돼.");
+      bindTextEditorAutosave();
+      updateLockUI();
+    } else if (activeTab === "original") {
+      if (headTitle) headTitle.textContent = "원곡";
+      tabOriginal.classList.add("tab-active");
+      mediaEl.innerHTML = originalPanelHTML(s);
+      bindOriginalPanel();
+      updateLockUI();
     } else {
       activeTab = "lyrics";
+      if (headTitle) headTitle.textContent = document.body?.dataset?.store?.startsWith("yt") ? "설명" : "가사";
       tabLyrics.classList.add("tab-active");
-      textEl.textContent = S.safeText(s.lyrics) || "가사가 아직 없어.";
-      textEl.style.display = "block";
-      mediaEl.style.display = "none";
-      mediaEl.innerHTML = "";
+      mediaEl.innerHTML = editorPanelHTML(
+        s,
+        "lyrics",
+        document.body?.dataset?.store?.startsWith("yt")
+          ? "여기에 설명을 적어줘. 쓰는 즉시 자동 저장돼."
+          : "여기에 가사를 적어줘. 쓰는 즉시 자동 저장돼."
+      );
+      bindTextEditorAutosave();
+      updateLockUI();
     }
   }
 
@@ -379,6 +520,7 @@
   document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("tabLyrics")?.addEventListener("click", () => setTab("lyrics"));
     document.getElementById("tabMr")?.addEventListener("click", () => setTab("mr"));
+    document.getElementById("tabOriginal")?.addEventListener("click", () => setTab("original"));
     document.getElementById("btnDownload")?.addEventListener("click", copyCurrentVideoUrl);
 
     document.addEventListener("keydown", (e) => {
@@ -405,6 +547,7 @@
   window.closeLyricsDrawer = closeLyricsDrawer;
   window.toggleLyricsDrawer = toggleLyricsDrawer;
   window.openCurrentVideoUrl = openCurrentVideoUrl;
+  window.openOriginalSong = openOriginalSong;
   window.copyCurrentVideoUrl = copyCurrentVideoUrl;
   window.requestYouTubeDownload = requestYouTubeDownload;
   window.openVideoLinkPanel = openVideoLinkPanel;
