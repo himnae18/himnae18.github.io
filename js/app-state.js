@@ -115,12 +115,26 @@
       if (thumbnailHeight > thumbnailWidth * 1.15) aspect = "portrait";
       else if (thumbnailWidth > thumbnailHeight * 1.15) aspect = "landscape";
     }
+    const legacyLyrics = String(song.lyrics || song.lyricsJa || song.lyricsCn || song.lyricsKr || song.lyricsEn || "");
+    const lyricsOriginal = song.lyricsOriginal === undefined || song.lyricsOriginal === null
+      ? legacyLyrics
+      : String(song.lyricsOriginal);
+    const lyricsPronunciation = song.lyricsPronunciation === undefined || song.lyricsPronunciation === null
+      ? String(song.lyricsReading || song.lyricsPronounce || song.lyricsRomaji || "")
+      : String(song.lyricsPronunciation);
+    const lyricsMeaning = song.lyricsMeaning === undefined || song.lyricsMeaning === null
+      ? String(song.lyricsTranslation || song.lyricsKrMeaning || "")
+      : String(song.lyricsMeaning);
+
     return {
       title,
       author: String(song.author || "").trim(),
       ytUrl,
       id,
-      lyrics: String(song.lyrics || "").trim(),
+      lyrics: String(song.lyrics === undefined || song.lyrics === null ? lyricsOriginal : song.lyrics).trim(),
+      lyricsOriginal,
+      lyricsPronunciation,
+      lyricsMeaning,
       lyricsJa: String(song.lyricsJa || "").trim(),
       lyricsCn: String(song.lyricsCn || "").trim(),
       lyricsKr: String(song.lyricsKr || "").trim(),
