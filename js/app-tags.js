@@ -3,7 +3,7 @@
   const S = window.AppState;
   if (!S) return;
 
-  const TITLE_TAGS_KEY = "musicTitleTags";
+  let tagIndexFilter = "all";
 
   function tagParam() {
     return S.normalizeTag(new URLSearchParams(location.search).get("tag") || "");
@@ -18,35 +18,17 @@
   }
 
   function readTitleTags() {
-    try {
-      const data = JSON.parse(localStorage.getItem(TITLE_TAGS_KEY) || "[]");
-      return S.normalizeTags(Array.isArray(data) ? data : []);
-    } catch {
-      return [];
-    }
-  }
-
-  function writeTitleTags(tags) {
-    localStorage.setItem(TITLE_TAGS_KEY, JSON.stringify(S.normalizeTags(tags)));
-  }
-
-  function isTitleTag(tag) {
-    return readTitleTags().includes(S.normalizeTag(tag));
+    return typeof S.readTitleTags === "function" ? S.readTitleTags() : [];
   }
 
   function registerTitleTag(tag) {
-    const clean = S.normalizeTag(tag);
-    if (!clean) return false;
-    const tags = S.addTags(readTitleTags(), [clean]);
-    writeTitleTags(tags);
-    return true;
+    if (typeof S.registerTitleTag === "function") return S.registerTitleTag(tag);
+    return false;
   }
 
   function unregisterTitleTag(tag) {
-    const clean = S.normalizeTag(tag);
-    if (!clean) return false;
-    writeTitleTags(readTitleTags().filter((item) => item !== clean));
-    return true;
+    if (typeof S.unregisterTitleTag === "function") return S.unregisterTitleTag(tag);
+    return false;
   }
 
   function removeTagEverywhere(tag) {
@@ -202,6 +184,54 @@
     `;
   }
 
+  function normalizeTagIndexFilter(value) {
+    return ["all", "title", "normal"].includes(value) ? value : "all";
+  }
+
+  function filterTagCounts(counts, titleTags, filter) {
+    const titleSet = new Set(titleTags);
+    const mode = normalizeTagIndexFilter(filter);
+    if (mode === "title") return counts.filter(([tag]) => titleSet.has(tag));
+    if (mode === "normal") return counts.filter(([tag]) => !titleSet.has(tag));
+    return counts;
+  }
+
+  function maxTagCount(counts) {
+    return counts.reduce((max, [, count]) => Math.max(max, Number(count) || 0), 1);
+  }
+
+  function tagFilterHelp(filter, totalCount, filteredCount) {
+    const mode = normalizeTagIndexFilter(filter);
+    if (mode === "title") return `제목등록한 태그만 보여주는 중이야. ${filteredCount}개 / 전체 ${totalCount}개`;
+    if (mode === "normal") return `제목태그를 뺀 일반 태그만 보여주는 중이야. ${filteredCount}개 / 전체 ${totalCount}개`;
+    return `제목태그와 일반 태그를 모두 보여주는 중이야. 전체 ${totalCount}개`;
+  }
+
+  function tagFilterTabsHTML(filter) {
+    const mode = normalizeTagIndexFilter(filter);
+    const tabs = [
+      { key: "all", label: "모두" },
+      { key: "title", label: "제목태그" },
+      { key: "normal", label: "제목 제외" }
+    ];
+    return `
+      <div class="tag-filter-tabs" aria-label="태그 보기 정렬">
+        ${tabs.map((item) => `
+          <button class="tag-filter-tab ${mode === item.key ? "is-active" : ""}" type="button" data-tag-filter="${item.key}">${item.label}</button>
+        `).join("")}
+      </div>
+    `;
+  }
+
+  function bindTagFilterButtons(root) {
+    root?.querySelectorAll("[data-tag-filter]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        tagIndexFilter = normalizeTagIndexFilter(btn.getAttribute("data-tag-filter") || "all");
+        renderTagIndex();
+      });
+    });
+  }
+
   function showTagIndex(root, counts) {
     const mainContent = document.getElementById("mainContent");
     const indexTitle = document.getElementById("tagIndexTitle") || document.querySelector("h1");
@@ -216,6 +246,9 @@
     if (indexTitle) indexTitle.textContent = "# 태그";
 
     const titleTags = readTitleTags();
+    const filter = normalizeTagIndexFilter(tagIndexFilter);
+    const filteredCounts = filterTagCounts(counts, titleTags, filter);
+    const maxCount = maxTagCount(counts);
 
     root.innerHTML = `
       <div class="tag-drag-actions" aria-label="태그 드래그 작업 영역">
@@ -239,12 +272,15 @@
       <section class="tag-page-card">
         <h2># 태그 모음</h2>
         <p class="tag-page-help">직접 넣은 태그들이 ㄱㄴㄷ 순으로 정리돼. 태그를 누르면 그 태그가 달린 노래/영상을 재생목록처럼 모아볼 수 있어. 태그를 끌어서 왼쪽은 삭제, 오른쪽은 제목등록, 왼쪽 아래는 제목등록해제로 쓸 수 있어.</p>
+        ${tagFilterTabsHTML(filter)}
+        <p class="tag-filter-help">${S.escapeHTML(tagFilterHelp(filter, counts.length, filteredCounts.length))}</p>
         <div class="tag-cloud tag-index-cloud">
-          ${counts.length ? counts.map(([tag, count]) => tagChipHTML(tag, count, titleTags, counts[0]?.[1] || 1)).join("") : `<p class="empty-center">아직 태그가 없어. 노래 페이지에서 태그를 먼저 넣어줘.</p>`}
+          ${filteredCounts.length ? filteredCounts.map(([tag, count]) => tagChipHTML(tag, count, titleTags, maxCount)).join("") : `<p class="empty-center">이 분류에 보여줄 태그가 없어.</p>`}
         </div>
       </section>
     `;
 
+    bindTagFilterButtons(root);
     bindTagDragActions(root);
   }
 
