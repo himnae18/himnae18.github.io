@@ -71,6 +71,10 @@
       tags: window.AppState?.applyTitleFixedTagsToTags ? window.AppState.applyTitleFixedTagsToTags(normalizeTags(document.getElementById("editTags")?.value)) : normalizeTags(document.getElementById("editTags")?.value)
     };
 
+    if (window.AppState?.setSharedTextForSong) {
+      window.AppState.setSharedTextForSong(songs[current], "original", songs[current].original);
+    }
+
     save();
     showList();
     updateLyricsDrawer();

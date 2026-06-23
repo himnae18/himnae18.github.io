@@ -15,8 +15,8 @@
 
   function getOriginalUrl(song) {
     const fallback = song?.original || song?.origin || song?.originalUrl || "";
-    const shared = typeof S.getSharedSongText === "function" ? S.getSharedSongText(song, "original", fallback) : undefined;
-    return S.safeLink(shared === undefined ? fallback : shared);
+    const shared = typeof S.getSharedTextForSong === "function" ? S.getSharedTextForSong(song, "original", fallback).value : fallback;
+    return S.safeLink(shared);
   }
 
   function getSubPagePrefix() {
@@ -107,6 +107,65 @@
     }
   }
 
+  let pageSearchQuery = "";
+
+  function pageSearchResults() {
+    const songs = S.songs || [];
+    return songs
+      .map((song, index) => ({ song, index }))
+      .filter(({ song }) => S.songMatchesSearch ? S.songMatchesSearch(song, pageSearchQuery) : true);
+  }
+
+  function updatePageSearchSummary(matchCount = null, totalCount = null) {
+    const summary = document.getElementById("pageSearchSummary");
+    if (!summary) return;
+    const total = Number.isFinite(totalCount) ? totalCount : (S.songs || []).length;
+    const matched = Number.isFinite(matchCount) ? matchCount : pageSearchResults().length;
+    if (!String(pageSearchQuery || "").trim()) {
+      summary.textContent = `이 페이지 안에서 제목 / 태그를 검색할 수 있어. 전체 ${total}개`;
+      return;
+    }
+    summary.textContent = `검색 결과 ${matched}개 / 전체 ${total}개`;
+  }
+
+  function setPageSearchQuery(value) {
+    pageSearchQuery = String(value ?? "");
+    showList();
+  }
+
+  function createPageSearchBox() {
+    const panel = document.querySelector(".left-library-panel");
+    if (!panel || document.getElementById("pageSearchBox")) return;
+
+    const section = document.createElement("section");
+    section.id = "pageSearchBox";
+    section.className = "add-song-section search-song-section";
+    section.setAttribute("aria-label", "현재 페이지 노래 검색");
+    section.innerHTML = `
+      <div class="add-song-row search-song-row">
+        <input id="pageSongSearchInput" placeholder="제목 / 태그 검색" aria-label="현재 페이지 노래 검색" />
+        <button id="pageSongSearchBtn" class="add-song-btn search-song-btn" type="button">검색</button>
+      </div>
+      <p id="pageSearchSummary" class="search-song-help"></p>
+    `;
+
+    const firstSection = panel.querySelector(".add-song-section, .tag-playlist-head");
+    if (firstSection) panel.insertBefore(section, firstSection);
+    else panel.insertBefore(section, panel.firstChild);
+
+    const input = section.querySelector("#pageSongSearchInput");
+    const run = () => setPageSearchQuery(input?.value || "");
+    section.querySelector("#pageSongSearchBtn")?.addEventListener("click", run);
+    input?.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        run();
+      }
+    });
+    input?.addEventListener("input", run);
+    updatePageSearchSummary();
+  }
+
   function tagChipHTML(tag, count = null, extraClass = "") {
     const safe = S.escapeHTML(tag);
     const countText = count === null ? "" : `<span class="tag-count">${count}</span>`;
@@ -127,12 +186,21 @@
     const songs = S.songs || [];
     if (songs.length === 0) {
       list.innerHTML = `<p class="empty-center">아직 추가된 노래가 없어!</p>`;
+      updatePageSearchSummary(0, 0);
+      return;
+    }
+
+    const filtered = pageSearchResults();
+    updatePageSearchSummary(filtered.length, songs.length);
+
+    if (filtered.length === 0) {
+      list.innerHTML = `<p class="empty-center">검색 결과가 없어!</p>`;
       return;
     }
 
     let html = `<div class="playlist">`;
 
-    songs.forEach((s, i) => {
+    filtered.forEach(({ song: s, index: i }, order) => {
       const thumb = s.id ? `https://i.ytimg.com/vi/${s.id}/hqdefault.jpg` : "";
       const active = i === S.current ? " active" : "";
       const hasMr = !!S.safeLink(s.mr);
@@ -236,27 +304,25 @@
     return song.lyrics || song.lyricsJa || song.lyricsCn || song.lyricsKr || song.lyricsEn || "";
   }
 
-  function getEditorFallbackText(song, field) {
-    if (!song) return "";
-    if (field === "lyricsOriginal") return song.lyricsOriginal ?? legacyLyricsText(song);
-    if (field === "lyrics") return song.lyrics ?? song.lyricsOriginal ?? "";
-    return song[field] ?? "";
-  }
-
   function getEditorText(song, field) {
-    const fallback = getEditorFallbackText(song, field);
-    const shared = typeof S.getSharedSongText === "function" ? S.getSharedSongText(song, field, fallback) : undefined;
-    return shared === undefined ? fallback : shared;
+    if (!song) return "";
+
+    let fallback = "";
+    if (field === "lyricsOriginal") fallback = song.lyricsOriginal ?? legacyLyricsText(song);
+    else if (field === "lyrics") fallback = song.lyrics ?? song.lyricsOriginal ?? "";
+    else fallback = song[field] ?? "";
+
+    if (typeof S.getSharedTextForSong === "function") {
+      return S.getSharedTextForSong(song, field, fallback).value;
+    }
+    return fallback;
   }
 
-  function getSongSharedTitleTag(song) {
-    return typeof S.getSongTitleTag === "function" ? S.getSongTitleTag(song) : "";
-  }
-
-  function sharedTitleNoticeHTML(song) {
-    const titleTag = getSongSharedTitleTag(song);
-    if (!titleTag) return "";
-    return `<span class="lyrics-shared-title-badge">#${S.escapeHTML(titleTag)} 공유중</span>`;
+  function sharedTitleBadgeHTML(song, field) {
+    if (typeof S.getSharedTextForSong !== "function") return "";
+    const info = S.getSharedTextForSong(song, field, "");
+    if (!info.shared || !info.titleTag) return "";
+    return `<span class="lyrics-shared-badge" title="같은 제목태그를 가진 노래/영상은 이 칸을 같이 써.">제목태그 #${S.escapeHTML(info.titleTag)} 공유</span>`;
   }
 
   function getLyricsLockButton() {
@@ -326,7 +392,7 @@
       <section class="lyrics-edit-panel" aria-label="${label} 메모장">
         <div class="lyrics-editor-toolbar">
           <strong>${S.escapeHTML(label)}</strong>
-          ${sharedTitleNoticeHTML(song)}
+          ${sharedTitleBadgeHTML(song, field)}
           <button class="lyrics-text-download-btn" type="button" data-download-field="${S.escapeHTML(field)}" data-download-kind="${downloadLabel}">${downloadLabel} txt 다운로드</button>
         </div>
         <textarea class="lyrics-edit-textarea ${editorLocked ? "is-locked" : "is-unlocked"}" data-field="${S.escapeHTML(field)}" placeholder="${S.escapeHTML(placeholder)}" spellcheck="false" ${editorLocked ? "readonly" : ""}>${value}</textarea>
@@ -351,7 +417,7 @@
       <section class="lyrics-edit-panel lyrics-part-panel lyrics-single-part-panel" aria-label="가사 ${item.label}">
         <div class="lyrics-single-panel-head">
           <strong>${S.escapeHTML(item.label)}</strong>
-          ${sharedTitleNoticeHTML(song)}
+          ${sharedTitleBadgeHTML(song, item.field)}
           <button class="lyrics-text-download-btn lyrics-floating-download-btn" type="button" data-download-field="${S.escapeHTML(item.field)}" data-download-kind="${S.escapeHTML(item.label)}">${S.escapeHTML(item.label)} txt 다운로드</button>
         </div>
         <textarea class="lyrics-edit-textarea lyrics-part-textarea ${editorLocked ? "is-locked" : "is-unlocked"}" data-field="${S.escapeHTML(item.field)}" placeholder="${S.escapeHTML(item.placeholder)}" spellcheck="false" ${editorLocked ? "readonly" : ""}>${value}</textarea>
@@ -382,8 +448,8 @@
     const s = songs[S.current];
     const field = getTextEditorField(editor);
     if (!s) return false;
-    const savedShared = typeof S.saveSharedSongText === "function" && S.saveSharedSongText(s, field, editor.value);
-    if (!savedShared) s[field] = editor.value;
+    s[field] = editor.value;
+    if (typeof S.setSharedTextForSong === "function") S.setSharedTextForSong(s, field, editor.value);
     S.save();
     if (options.refreshTags && typeof renderTagTools === "function") renderTagTools();
     return true;
@@ -970,6 +1036,8 @@
 
     updateLyricsDrawer();
     renderTagTools();
+    createPageSearchBox();
+    updatePageSearchSummary();
   });
 
   window.showList = showList;
