@@ -17,9 +17,6 @@
   ];
 
   const ALL_STORES = [...COUNTRY_STORES, ...YOUTUBE_STORES];
-  const TITLE_TAGS_KEY = "musicTitleTags";
-  const TITLE_SHARED_TEXT_KEY = "musicTitleSharedLyrics";
-  const TITLE_SHARED_TEXT_FIELDS = ["lyrics", "lyricsOriginal", "lyricsPronunciation", "lyricsMeaning", "memo"];
 
   function readStorage(key) {
     try {
@@ -107,43 +104,10 @@
     return normalizeTags([...(Array.isArray(existing) ? existing : normalizeTags(existing)), ...normalizeTags(extra)]);
   }
 
-  function normalizeSearchText(value) {
-    return String(value ?? "")
-      .toLowerCase()
-      .replace(/^#+/, "")
-      .replace(/\s+/g, "")
-      .trim();
-  }
-
-  function getSearchTerms(query) {
-    return String(query ?? "")
-      .split(/\s+/)
-      .map(normalizeSearchText)
-      .filter(Boolean);
-  }
-
-  function makeSongSearchHaystack(song) {
-    const parts = [
-      safeText(song?.title),
-      safeText(song?.author),
-      ...normalizeTags(song?.tags)
-    ];
-    return normalizeSearchText(parts.join(" "));
-  }
-
-  function songMatchesSearch(song, query) {
-    const terms = getSearchTerms(query);
-    if (!terms.length) return true;
-    const haystack = makeSongSearchHaystack(song);
-    return terms.every((term) => haystack.includes(term));
-  }
-
-  function searchSongs(query, scopeKey = "all") {
-    const source = scopeKey && scopeKey !== "all"
-      ? cleanSongArray(readStorage(scopeKey)).map((song, index) => ({ ...song, storeKey: scopeKey, index }))
-      : getAllSongs();
-    return source.filter((song) => songMatchesSearch(song, query));
-  }
+  const TITLE_TAGS_KEY = "musicTitleTags";
+  const TITLE_SHARED_TEXT_KEY = "musicTitleSharedLyrics";
+  const TITLE_FIXED_TAGS_KEY = "musicTitleFixedTags";
+  const SHARED_TEXT_FIELDS = ["lyrics", "lyricsOriginal", "lyricsPronunciation", "lyricsMeaning", "memo", "original"];
 
   function readTitleTags() {
     try {
@@ -159,117 +123,15 @@
   }
 
   function isTitleTag(tag) {
-    const clean = normalizeTag(tag);
-    return !!clean && readTitleTags().includes(clean);
-  }
-
-  function readTitleSharedText() {
-    try {
-      const data = JSON.parse(localStorage.getItem(TITLE_SHARED_TEXT_KEY) || "{}");
-      if (!data || typeof data !== "object" || Array.isArray(data)) return {};
-
-      const result = {};
-      Object.entries(data).forEach(([rawTag, rawRecord]) => {
-        const tag = normalizeTag(rawTag);
-        if (!tag || !rawRecord || typeof rawRecord !== "object" || Array.isArray(rawRecord)) return;
-        const record = {};
-        TITLE_SHARED_TEXT_FIELDS.forEach((field) => {
-          if (Object.prototype.hasOwnProperty.call(rawRecord, field)) record[field] = String(rawRecord[field] ?? "");
-        });
-        if (Object.keys(record).length > 0) result[tag] = record;
-      });
-      return result;
-    } catch {
-      return {};
-    }
-  }
-
-  function writeTitleSharedText(data) {
-    const cleanData = {};
-    if (data && typeof data === "object" && !Array.isArray(data)) {
-      Object.entries(data).forEach(([rawTag, rawRecord]) => {
-        const tag = normalizeTag(rawTag);
-        if (!tag || !rawRecord || typeof rawRecord !== "object" || Array.isArray(rawRecord)) return;
-        const record = {};
-        TITLE_SHARED_TEXT_FIELDS.forEach((field) => {
-          if (Object.prototype.hasOwnProperty.call(rawRecord, field)) record[field] = String(rawRecord[field] ?? "");
-        });
-        if (Object.keys(record).length > 0) cleanData[tag] = record;
-      });
-    }
-    localStorage.setItem(TITLE_SHARED_TEXT_KEY, JSON.stringify(cleanData));
-  }
-
-  function getSongTitleTag(song) {
-    const titleTags = readTitleTags();
-    if (!song || titleTags.length === 0) return "";
-    return normalizeTags(song.tags).find((tag) => titleTags.includes(tag)) || "";
-  }
-
-  function getTitleSharedRecord(tag) {
-    const clean = normalizeTag(tag);
-    if (!clean) return {};
-    const data = readTitleSharedText();
-    const record = data[clean];
-    return record && typeof record === "object" && !Array.isArray(record) ? record : {};
-  }
-
-  function getSharedTextForSong(song, field, fallback = "") {
-    const titleTag = getSongTitleTag(song);
-    if (!titleTag || !TITLE_SHARED_TEXT_FIELDS.includes(field)) {
-      return { shared: false, titleTag: "", value: fallback };
-    }
-
-    const record = getTitleSharedRecord(titleTag);
-    if (Object.prototype.hasOwnProperty.call(record, field)) {
-      return { shared: true, titleTag, value: String(record[field] ?? "") };
-    }
-    return { shared: true, titleTag, value: fallback };
-  }
-
-  function setSharedTextForSong(song, field, value) {
-    const titleTag = getSongTitleTag(song);
-    if (!titleTag || !TITLE_SHARED_TEXT_FIELDS.includes(field)) return false;
-    const data = readTitleSharedText();
-    const record = data[titleTag] && typeof data[titleTag] === "object" ? { ...data[titleTag] } : {};
-    record[field] = String(value ?? "");
-    data[titleTag] = record;
-    writeTitleSharedText(data);
-    return true;
-  }
-
-  function pickSongTextField(song, field) {
-    if (!song) return "";
-    if (field === "lyricsOriginal") return song.lyricsOriginal ?? song.lyrics ?? song.lyricsJa ?? song.lyricsCn ?? song.lyricsKr ?? song.lyricsEn ?? "";
-    if (field === "lyrics") return song.lyrics ?? song.lyricsOriginal ?? "";
-    return song[field] ?? "";
-  }
-
-  function ensureTitleTagSharedTextFromSongs(tag) {
-    const clean = normalizeTag(tag);
-    if (!clean) return false;
-    const data = readTitleSharedText();
-    if (data[clean] && TITLE_SHARED_TEXT_FIELDS.some((field) => Object.prototype.hasOwnProperty.call(data[clean], field))) return true;
-
-    const taggedSongs = getAllSongs().filter((song) => normalizeTags(song.tags).includes(clean));
-    const record = {};
-    TITLE_SHARED_TEXT_FIELDS.forEach((field) => {
-      const found = taggedSongs.map((song) => String(pickSongTextField(song, field) ?? "")).find((text) => text.trim());
-      if (found !== undefined) record[field] = found;
-    });
-
-    if (Object.keys(record).length > 0) {
-      data[clean] = record;
-      writeTitleSharedText(data);
-    }
-    return true;
+    return readTitleTags().includes(normalizeTag(tag));
   }
 
   function registerTitleTag(tag) {
     const clean = normalizeTag(tag);
     if (!clean) return false;
     writeTitleTags(addTags(readTitleTags(), [clean]));
-    ensureTitleTagSharedTextFromSongs(clean);
+    ensureTitleSharedDataForTag(clean);
+    applyTitleFixedTagsToStores(clean);
     return true;
   }
 
@@ -277,6 +139,307 @@
     const clean = normalizeTag(tag);
     if (!clean) return false;
     writeTitleTags(readTitleTags().filter((item) => item !== clean));
+    return true;
+  }
+
+  function normalizeTitleSharedText(data) {
+    const result = {};
+    if (!data || typeof data !== "object" || Array.isArray(data)) return result;
+
+    Object.entries(data).forEach(([rawTag, rawValue]) => {
+      const tag = normalizeTag(rawTag);
+      if (!tag || !rawValue || typeof rawValue !== "object" || Array.isArray(rawValue)) return;
+      result[tag] = {};
+      SHARED_TEXT_FIELDS.forEach((field) => {
+        if (Object.prototype.hasOwnProperty.call(rawValue, field)) {
+          result[tag][field] = String(rawValue[field] ?? "");
+        }
+      });
+    });
+    return result;
+  }
+
+  function readTitleSharedText() {
+    try {
+      return normalizeTitleSharedText(JSON.parse(localStorage.getItem(TITLE_SHARED_TEXT_KEY) || "{}"));
+    } catch {
+      return {};
+    }
+  }
+
+  function writeTitleSharedText(data) {
+    localStorage.setItem(TITLE_SHARED_TEXT_KEY, JSON.stringify(normalizeTitleSharedText(data)));
+  }
+
+  function normalizeTitleFixedTags(data) {
+    const result = {};
+    if (!data || typeof data !== "object" || Array.isArray(data)) return result;
+
+    Object.entries(data).forEach(([rawTitleTag, rawTags]) => {
+      const titleTag = normalizeTag(rawTitleTag);
+      if (!titleTag) return;
+      const tags = normalizeTags(rawTags).filter((tag) => tag && tag !== titleTag);
+      if (tags.length > 0) result[titleTag] = tags;
+    });
+
+    return result;
+  }
+
+  function readTitleFixedTags() {
+    try {
+      return normalizeTitleFixedTags(JSON.parse(localStorage.getItem(TITLE_FIXED_TAGS_KEY) || "{}"));
+    } catch {
+      return {};
+    }
+  }
+
+  function writeTitleFixedTags(data) {
+    localStorage.setItem(TITLE_FIXED_TAGS_KEY, JSON.stringify(normalizeTitleFixedTags(data)));
+  }
+
+  function getTitleFixedTags(titleTag) {
+    const clean = normalizeTag(titleTag);
+    if (!clean) return [];
+    return readTitleFixedTags()[clean] || [];
+  }
+
+  function setTitleFixedTags(titleTag, tags) {
+    const clean = normalizeTag(titleTag);
+    if (!clean) return false;
+    const data = readTitleFixedTags();
+    const previousFixed = data[clean] || [];
+    const fixed = normalizeTags(tags).filter((tag) => tag && tag !== clean);
+    if (fixed.length > 0) data[clean] = fixed;
+    else delete data[clean];
+    writeTitleFixedTags(data);
+    applyTitleFixedTagsToStores(clean, previousFixed);
+    return true;
+  }
+
+  function applyTitleFixedTagsToTags(tags) {
+    let result = normalizeTags(tags);
+    const titleTags = readTitleTags();
+    const fixedData = readTitleFixedTags();
+
+    titleTags.forEach((titleTag) => {
+      if (!result.includes(titleTag)) return;
+      result = addTags(result, fixedData[titleTag] || []);
+    });
+
+    return result;
+  }
+
+  function applyTitleFixedTagsToStores(titleTag = "", previousFixedTags = []) {
+    const cleanTitle = normalizeTag(titleTag);
+    const titleTags = cleanTitle ? [cleanTitle] : readTitleTags();
+    const fixedData = readTitleFixedTags();
+    const previousMap = cleanTitle ? { [cleanTitle]: normalizeTags(previousFixedTags) } : {};
+    let changedCount = 0;
+
+    function nextTagsForTitle(tags) {
+      let next = normalizeTags(tags);
+      titleTags.forEach((tag) => {
+        if (!next.includes(tag)) return;
+        const currentFixed = normalizeTags(fixedData[tag] || []);
+        const oldFixed = normalizeTags(previousMap[tag] || []);
+        if (oldFixed.length > 0) {
+          next = next.filter((item) => !oldFixed.includes(item) || currentFixed.includes(item));
+        }
+        next = addTags(next, currentFixed);
+      });
+      return next;
+    }
+
+    ALL_STORES.forEach((store) => {
+      const arr = cleanSongArray(readStorage(store.key));
+      let changed = false;
+
+      arr.forEach((song) => {
+        const tags = normalizeTags(song.tags);
+        const matches = titleTags.some((tag) => tags.includes(tag));
+        if (!matches) return;
+        const nextTags = nextTagsForTitle(tags);
+        if (nextTags.join("\u0001") !== tags.join("\u0001")) {
+          song.tags = nextTags;
+          changed = true;
+        }
+        changedCount += 1;
+      });
+
+      if (changed) writeStorage(store.key, arr);
+    });
+
+    try {
+      if (Array.isArray(songs)) {
+        songs.forEach((song) => {
+          const tags = normalizeTags(song.tags);
+          const matches = titleTags.some((tag) => tags.includes(tag));
+          if (matches) song.tags = nextTagsForTitle(tags);
+        });
+      }
+    } catch {}
+
+    return changedCount;
+  }
+
+  async function addVideoToStoreWithTags({ ytUrl, storeKey: wantedStoreKey, tags = [], mr = "", original = "", lyrics = "" } = {}) {
+    const cleanUrl = safeLink(ytUrl);
+    const id = extractID(cleanUrl);
+    const targetStore = ALL_STORES.find((item) => item.key === wantedStoreKey) || YOUTUBE_STORES[0] || ALL_STORES[0];
+
+    if (!targetStore) return { ok: false, error: "저장 위치를 찾지 못했어." };
+    if (!cleanUrl || !id) return { ok: false, error: "유튜브 링크가 올바르지 않아." };
+
+    const meta = await fetchYouTubeMeta(cleanUrl);
+    const finalTags = applyTitleFixedTagsToTags(tags);
+    const arr = cleanSongArray(readStorage(targetStore.key));
+    const foundIndex = arr.findIndex((song) => {
+      const songId = song.id || extractID(song.ytUrl);
+      return (songId && songId === id) || safeLink(song.ytUrl) === cleanUrl;
+    });
+
+    let index = foundIndex;
+    if (foundIndex >= 0) {
+      arr[foundIndex] = cleanSong({
+        ...arr[foundIndex],
+        title: arr[foundIndex].title || meta.title || "제목 없음",
+        author: arr[foundIndex].author || meta.author || "",
+        ytUrl: arr[foundIndex].ytUrl || cleanUrl,
+        id: arr[foundIndex].id || id,
+        tags: addTags(arr[foundIndex].tags, finalTags),
+        mr: arr[foundIndex].mr || safeLink(mr),
+        original: arr[foundIndex].original || safeLink(original),
+        lyrics: arr[foundIndex].lyrics || safeText(lyrics),
+        aspect: arr[foundIndex].aspect || meta.aspect || "",
+        thumbnailWidth: arr[foundIndex].thumbnailWidth || meta.thumbnailWidth || 0,
+        thumbnailHeight: arr[foundIndex].thumbnailHeight || meta.thumbnailHeight || 0
+      });
+    } else {
+      arr.push(cleanSong({
+        title: meta.title || "제목 없음",
+        author: meta.author || "",
+        ytUrl: cleanUrl,
+        id,
+        lyrics: safeText(lyrics),
+        mr: safeLink(mr),
+        score: "",
+        original: safeLink(original),
+        memo: "",
+        tags: finalTags,
+        aspect: meta.aspect || "",
+        thumbnailWidth: meta.thumbnailWidth || 0,
+        thumbnailHeight: meta.thumbnailHeight || 0
+      }));
+      index = arr.length - 1;
+    }
+
+    writeStorage(targetStore.key, arr);
+
+    if (storeKey === targetStore.key) {
+      songs = cleanSongArray(readStorage(targetStore.key));
+      current = index;
+    }
+
+    return { ok: true, storeKey: targetStore.key, store: targetStore, index, song: arr[index], updatedExisting: foundIndex >= 0 };
+  }
+
+  function isSharedTextField(field) {
+    return SHARED_TEXT_FIELDS.includes(String(field || ""));
+  }
+
+  function getSongTitleTag(song) {
+    const tags = normalizeTags(song?.tags);
+    if (tags.length === 0) return "";
+    const titleTags = readTitleTags();
+    return tags.find((tag) => titleTags.includes(tag)) || "";
+  }
+
+  function getSongFieldFallback(song, field) {
+    if (!song) return "";
+    if (field === "lyricsOriginal") return String(song.lyricsOriginal ?? song.lyrics ?? song.lyricsJa ?? song.lyricsCn ?? song.lyricsKr ?? song.lyricsEn ?? "");
+    if (field === "lyrics") return String(song.lyrics ?? song.lyricsOriginal ?? song.lyricsJa ?? song.lyricsCn ?? song.lyricsKr ?? song.lyricsEn ?? "");
+    return String(song[field] ?? "");
+  }
+
+  function getSharedSongText(song, field, fallbackValue = undefined) {
+    const safeField = String(field || "");
+    if (!isSharedTextField(safeField)) return undefined;
+    const titleTag = getSongTitleTag(song);
+    if (!titleTag) return undefined;
+
+    const data = readTitleSharedText();
+    if (!data[titleTag]) data[titleTag] = {};
+    if (!Object.prototype.hasOwnProperty.call(data[titleTag], safeField)) {
+      data[titleTag][safeField] = String(fallbackValue ?? getSongFieldFallback(song, safeField));
+      writeTitleSharedText(data);
+    }
+    return String(data[titleTag][safeField] ?? "");
+  }
+
+  function syncTitleSharedFieldsToStores(titleTag, values) {
+    const clean = normalizeTag(titleTag);
+    if (!clean || !values || typeof values !== "object") return 0;
+    let changedCount = 0;
+
+    ALL_STORES.forEach((store) => {
+      const arr = cleanSongArray(readStorage(store.key));
+      let changed = false;
+      arr.forEach((song) => {
+        if (!normalizeTags(song.tags).includes(clean)) return;
+        SHARED_TEXT_FIELDS.forEach((field) => {
+          if (Object.prototype.hasOwnProperty.call(values, field)) {
+            song[field] = String(values[field] ?? "");
+            changed = true;
+          }
+        });
+        changedCount += 1;
+      });
+      if (changed) writeStorage(store.key, arr);
+    });
+
+    songs.forEach((song) => {
+      if (!normalizeTags(song.tags).includes(clean)) return;
+      SHARED_TEXT_FIELDS.forEach((field) => {
+        if (Object.prototype.hasOwnProperty.call(values, field)) {
+          song[field] = String(values[field] ?? "");
+        }
+      });
+    });
+
+    return changedCount;
+  }
+
+  function ensureTitleSharedDataForTag(tag) {
+    const clean = normalizeTag(tag);
+    if (!clean) return false;
+    const data = readTitleSharedText();
+    const first = getAllSongs().find((song) => normalizeTags(song.tags).includes(clean));
+    if (!data[clean]) data[clean] = {};
+
+    if (first) {
+      SHARED_TEXT_FIELDS.forEach((field) => {
+        if (!Object.prototype.hasOwnProperty.call(data[clean], field)) {
+          data[clean][field] = getSongFieldFallback(first, field);
+        }
+      });
+    }
+
+    writeTitleSharedText(data);
+    syncTitleSharedFieldsToStores(clean, data[clean]);
+    return true;
+  }
+
+  function saveSharedSongText(song, field, value) {
+    const safeField = String(field || "");
+    if (!isSharedTextField(safeField)) return false;
+    const titleTag = getSongTitleTag(song);
+    if (!titleTag) return false;
+
+    const data = readTitleSharedText();
+    if (!data[titleTag]) data[titleTag] = {};
+    data[titleTag][safeField] = String(value ?? "");
+    writeTitleSharedText(data);
+    syncTitleSharedFieldsToStores(titleTag, data[titleTag]);
     return true;
   }
 
@@ -320,7 +483,7 @@
       score: String(song.score || "").trim(),
       original: String(song.original || song.origin || song.originalUrl || "").trim(),
       memo: String(song.memo || ""),
-      tags: addTags(song.tags, extraTag),
+      tags: applyTitleFixedTagsToTags(addTags(song.tags, extraTag)),
       aspect,
       thumbnailWidth,
       thumbnailHeight
@@ -528,10 +691,10 @@
     normalizeTags,
     normalizeVideoAspect,
     addTags,
-    normalizeSearchText,
-    getSearchTerms,
-    songMatchesSearch,
-    searchSongs,
+    TITLE_TAGS_KEY,
+    TITLE_SHARED_TEXT_KEY,
+    TITLE_FIXED_TAGS_KEY,
+    SHARED_TEXT_FIELDS,
     readTitleTags,
     writeTitleTags,
     isTitleTag,
@@ -539,10 +702,19 @@
     unregisterTitleTag,
     readTitleSharedText,
     writeTitleSharedText,
+    readTitleFixedTags,
+    writeTitleFixedTags,
+    getTitleFixedTags,
+    setTitleFixedTags,
+    applyTitleFixedTagsToTags,
+    applyTitleFixedTagsToStores,
+    addVideoToStoreWithTags,
+    isSharedTextField,
     getSongTitleTag,
-    getSharedTextForSong,
-    setSharedTextForSong,
-    ensureTitleTagSharedTextFromSongs,
+    getSharedSongText,
+    saveSharedSongText,
+    ensureTitleSharedDataForTag,
+    syncTitleSharedFieldsToStores,
     cleanSong,
     cleanSongArray,
     getAllSongs,
@@ -569,7 +741,7 @@
     });
   });
 
-  ["save", "safeText", "safeLink", "escapeHTML", "extractID", "fetchYouTubeMeta", "normalizeTags", "getTagCounts"]
+  ["save", "safeText", "safeLink", "escapeHTML", "extractID", "fetchYouTubeMeta", "normalizeTags", "getTagCounts", "readTitleTags", "registerTitleTag", "unregisterTitleTag", "addVideoToStoreWithTags"]
     .forEach((fn) => (window[fn] = S[fn]));
 })();
 
@@ -600,10 +772,11 @@
 
     return {
       app: "my-music-library",
-      version: 5,
+      version: 6,
       exportedAt: new Date().toISOString(),
-      titleTags: typeof S.readTitleTags === "function" ? S.readTitleTags() : [],
-      titleSharedLyrics: typeof S.readTitleSharedText === "function" ? S.readTitleSharedText() : {},
+      titleTags: S.readTitleTags ? S.readTitleTags() : [],
+      titleSharedText: S.readTitleSharedText ? S.readTitleSharedText() : {},
+      titleFixedTags: S.readTitleFixedTags ? S.readTitleFixedTags() : {},
       stores
     };
   }
@@ -707,14 +880,12 @@
           if (!ok) return;
 
           applyImportedStores(stores);
-
-          if (data && typeof data === "object" && Object.prototype.hasOwnProperty.call(data, "titleTags") && typeof S.writeTitleTags === "function") {
-            S.writeTitleTags(data.titleTags);
-          }
-          if (data && typeof data === "object" && Object.prototype.hasOwnProperty.call(data, "titleSharedLyrics") && typeof S.writeTitleSharedText === "function") {
-            S.writeTitleSharedText(data.titleSharedLyrics);
-          }
-
+          if (Array.isArray(data?.titleTags) && S.writeTitleTags) S.writeTitleTags(data.titleTags);
+          if (data?.titleSharedText && S.writeTitleSharedText) S.writeTitleSharedText(data.titleSharedText);
+          if (data?.titleFixedTags && S.writeTitleFixedTags) S.writeTitleFixedTags(data.titleFixedTags);
+          if (S.readTitleTags && S.ensureTitleSharedDataForTag) S.readTitleTags().forEach((tag) => S.ensureTitleSharedDataForTag(tag));
+          if (S.applyTitleFixedTagsToStores) S.applyTitleFixedTagsToStores();
+          if (typeof renderTagTools === "function") renderTagTools();
           alert("불러오기 완료! 목록이 복원됐어.");
         } catch {
           alert("파일을 읽을 수 없어. 저장 버튼으로 받은 JSON 파일인지 확인해줘.");
@@ -736,6 +907,7 @@
     box.innerHTML = `
       <button id="exportBackupBtn" class="backup-btn" type="button">💾 저장</button>
       <button id="importBackupBtn" class="backup-btn" type="button">📂 불러오기</button>
+      <button id="openTagIndexBtn" class="backup-btn tag-index-open" type="button"># 태그</button>
       <p class="backup-help">저장은 JSON 파일로 다운로드되고, 불러오기는 그 파일을 다시 넣는 방식이야. 노래 페이지와 유튜브 1P~4P도 같이 저장돼.</p>
     `;
 
@@ -746,112 +918,12 @@
 
     document.getElementById("exportBackupBtn")?.addEventListener("click", downloadBackup);
     document.getElementById("importBackupBtn")?.addEventListener("click", openImportFilePicker);
-  }
-
-  function isMainHomePage() {
-    if (document.body?.dataset?.store || document.body?.dataset?.page === "tag") return false;
-    const path = String(location.pathname || "");
-    return /(?:^|\/)index\.html?$/.test(path) || path.endsWith("/");
-  }
-
-  function escapeAttr(value) {
-    return String(value ?? "")
-      .replaceAll("&", "&amp;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;");
-  }
-
-  function getSongOpenHref(song) {
-    const page = song?.collection?.page || song?.page || "index.html";
-    const playKey = song?.id || song?.ytUrl || "";
-    return `${page}${playKey ? `?play=${encodeURIComponent(playKey)}` : ""}`;
-  }
-
-  function mainSearchTagsHTML(song) {
-    const tags = normalizeTags(song?.tags);
-    if (!tags.length) return "";
-    return `<div class="main-search-tags">${tags.map((tag) => `<span class="main-search-tag">#${escapeHTML(tag)}</span>`).join("")}</div>`;
-  }
-
-  function renderMainSearchResults(query) {
-    const resultBox = document.getElementById("mainSearchResults");
-    const summary = document.getElementById("mainSearchSummary");
-    if (!resultBox || !summary) return;
-
-    const text = String(query ?? "").trim();
-    if (!text) {
-      summary.textContent = "노래 제목이나 태그를 검색해줘. 예: 오버, 잔잔함";
-      resultBox.innerHTML = "";
-      resultBox.hidden = true;
-      return;
-    }
-
-    const results = searchSongs(text, "all");
-    summary.textContent = `${results.length}개 찾았어.`;
-    resultBox.hidden = false;
-
-    if (!results.length) {
-      resultBox.innerHTML = `<p class="empty-center main-search-empty">검색 결과가 없어.</p>`;
-      return;
-    }
-
-    resultBox.innerHTML = results.map((song) => {
-      const badge = `${song?.collection?.emoji || ""} ${song?.collection?.label || ""}`.trim();
-      const sub = [safeText(song?.author), badge].filter(Boolean).join(" · ");
-      return `
-        <a class="main-search-item" href="${escapeAttr(getSongOpenHref(song))}">
-          <div class="main-search-meta">
-            <div class="main-search-title">${escapeHTML(song?.title || "제목 없음")}</div>
-            <div class="main-search-sub">${escapeHTML(sub)}</div>
-            ${mainSearchTagsHTML(song)}
-          </div>
-          <span class="main-search-open">열기</span>
-        </a>
-      `;
-    }).join("");
-  }
-
-  function createMainSearchUI() {
-    if (!isMainHomePage() || document.getElementById("mainSearchSection")) return;
-
-    const backupTools = document.getElementById("backupTools");
-    const anchor = backupTools || document.querySelector("h1");
-    if (!anchor) return;
-
-    const section = document.createElement("section");
-    section.id = "mainSearchSection";
-    section.className = "main-search-section";
-    section.innerHTML = `
-      <div class="add-song-section search-song-section search-song-section-main">
-        <div class="add-song-row search-song-row">
-          <input id="mainSongSearchInput" placeholder="노래 제목 / 태그 검색" aria-label="메인 노래 검색" />
-          <button id="mainSongSearchBtn" class="add-song-btn search-song-btn" type="button">검색</button>
-        </div>
-        <p id="mainSearchSummary" class="search-song-help">노래 제목이나 태그를 검색해줘. 예: 오버, 잔잔함</p>
-      </div>
-      <div id="mainSearchResults" class="main-search-results" hidden></div>
-    `;
-
-    if (backupTools) backupTools.insertAdjacentElement("afterend", section);
-    else anchor.insertAdjacentElement("afterend", section);
-
-    const input = document.getElementById("mainSongSearchInput");
-    const run = () => renderMainSearchResults(input?.value || "");
-    document.getElementById("mainSongSearchBtn")?.addEventListener("click", run);
-    input?.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        run();
-      }
+    document.getElementById("openTagIndexBtn")?.addEventListener("click", () => {
+      window.location.href = "tag.html";
     });
-    input?.addEventListener("input", run);
   }
 
-  document.addEventListener("DOMContentLoaded", () => {
-    createBackupButtons();
-    createMainSearchUI();
-  });
+  document.addEventListener("DOMContentLoaded", createBackupButtons);
 
   window.downloadMusicLibraryBackup = downloadBackup;
   window.openMusicLibraryBackup = openImportFilePicker;

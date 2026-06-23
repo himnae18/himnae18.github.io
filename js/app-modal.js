@@ -68,7 +68,7 @@
       id,
       mr: safeLink(document.getElementById("editMr")?.value),
       original: safeLink(document.getElementById("editOriginal")?.value),
-      tags: normalizeTags(document.getElementById("editTags")?.value)
+      tags: window.AppState?.applyTitleFixedTagsToTags ? window.AppState.applyTitleFixedTagsToTags(normalizeTags(document.getElementById("editTags")?.value)) : normalizeTags(document.getElementById("editTags")?.value)
     };
 
     save();
