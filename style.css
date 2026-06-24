@@ -3006,3 +3006,13 @@ body[data-page="tag"] .tag-drop-zone{
   border-color:#2ea44f;
   background:#fbfffc;
 }
+.fivep-panel.fivep-drop-over{
+  outline:3px dashed rgba(46,164,79,.35);
+  outline-offset:6px;
+  background:#fbfffc;
+}
+.tab-link.fivep-drop-over{
+  outline:3px solid rgba(46,164,79,.35);
+  background:#2ea44f !important;
+  color:#fff !important;
+}
