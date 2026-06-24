@@ -23,6 +23,7 @@
     return location.pathname.includes("/japan/") ||
       location.pathname.includes("/china/") ||
       location.pathname.includes("/korea/") ||
+      location.pathname.includes("/english/") ||
       location.pathname.includes("/youtube/") ? "../" : "";
   }
 
@@ -179,6 +180,185 @@
     return `<div class="song-tags song-tags-${mode}">${tags.map((tag) => tagChipHTML(tag, counts.get(tag) || 1)).join("")}</div>`;
   }
 
+  function getFivePStore() {
+    return S.YOUTUBE_STORES?.find((item) => item.key === "yt5pVideos") || null;
+  }
+
+  function getFivePSongs() {
+    return S.cleanSongArray ? S.cleanSongArray(S.readStorage("yt5pVideos")) : [];
+  }
+
+  function serializeFivePSong(song, index = 0) {
+    return JSON.stringify({
+      title: S.safeText(song?.title || "제목 없음"),
+      author: S.safeText(song?.author || ""),
+      ytUrl: S.safeLink(song?.ytUrl || ""),
+      id: S.safeText(song?.id || S.extractID(song?.ytUrl || "")),
+      lyrics: String(song?.lyrics || ""),
+      lyricsOriginal: String(song?.lyricsOriginal || ""),
+      lyricsPronunciation: String(song?.lyricsPronunciation || ""),
+      lyricsMeaning: String(song?.lyricsMeaning || ""),
+      memo: String(song?.memo || ""),
+      original: S.safeLink(song?.original || ""),
+      mr: S.safeLink(song?.mr || ""),
+      score: S.safeLink(song?.score || ""),
+      tags: S.normalizeTags(song?.tags),
+      aspect: S.safeText(song?.aspect || ""),
+      thumbnailWidth: Number(song?.thumbnailWidth || 0) || 0,
+      thumbnailHeight: Number(song?.thumbnailHeight || 0) || 0,
+      fivePIndex: index
+    });
+  }
+
+  function fivePPanelHTML() {
+    const items = getFivePSongs();
+    if (items.length === 0) {
+      return `
+        <section class="fivep-panel">
+          <p class="fivep-help">5P에 아직 영상이 없어. 유튜브 영상 5P 페이지에 영상을 모아두면 여기에서 끌어다 다른 페이지에 넣을 수 있어.</p>
+          <a class="fivep-open-page" href="${getCollectionPageHref(getFivePStore())}">5P 페이지 열기</a>
+        </section>
+      `;
+    }
+
+    return `
+      <section class="fivep-panel">
+        <p class="fivep-help">5P에 모아둔 영상을 왼쪽 목록/영상 추가 영역으로 끌면 현재 페이지에 복사돼.</p>
+        <a class="fivep-open-page" href="${getCollectionPageHref(getFivePStore())}">5P 페이지 열기</a>
+        <div class="fivep-video-list">
+          ${items.map((song, index) => {
+            const id = song.id || S.extractID(song.ytUrl);
+            const thumb = id ? `https://i.ytimg.com/vi/${id}/hqdefault.jpg` : "";
+            const sub = S.safeText(song.author || "");
+            return `
+              <article class="fivep-video-card" draggable="true" data-fivep-song="${S.escapeHTML(serializeFivePSong(song, index))}" data-fivep-index="${index}">
+                <div class="fivep-thumb">${thumb ? `<img src="${thumb}" alt="thumb">` : ""}</div>
+                <div class="fivep-meta">
+                  <strong>${S.escapeHTML(song.title || "제목 없음")}</strong>
+                  <span>${S.escapeHTML(sub || "5P 보관 영상")}</span>
+                </div>
+                <button class="fivep-add-btn" type="button" data-fivep-add="${index}">넣기</button>
+              </article>
+            `;
+          }).join("")}
+        </div>
+      </section>
+    `;
+  }
+
+  function readFivePTransfer(e) {
+    const raw = e?.dataTransfer?.getData("application/x-fivep-song") || "";
+    if (!raw) return null;
+    try {
+      const song = JSON.parse(raw);
+      return song && typeof song === "object" ? song : null;
+    } catch {
+      return null;
+    }
+  }
+
+  function copyFivePSongToCurrentPage(song) {
+    if (!song || typeof song !== "object") return false;
+    const targetStore = S.ALL_STORES?.find((item) => item.key === S.storeKey);
+    if (!targetStore) {
+      alert("현재 페이지에는 5P 영상을 넣을 수 없어.");
+      return false;
+    }
+
+    const ytUrl = S.safeLink(song.ytUrl);
+    const id = S.safeText(song.id || S.extractID(ytUrl));
+    if (!ytUrl || !id) {
+      alert("이 5P 영상 링크가 올바르지 않아.");
+      return false;
+    }
+
+    const duplicates = S.collectDuplicateSongs ? S.collectDuplicateSongs({
+      ytUrl,
+      id,
+      title: song.title,
+      storeKey: S.storeKey
+    }) : [];
+
+    if (duplicates.length > 0 && typeof S.confirmDuplicateAdd === "function" && !S.confirmDuplicateAdd(duplicates)) {
+      return false;
+    }
+
+    const clean = S.cleanSong ? S.cleanSong({
+      ...song,
+      ytUrl,
+      id,
+      tags: S.normalizeTags(song.tags),
+      title: song.title || "제목 없음"
+    }) : song;
+
+    S.songs = [...(S.songs || []), clean];
+    S.save();
+    showList();
+    updatePageSearchSummary();
+    updateLyricsDrawer();
+    renderTagTools();
+    return true;
+  }
+
+  function bindFivePPanel() {
+    document.querySelectorAll("[data-fivep-song]").forEach((card) => {
+      if (card.dataset.fivepDragBound === "1") return;
+      card.dataset.fivepDragBound = "1";
+      card.addEventListener("dragstart", (e) => {
+        const raw = card.getAttribute("data-fivep-song") || "";
+        if (!raw) return;
+        S.dragIndex = null;
+        e.dataTransfer.effectAllowed = "copy";
+        e.dataTransfer.setData("application/x-fivep-song", raw);
+        try {
+          const parsed = JSON.parse(raw);
+          if (parsed?.ytUrl) e.dataTransfer.setData("text/plain", parsed.ytUrl);
+        } catch {}
+        card.classList.add("is-dragging");
+      });
+      card.addEventListener("dragend", () => card.classList.remove("is-dragging"));
+    });
+
+    document.querySelectorAll("[data-fivep-add]").forEach((btn) => {
+      if (btn.dataset.fivepAddBound === "1") return;
+      btn.dataset.fivepAddBound = "1";
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const idx = Number(btn.getAttribute("data-fivep-add"));
+        const song = getFivePSongs()[idx];
+        copyFivePSongToCurrentPage(song);
+      });
+    });
+  }
+
+  function bindFivePDropTargets() {
+    const panel = document.querySelector(".left-library-panel");
+    if (!panel || panel.dataset.fivepDropBound === "1") return;
+    panel.dataset.fivepDropBound = "1";
+
+    panel.addEventListener("dragover", (e) => {
+      const hasFiveP = Array.from(e.dataTransfer?.types || []).includes("application/x-fivep-song");
+      if (!hasFiveP) return;
+      e.preventDefault();
+      panel.classList.add("fivep-drop-over");
+      if (e.dataTransfer) e.dataTransfer.dropEffect = "copy";
+    });
+
+    panel.addEventListener("dragleave", (e) => {
+      if (panel.contains(e.relatedTarget)) return;
+      panel.classList.remove("fivep-drop-over");
+    });
+
+    panel.addEventListener("drop", (e) => {
+      const song = readFivePTransfer(e);
+      if (!song) return;
+      e.preventDefault();
+      e.stopPropagation();
+      panel.classList.remove("fivep-drop-over");
+      copyFivePSongToCurrentPage(song);
+    });
+  }
+
   function showList() {
     const list = document.getElementById("list");
     if (!list) return;
@@ -274,7 +454,7 @@
   }
 
   function normalizeDrawerTab(tab) {
-    return ["lyrics", "mr", "original"].includes(tab) ? tab : "lyrics";
+    return ["lyrics", "mr", "original", "fivep"].includes(tab) ? tab : "lyrics";
   }
 
   function normalizeLyricsSubTab(tab) {
@@ -739,6 +919,7 @@
     const tabLyrics = document.getElementById("tabLyrics");
     const tabMr = document.getElementById("tabMr");
     const tabOriginal = document.getElementById("tabOriginal");
+    const tabFiveP = document.getElementById("tabFiveP");
     const headTitle = document.querySelector(".lyrics-head-title");
 
     getLyricsLockButton();
@@ -750,12 +931,27 @@
     const songs = S.songs || [];
     const s = songs[S.current];
 
+    activeTab = normalizeDrawerTab(activeTab);
+
     setTabClass(tabLyrics);
     setTabClass(tabMr);
     setTabClass(tabOriginal);
+    if (tabFiveP) setTabClass(tabFiveP);
+
+    if (activeTab === "fivep" && tabFiveP) {
+      if (headTitle) headTitle.textContent = "5P";
+      titleEl.textContent = "5P 영상 보관함";
+      if (tagEl) tagEl.innerHTML = "";
+      textEl.style.display = "none";
+      mediaEl.style.display = "block";
+      tabFiveP.classList.add("tab-active");
+      mediaEl.innerHTML = fivePPanelHTML();
+      bindFivePPanel();
+      return;
+    }
 
     if (!s) {
-      if (headTitle) headTitle.textContent = "가사 / 메모 / 기타";
+      if (headTitle) headTitle.textContent = "가사 / 메모 / 기타 / 5P";
       const videoLikePage = isTagPage() || document.body?.dataset?.store?.startsWith("yt");
       titleEl.textContent = videoLikePage ? "재생중인 영상이 없어" : "재생중인 곡이 없어";
       if (tagEl) tagEl.innerHTML = "";
@@ -769,6 +965,7 @@
       tabLyrics.classList.add("tab-active");
       tabMr.classList.add("tab-disabled-soft");
       tabOriginal.classList.add("tab-disabled-soft");
+      if (tabFiveP) tabFiveP.classList.add("tab-ready");
       return;
     }
 
@@ -779,11 +976,21 @@
     tabLyrics.classList.add("tab-ready");
     tabMr.classList.add("tab-ready");
     tabOriginal.classList.add("tab-ready");
+    if (tabFiveP) tabFiveP.classList.add("tab-ready");
 
     textEl.style.display = "none";
     mediaEl.style.display = "block";
 
     activeTab = normalizeDrawerTab(activeTab);
+
+    if (activeTab === "fivep" && tabFiveP) {
+      if (headTitle) headTitle.textContent = "5P";
+      tabFiveP.classList.add("tab-active");
+      mediaEl.innerHTML = fivePPanelHTML();
+      bindFivePPanel();
+      updateLockUI();
+      return;
+    }
 
     if (activeTab === "mr") {
       if (headTitle) headTitle.textContent = "메모";
@@ -911,7 +1118,7 @@
   function onDragOver(e) {
     e.preventDefault();
     const types = Array.from(e.dataTransfer?.types || []);
-    if (types.includes("application/x-music-tag")) e.dataTransfer.dropEffect = "copy";
+    if (types.includes("application/x-music-tag") || types.includes("application/x-fivep-song")) e.dataTransfer.dropEffect = "copy";
     else e.dataTransfer.dropEffect = "move";
   }
 
@@ -1046,6 +1253,7 @@
     document.getElementById("tabLyrics")?.addEventListener("click", () => setTab("lyrics"));
     document.getElementById("tabMr")?.addEventListener("click", () => setTab("mr"));
     document.getElementById("tabOriginal")?.addEventListener("click", () => setTab("original"));
+    document.getElementById("tabFiveP")?.addEventListener("click", () => setTab("fivep"));
     document.getElementById("btnDownload")?.addEventListener("click", copyCurrentVideoUrl);
 
     document.addEventListener("keydown", (e) => {
@@ -1061,6 +1269,7 @@
     updateLyricsDrawer();
     renderTagTools();
     createPageSearchBox();
+    bindFivePDropTargets();
     updatePageSearchSummary();
   });
 
@@ -1080,4 +1289,5 @@
   window.requestYouTubeDownload = requestYouTubeDownload;
   window.openVideoLinkPanel = openVideoLinkPanel;
   window.closeVideoLinkPanel = closeVideoLinkPanel;
+  window.copyFivePSongToCurrentPage = copyFivePSongToCurrentPage;
 })();

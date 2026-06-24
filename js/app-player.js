@@ -357,6 +357,7 @@ function bindAddSongDropTargets() {
 
     target.addEventListener("dragover", (e) => {
       const types = Array.from(e.dataTransfer?.types || []);
+      if (types.includes("application/x-fivep-song")) return;
       const maybeUrl = types.includes("text/uri-list") || types.includes("text/plain") || types.includes("text/html") || types.includes("text");
       if (!maybeUrl) return;
       e.preventDefault();
@@ -372,6 +373,8 @@ function bindAddSongDropTargets() {
     });
 
     target.addEventListener("drop", (e) => {
+      const types = Array.from(e.dataTransfer?.types || []);
+      if (types.includes("application/x-fivep-song")) return;
       const url = getDraggedYoutubeUrl(e);
       if (!url || !extractID(url)) return;
       e.preventDefault();

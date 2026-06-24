@@ -2,7 +2,7 @@
 (() => {
   function prefix() {
     const p = location.pathname;
-    return (p.includes('/japan/') || p.includes('/china/') || p.includes('/korea/') || p.includes('/youtube/')) ? '../' : '';
+    return (p.includes('/japan/') || p.includes('/china/') || p.includes('/korea/') || p.includes('/english/') || p.includes('/youtube/')) ? '../' : '';
   }
 
   function renderDrawer() {
@@ -38,6 +38,7 @@
           <a class="drawer-menu-link" href="${pre}youtube/2p.html"><span>2P</span><span>›</span></a>
           <a class="drawer-menu-link" href="${pre}youtube/3p.html"><span>3P</span><span>›</span></a>
           <a class="drawer-menu-link" href="${pre}youtube/4p.html"><span>4P</span><span>›</span></a>
+          <a class="drawer-menu-link" href="${pre}youtube/5p.html"><span>5P</span><span>›</span></a>
         </div>
       </div>
 
@@ -70,6 +71,19 @@
     else openDrawer();
   }
 
+
+  function goShortcutPage(page) {
+    location.href = `${prefix()}${page}`;
+  }
+
+  function openFivePDrawerOrPage() {
+    if (typeof window.openLyricsDrawer === 'function' && document.getElementById('lyricsDrawer')) {
+      window.openLyricsDrawer('fivep');
+      return;
+    }
+    goShortcutPage('youtube/5p.html');
+  }
+
   function updateDrawerCounts() {
     // 예전 코드와 연결되어 있어도 오류 안 나게 남겨둔 빈 함수야.
   }
@@ -90,10 +104,33 @@
       }
 
       if (isTypingTarget(e.target)) return;
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
 
       if (e.key === 'Tab') {
         e.preventDefault();
         toggleDrawer();
+        return;
+      }
+
+      const code = e.code || '';
+      const key = String(e.key || '').toLowerCase();
+
+      if (e.shiftKey && code === 'Digit5') {
+        e.preventDefault();
+        goShortcutPage('youtube/5p.html');
+        return;
+      }
+
+      if (!e.shiftKey) {
+        if (key === 'a') { e.preventDefault(); goShortcutPage('japan/jaindex.html'); return; }
+        if (key === 's') { e.preventDefault(); goShortcutPage('china/cnindex.html'); return; }
+        if (key === 'd') { e.preventDefault(); goShortcutPage('korea/krindex.html'); return; }
+        if (key === 'f') { e.preventDefault(); goShortcutPage('english/enindex.html'); return; }
+        if (key === '1') { e.preventDefault(); goShortcutPage('youtube/1p.html'); return; }
+        if (key === '2') { e.preventDefault(); goShortcutPage('youtube/2p.html'); return; }
+        if (key === '3') { e.preventDefault(); goShortcutPage('youtube/3p.html'); return; }
+        if (key === '4') { e.preventDefault(); goShortcutPage('youtube/4p.html'); return; }
+        if (key === '5') { e.preventDefault(); openFivePDrawerOrPage(); return; }
       }
     });
   });

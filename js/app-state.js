@@ -13,7 +13,8 @@
     { key: "yt1pVideos", label: "유튜브 영상 1P", emoji: "📺", page: "youtube/1p.html" },
     { key: "yt2pVideos", label: "유튜브 영상 2P", emoji: "📺", page: "youtube/2p.html" },
     { key: "yt3pVideos", label: "유튜브 영상 3P", emoji: "📺", page: "youtube/3p.html" },
-    { key: "yt4pVideos", label: "유튜브 영상 4P", emoji: "📺", page: "youtube/4p.html" }
+    { key: "yt4pVideos", label: "유튜브 영상 4P", emoji: "📺", page: "youtube/4p.html" },
+    { key: "yt5pVideos", label: "유튜브 영상 5P", emoji: "📺", page: "youtube/5p.html" }
   ];
 
   const ALL_STORES = [...COUNTRY_STORES, ...YOUTUBE_STORES];
@@ -991,7 +992,7 @@
   }
 
   function getTagPageUrl(tag, basePrefix = "") {
-    const prefix = basePrefix || (location.pathname.includes("/japan/") || location.pathname.includes("/china/") || location.pathname.includes("/korea/") || location.pathname.includes("/youtube/") ? "../" : "");
+    const prefix = basePrefix || (location.pathname.includes("/japan/") || location.pathname.includes("/china/") || location.pathname.includes("/korea/") || location.pathname.includes("/english/") || location.pathname.includes("/youtube/") ? "../" : "");
     return `${prefix}tag.html?tag=${encodeURIComponent(tag)}`;
   }
 
