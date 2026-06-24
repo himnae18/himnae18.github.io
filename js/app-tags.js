@@ -510,6 +510,7 @@
       chip.addEventListener("dragend", () => {
         chip.classList.remove("is-dragging");
         root.querySelectorAll(".tag-drop-over").forEach((el) => el.classList.remove("tag-drop-over"));
+        root.querySelectorAll(".tag-filter-drop-over").forEach((el) => el.classList.remove("tag-filter-drop-over"));
       });
 
       chip.addEventListener("contextmenu", (e) => {
@@ -578,12 +579,14 @@
 
   function bindFilterDropActions(root) {
     if (!root) return;
+    const dropModes = ["title", "playlist", "song", "lecture", "general", "pretty", "other"];
+
     root.querySelectorAll("[data-tag-filter]").forEach((btn) => {
       btn.addEventListener("dragover", (e) => {
         const hasTag = Array.from(e.dataTransfer?.types || []).includes("application/x-music-tag");
         if (!hasTag) return;
         const mode = btn.getAttribute("data-tag-filter") || "";
-        if (!["title", "playlist", "song", "lecture", "general", "pretty", "other"].includes(mode)) return;
+        if (!dropModes.includes(mode)) return;
         e.preventDefault();
         btn.classList.add("tag-filter-drop-over");
         if (e.dataTransfer) e.dataTransfer.dropEffect = "move";
@@ -594,7 +597,7 @@
       btn.addEventListener("drop", (e) => {
         const tag = S.normalizeTag(e.dataTransfer?.getData("application/x-music-tag") || "");
         const mode = btn.getAttribute("data-tag-filter") || "";
-        if (!tag || !["title", "playlist", "song", "lecture", "general", "pretty", "other"].includes(mode)) return;
+        if (!tag || !dropModes.includes(mode)) return;
         e.preventDefault();
         btn.classList.remove("tag-filter-drop-over");
 
@@ -610,8 +613,8 @@
           S.setTagKind?.(tag, mode);
         }
 
-        setTagIndexFilter(mode);
-        renderTagIndex();
+        // 분류 저장만 하고, 현재 보고 있던 필터 화면은 바꾸지 않는다.
+        refreshTagPageAfterChange();
       });
     });
   }
@@ -661,19 +664,18 @@
     const registered = titleTags.includes(clean);
     const hasShared = registered && S.titleHasSharedText?.(clean);
     const kind = registered ? "title" : (S.getTagKind ? S.getTagKind(clean) : "song");
-    const kindLabel = S.getTagKindLabel ? S.getTagKindLabel(kind) : "노래전용";
     const isPlaylist = S.isPlaylistTag?.(clean) || kind === "playlist";
+    const visualKind = registered ? "title" : (isPlaylist ? "playlist" : kind);
     const badgeStyle = tagCountBadgeStyle(count, maxCount);
     const fixed = registered && S.getTitleFixedTags ? S.getTitleFixedTags(clean) : [];
     return `
-      <a class="tag-chip tag-index-chip ${registered ? "is-title-tag" : ""} ${hasShared ? "has-title-shared" : ""} ${isPlaylist ? "is-playlist-tag" : ""}"
+      <a class="tag-chip tag-index-chip tag-kind-${visualKind} ${registered ? "is-title-tag" : ""} ${hasShared ? "has-title-shared" : ""} ${isPlaylist ? "is-playlist-tag" : ""}"
         href="${tagPageUrl(clean)}"
         draggable="true"
         data-drag-tag="${safe}"
-        title="드래그: 삭제/제목등록/재생목록/분류이동 · 우클릭: ${registered ? "고정태그 추가" : "영상 추가"}">
+        title="드래그: 삭제/제목등록/분류이동 · 우클릭: ${registered ? "고정태그 추가" : "영상 추가"}">
         #${safe}
-        ${registered ? `<span class="tag-title-badge">${hasShared ? "가사 있음" : "제목"}</span>` : (isPlaylist ? "" : `<span class="tag-kind-badge">${S.escapeHTML(kindLabel)}</span>`)}
-        ${isPlaylist ? `<span class="tag-playlist-badge">재생목록</span>` : ""}
+        ${registered ? `<span class="tag-title-badge">${hasShared ? "가사 있음" : "제목"}</span>` : ""}
         ${fixed.length ? `<span class="tag-fixed-badge">고정 ${fixed.length}</span>` : ""}
         <span class="tag-count" style="${badgeStyle}">${count}</span>
       </a>
@@ -696,7 +698,7 @@
   function tagFilterButtonHTML(mode, label, current, count) {
     const active = current === mode;
     return `
-      <button class="tag-filter-btn ${active ? "is-active" : ""}" type="button" data-tag-filter="${mode}" aria-pressed="${active ? "true" : "false"}">
+      <button class="tag-filter-btn tag-filter-${mode} ${active ? "is-active" : ""}" type="button" data-tag-filter="${mode}" aria-pressed="${active ? "true" : "false"}">
         <span>${label}</span>
         <b>${count}</b>
       </button>
@@ -841,16 +843,8 @@
             <strong>삭제</strong>
             <span>태그를 여기로 끌면 전체 삭제</span>
           </div>
-          <div class="tag-drop-zone tag-drop-unregister" data-tag-drop-action="unregister-title">
-            <strong>제목등록해제</strong>
-            <span>제목 표시만 해제</span>
-          </div>
         </div>
         <div class="tag-side-drop tag-side-drop-right">
-          <div class="tag-drop-zone tag-drop-playlist" data-tag-drop-action="register-playlist">
-            <strong>재생목록</strong>
-            <span>묶음 태그로 표시</span>
-          </div>
           <div class="tag-drop-zone tag-drop-register" data-tag-drop-action="register-title">
             <strong>제목등록</strong>
             <span>노래 제목 태그로 표시</span>
@@ -863,7 +857,7 @@
         <div class="tag-filter-tabs" aria-label="태그 보기 필터">
           ${TAG_FILTERS.map((item) => tagFilterButtonHTML(item.key, item.label, currentFilter, filterCounts[item.key] || 0)).join("")}
         </div>
-        <p class="tag-page-help">태그를 왼쪽/오른쪽 큰 영역으로 끌면 삭제·제목등록·재생목록 등록이 되고, 아래 분류 버튼으로 끌면 노래전용/강의전용/일반/이쁜거/기타 분류가 바뀌어. 공유 데이터가 있는 제목태그는 핑크색으로 표시돼.</p>
+        <p class="tag-page-help">태그를 왼쪽 큰 영역으로 끌면 전체 삭제, 오른쪽 큰 영역으로 끌면 제목등록이 돼. 위 분류 버튼에 태그를 끌어놓으면 해당 분류로 저장되고, 현재 보고 있는 창은 그대로 유지돼. 공유 데이터가 있는 제목태그는 핑크색으로 표시돼.</p>
         <div class="tag-cloud tag-index-cloud">
           ${visibleCounts.length ? visibleCounts.map(([tag, count]) => tagChipHTML(tag, count, titleTags, maxCount)).join("") : `<p class="empty-center">이 분류에 표시할 태그가 없어.</p>`}
         </div>

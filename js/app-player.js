@@ -106,7 +106,10 @@ function deleteSong(index) {
 let ytPlayer = null;
 let apiLoading = false;
 let apiReady = false;
+let playerReady = false;
 let apiReadyQueue = [];
+const YOUTUBE_CAPTION_LANGUAGE = "ko";
+const SEEK_STEP_SECONDS = 5;
 
 // 모드: seq | rand_once | rand_n | rand_auto | loop_n | loop_inf
 let playMode = "seq";
@@ -277,6 +280,98 @@ function isPlainSpaceKey(e) {
   return e.code === "Space" || e.key === " " || e.key === "Spacebar";
 }
 
+function seekPlayerRelative(seconds) {
+  if (!ytPlayer || typeof ytPlayer.getCurrentTime !== "function" || typeof ytPlayer.seekTo !== "function") return false;
+
+  try {
+    const now = Number(ytPlayer.getCurrentTime()) || 0;
+    const duration = Number(ytPlayer.getDuration?.()) || 0;
+    let next = now + Number(seconds || 0);
+    if (duration > 0) next = Math.min(duration, next);
+    next = Math.max(0, next);
+    ytPlayer.seekTo(next, true);
+    focusPlayerArea();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function applyKoreanCaptions() {
+  if (!ytPlayer) return;
+
+  try { ytPlayer.loadModule?.("captions"); } catch {}
+  try { ytPlayer.loadModule?.("cc"); } catch {}
+
+  const apply = () => {
+    try {
+      ytPlayer.setOption?.("captions", "track", { languageCode: YOUTUBE_CAPTION_LANGUAGE });
+    } catch {}
+    try {
+      ytPlayer.setOption?.("cc", "track", { languageCode: YOUTUBE_CAPTION_LANGUAGE });
+    } catch {}
+  };
+
+  apply();
+  window.setTimeout(apply, 450);
+  window.setTimeout(apply, 1200);
+}
+
+function getDraggedYoutubeUrl(e) {
+  const dt = e.dataTransfer;
+  if (!dt) return "";
+  const values = [
+    dt.getData("text/uri-list"),
+    dt.getData("text/plain"),
+    dt.getData("text"),
+    dt.getData("text/html")
+  ].filter(Boolean);
+  const joined = values.join("\n");
+  const match = joined.match(/https?:\/\/(?:www\.)?(?:youtube\.com|youtu\.be)\/[^\s"'<>]+/i);
+  return safeLink(match ? match[0] : values[0] || "");
+}
+
+function bindAddSongDropTargets() {
+  const ytInput = document.getElementById("yt");
+  if (!ytInput) return;
+
+  const addButton = ytInput.closest(".add-song-row")?.querySelector(".add-song-btn");
+  const addSection = ytInput.closest(".add-song-section");
+  const targets = [...new Set([addSection, ytInput, addButton].filter(Boolean))];
+
+  targets.forEach((target) => {
+    if (target.dataset.youtubeAddDropBound === "1") return;
+    target.dataset.youtubeAddDropBound = "1";
+
+    target.addEventListener("dragover", (e) => {
+      const types = Array.from(e.dataTransfer?.types || []);
+      const maybeUrl = types.includes("text/uri-list") || types.includes("text/plain") || types.includes("text/html") || types.includes("text");
+      if (!maybeUrl) return;
+      e.preventDefault();
+      target.classList.add("is-url-dragover");
+      if (addSection) addSection.classList.add("is-url-dragover");
+      if (e.dataTransfer) e.dataTransfer.dropEffect = "copy";
+    });
+
+    target.addEventListener("dragleave", (e) => {
+      if (target.contains(e.relatedTarget)) return;
+      target.classList.remove("is-url-dragover");
+      if (addSection && !addSection.contains(e.relatedTarget)) addSection.classList.remove("is-url-dragover");
+    });
+
+    target.addEventListener("drop", (e) => {
+      const url = getDraggedYoutubeUrl(e);
+      if (!url || !extractID(url)) return;
+      e.preventDefault();
+      e.stopPropagation();
+      targets.forEach((el) => el.classList.remove("is-url-dragover"));
+      if (addSection) addSection.classList.remove("is-url-dragover");
+      ytInput.value = url;
+      addSong();
+    });
+  });
+}
+
 function setupGlobalPlayerShortcuts() {
   focusPlayerArea();
 
@@ -309,6 +404,24 @@ function setupGlobalPlayerShortcuts() {
         changePlayerPlaybackRate(speedShortcuts[code]);
         focusPlayerArea();
         return;
+      }
+    }
+
+    if (!e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
+      const key = String(e.key || "").toLowerCase();
+      if (e.key === "ArrowLeft" || key === "j") {
+        if (seekPlayerRelative(-SEEK_STEP_SECONDS)) {
+          e.preventDefault();
+          e.stopPropagation();
+          return;
+        }
+      }
+      if (e.key === "ArrowRight" || key === "l") {
+        if (seekPlayerRelative(SEEK_STEP_SECONDS)) {
+          e.preventDefault();
+          e.stopPropagation();
+          return;
+        }
       }
     }
 
@@ -477,51 +590,74 @@ function applyPlayerFrame(song) {
   }).catch(() => {});
 }
 
+function flushPlayerReadyQueue() {
+  const q = [...apiReadyQueue];
+  apiReadyQueue = [];
+  q.forEach((fn) => {
+    try { fn(); } catch {}
+  });
+}
+
+function createYouTubePlayerOnce() {
+  if (ytPlayer || !window.YT || typeof window.YT.Player !== "function") return;
+
+  ytPlayer = new YT.Player("player", {
+    width: "100%",
+    height: "100%",
+    playerVars: {
+      autoplay: 1,
+      rel: 0,
+      playsinline: 1,
+      hl: "ko",
+      cc_lang_pref: YOUTUBE_CAPTION_LANGUAGE,
+      cc_load_policy: 1
+    },
+    events: {
+      onReady: () => {
+        apiReady = true;
+        playerReady = true;
+        apiLoading = false;
+        applyKoreanCaptions();
+        flushPlayerReadyQueue();
+      },
+      onStateChange: onPlayerStateChange
+    }
+  });
+}
+
 function ensurePlayerReady(cb) {
-  if (ytPlayer && apiReady) {
+  if (ytPlayer && apiReady && playerReady) {
     cb();
     return;
   }
 
   apiReadyQueue.push(cb);
+
+  if (window.YT && typeof window.YT.Player === "function") {
+    createYouTubePlayerOnce();
+    return;
+  }
+
   if (apiLoading) return;
   apiLoading = true;
-
-  if (!document.getElementById("yt-iframe-api")) {
-    const tag = document.createElement("script");
-    tag.id = "yt-iframe-api";
-    tag.src = "https://www.youtube.com/iframe_api";
-    document.head.appendChild(tag);
-  }
 
   const prev = window.onYouTubeIframeAPIReady;
   window.onYouTubeIframeAPIReady = () => {
     try {
       if (typeof prev === "function") prev();
     } catch {}
-
-    ytPlayer = new YT.Player("player", {
-      width: "100%",
-      height: "100%",
-      playerVars: {
-        autoplay: 1,
-        rel: 0,
-        playsinline: 1
-      },
-      events: {
-        onStateChange: onPlayerStateChange
-      }
-    });
-
-    apiReady = true;
-    apiLoading = false;
-
-    const q = [...apiReadyQueue];
-    apiReadyQueue = [];
-    q.forEach((fn) => {
-      try { fn(); } catch {}
-    });
+    createYouTubePlayerOnce();
   };
+
+  if (!document.getElementById("yt-iframe-api")) {
+    const tag = document.createElement("script");
+    tag.id = "yt-iframe-api";
+    tag.src = "https://www.youtube.com/iframe_api";
+    tag.onerror = () => {
+      apiLoading = false;
+    };
+    document.head.appendChild(tag);
+  }
 }
 
 function play(i, options = {}) {
@@ -539,6 +675,7 @@ function play(i, options = {}) {
 
   ensurePlayerReady(() => {
     ytPlayer.loadVideoById(songs[nextIndex].id);
+    applyKoreanCaptions();
     setTimeout(() => setPlayerPlaybackRate(desiredPlaybackRate, 0, { silent: true }), 350);
   });
 
@@ -592,6 +729,7 @@ function playMr(i) {
   applyPlayerFrame({ ytUrl: mrUrl, id: mrId });
   ensurePlayerReady(() => {
     ytPlayer.loadVideoById(mrId);
+    applyKoreanCaptions();
     setTimeout(() => setPlayerPlaybackRate(desiredPlaybackRate, 0, { silent: true }), 350);
   });
 
@@ -747,6 +885,7 @@ document.addEventListener("DOMContentLoaded", () => {
     addSong();
   });
 
+  bindAddSongDropTargets();
   setupGlobalPlayerShortcuts();
 
   document.addEventListener("keydown", (e) => {

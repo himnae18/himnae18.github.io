@@ -2606,3 +2606,310 @@ body[data-store="cnSongs"] .lyrics-tabs .tab-link{
 .tag-video-add-box{
   position:relative;
 }
+
+
+/* 태그 분류 색상 표시 */
+.tag-filter-btn.tag-filter-all{ background:#ffffff; }
+.tag-filter-btn.tag-filter-title{ background:#7bc96f; border-color:#6bb35f; }
+.tag-filter-btn.tag-filter-playlist{ background:#f2d54b; border-color:#d8bd3f; }
+.tag-filter-btn.tag-filter-song{ background:#ff715d; border-color:#e35c49; color:#111; }
+.tag-filter-btn.tag-filter-lecture{ background:#78e3ea; border-color:#60c8cf; }
+.tag-filter-btn.tag-filter-general{ background:#69c6f4; border-color:#53abd8; }
+.tag-filter-btn.tag-filter-pretty{ background:#6d8ef8; border-color:#5d78da; color:#fff; }
+.tag-filter-btn.tag-filter-other{ background:#c79af7; border-color:#af84dd; }
+.tag-filter-btn.tag-filter-title:hover,
+.tag-filter-btn.tag-filter-playlist:hover,
+.tag-filter-btn.tag-filter-song:hover,
+.tag-filter-btn.tag-filter-lecture:hover,
+.tag-filter-btn.tag-filter-general:hover,
+.tag-filter-btn.tag-filter-pretty:hover,
+.tag-filter-btn.tag-filter-other:hover{ filter:brightness(.98); }
+.tag-filter-btn.tag-filter-title.is-active,
+.tag-filter-btn.tag-filter-playlist.is-active,
+.tag-filter-btn.tag-filter-song.is-active,
+.tag-filter-btn.tag-filter-lecture.is-active,
+.tag-filter-btn.tag-filter-general.is-active,
+.tag-filter-btn.tag-filter-pretty.is-active,
+.tag-filter-btn.tag-filter-other.is-active{ outline:3px solid rgba(0,0,0,.12); }
+.tag-filter-btn.tag-filter-pretty b{ background:#1f2d62; }
+
+.tag-index-chip{ transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease, background .12s ease; }
+.tag-index-chip:hover{ transform:translateY(-1px); }
+.tag-index-chip.tag-kind-song{ border-color:#ff9f93; background:#fff1ef; color:#8d291d; }
+.tag-index-chip.tag-kind-lecture{ border-color:#99e3e8; background:#effcfd; color:#165b61; }
+.tag-index-chip.tag-kind-general{ border-color:#9dd9fb; background:#f0f9ff; color:#15506d; }
+.tag-index-chip.tag-kind-pretty{ border-color:#9cb0ff; background:#f2f5ff; color:#2840a1; }
+.tag-index-chip.tag-kind-other{ border-color:#d1b5fb; background:#f7f1ff; color:#5e2f9b; }
+.tag-index-chip.tag-kind-playlist{ border-color:#f0d36a; background:#fff9df; color:#806300; }
+.tag-index-chip.tag-kind-title{ border-color:#83cb73; background:#f3fff0; color:#2d6f20; }
+.tag-index-chip.tag-kind-song:hover{ border-color:#ff715d; background:#ffe9e5; }
+.tag-index-chip.tag-kind-lecture:hover{ border-color:#60c8cf; background:#e8fbfd; }
+.tag-index-chip.tag-kind-general:hover{ border-color:#53abd8; background:#e7f5ff; }
+.tag-index-chip.tag-kind-pretty:hover{ border-color:#6d8ef8; background:#edf2ff; }
+.tag-index-chip.tag-kind-other:hover{ border-color:#af84dd; background:#f2e9ff; }
+.tag-index-chip.tag-kind-playlist:hover{ border-color:#d8bd3f; background:#fff5c8; }
+.tag-index-chip.tag-kind-title:hover{ border-color:#6bb35f; background:#ebfce8; }
+.tag-index-chip.is-playlist-tag{ border-color:#f0d36a; background:#fff9df; color:#806300; }
+.tag-index-chip.has-title-shared{ border-color:#ff5fa8 !important; background:#fff0f7 !important; color:#bd145d; }
+.tag-index-chip.has-title-shared:hover{ border-color:#ff4f9f !important; background:#ffe7f2 !important; }
+.tag-kind-badge,
+.tag-playlist-badge{ display:none !important; }
+
+
+
+/* 태그 분류 UI 심플 버전 */
+.tag-filter-tabs{
+  gap:8px;
+  justify-content:center;
+  align-items:center;
+  margin:16px 0 14px;
+}
+.tag-filter-btn,
+.tag-filter-btn.tag-filter-all,
+.tag-filter-btn.tag-filter-title,
+.tag-filter-btn.tag-filter-playlist,
+.tag-filter-btn.tag-filter-song,
+.tag-filter-btn.tag-filter-lecture,
+.tag-filter-btn.tag-filter-general,
+.tag-filter-btn.tag-filter-pretty,
+.tag-filter-btn.tag-filter-other{
+  --tag-kind-color:#999;
+  min-width:82px;
+  min-height:38px;
+  padding:7px 12px;
+  border:1px solid #e3e3e3 !important;
+  border-radius:12px;
+  background:#fff !important;
+  color:#222 !important;
+  font-size:14px;
+  box-shadow:0 1px 3px rgba(0,0,0,.045) !important;
+  transition:border-color .12s ease, background .12s ease, transform .12s ease, box-shadow .12s ease;
+}
+.tag-filter-btn.tag-filter-all{ --tag-kind-color:#222; }
+.tag-filter-btn.tag-filter-title{ --tag-kind-color:#50b85a; }
+.tag-filter-btn.tag-filter-playlist{ --tag-kind-color:#e0bd32; }
+.tag-filter-btn.tag-filter-song{ --tag-kind-color:#ff6f61; }
+.tag-filter-btn.tag-filter-lecture{ --tag-kind-color:#35c8cf; }
+.tag-filter-btn.tag-filter-general{ --tag-kind-color:#45b7e8; }
+.tag-filter-btn.tag-filter-pretty{ --tag-kind-color:#6688ee; }
+.tag-filter-btn.tag-filter-other{ --tag-kind-color:#b78af0; }
+.tag-filter-btn::before{
+  content:"";
+  width:8px;
+  height:8px;
+  border-radius:999px;
+  background:var(--tag-kind-color);
+  flex:0 0 auto;
+}
+.tag-filter-btn:hover{
+  transform:translateY(-1px);
+  border-color:#cfcfcf !important;
+  background:#fafafa !important;
+}
+.tag-filter-btn.is-active{
+  border-color:var(--tag-kind-color) !important;
+  outline:2px solid rgba(0,0,0,.045) !important;
+  background:#fafafa !important;
+}
+.tag-filter-btn.tag-filter-drop-over{
+  outline:3px dashed var(--tag-kind-color) !important;
+  outline-offset:3px;
+  background:#fff !important;
+  transform:translateY(-1px);
+}
+.tag-filter-btn b{
+  min-width:18px;
+  height:18px;
+  padding:0 6px;
+  background:#222;
+  color:#fff;
+  font-size:11px;
+}
+
+.tag-index-chip,
+.tag-index-chip.tag-kind-song,
+.tag-index-chip.tag-kind-lecture,
+.tag-index-chip.tag-kind-general,
+.tag-index-chip.tag-kind-pretty,
+.tag-index-chip.tag-kind-other,
+.tag-index-chip.tag-kind-playlist,
+.tag-index-chip.tag-kind-title,
+.tag-index-chip.is-playlist-tag{
+  --tag-kind-color:#ddd;
+  background:#fff !important;
+  color:#222 !important;
+  border:1px solid #e4e4e4 !important;
+  border-left:4px solid var(--tag-kind-color) !important;
+  border-radius:999px;
+  box-shadow:0 1px 3px rgba(0,0,0,.04);
+  padding:6px 10px 6px 9px;
+  transform:none !important;
+}
+.tag-index-chip.tag-kind-song{ --tag-kind-color:#ff6f61; }
+.tag-index-chip.tag-kind-lecture{ --tag-kind-color:#35c8cf; }
+.tag-index-chip.tag-kind-general{ --tag-kind-color:#45b7e8; }
+.tag-index-chip.tag-kind-pretty{ --tag-kind-color:#6688ee; }
+.tag-index-chip.tag-kind-other{ --tag-kind-color:#b78af0; }
+.tag-index-chip.tag-kind-playlist,
+.tag-index-chip.is-playlist-tag{ --tag-kind-color:#e0bd32; }
+.tag-index-chip.tag-kind-title{ --tag-kind-color:#50b85a; }
+.tag-index-chip:hover,
+.tag-index-chip.tag-kind-song:hover,
+.tag-index-chip.tag-kind-lecture:hover,
+.tag-index-chip.tag-kind-general:hover,
+.tag-index-chip.tag-kind-pretty:hover,
+.tag-index-chip.tag-kind-other:hover,
+.tag-index-chip.tag-kind-playlist:hover,
+.tag-index-chip.tag-kind-title:hover,
+.tag-index-chip.is-playlist-tag:hover{
+  background:#fafafa !important;
+  border-color:#d6d6d6 !important;
+  border-left-color:var(--tag-kind-color) !important;
+  box-shadow:0 2px 8px rgba(0,0,0,.07);
+}
+.tag-index-chip.has-title-shared{
+  --tag-kind-color:#ff5fa8;
+  border-color:#ffd1e4 !important;
+  border-left-color:#ff5fa8 !important;
+  background:#fff7fb !important;
+  color:#bd145d !important;
+}
+.tag-index-chip.has-title-shared:hover{
+  background:#fff2f8 !important;
+  border-color:#ffbddb !important;
+  border-left-color:#ff5fa8 !important;
+}
+.tag-kind-badge,
+.tag-playlist-badge{
+  display:none !important;
+}
+.tag-title-badge,
+.tag-fixed-badge{
+  min-height:18px;
+  padding:0 6px;
+  border-radius:999px;
+  background:#f0f0f0;
+  color:#555;
+  font-size:10px;
+  font-weight:900;
+}
+.tag-index-chip.has-title-shared .tag-title-badge{
+  background:#ff5fa8;
+  color:#fff;
+}
+
+
+/* 영상 추가: 유튜브 링크를 추가 영역/버튼에 끌어놓으면 바로 추가 */
+.add-song-section.is-url-dragover,
+.add-song-row input.is-url-dragover,
+.add-song-btn.is-url-dragover{
+  outline:3px dashed rgba(255,116,184,.55);
+  outline-offset:4px;
+  border-color:#ff74b8 !important;
+  background:#fff2f8 !important;
+}
+
+/* 태그 필터 버튼은 항상 가로 글씨로 유지 */
+.tag-filter-tabs{
+  display:flex !important;
+  flex-direction:row !important;
+  flex-wrap:nowrap !important;
+  overflow-x:auto;
+  writing-mode:horizontal-tb !important;
+  text-orientation:mixed !important;
+}
+.tag-filter-btn{
+  flex:0 0 auto !important;
+  flex-direction:row !important;
+  writing-mode:horizontal-tb !important;
+  text-orientation:mixed !important;
+  white-space:nowrap !important;
+  word-break:keep-all !important;
+  line-height:1.2;
+}
+.tag-filter-btn span,
+.tag-filter-btn b{
+  display:inline-flex !important;
+  writing-mode:horizontal-tb !important;
+  text-orientation:mixed !important;
+  white-space:nowrap !important;
+  word-break:keep-all !important;
+}
+
+/* 20260624 tag page cleanup: side bars, wider card, no filter scrollbar, tag-only scroll */
+body[data-page="tag"] .tag-page-card{
+  width:min(1120px, calc(100vw - 240px));
+  max-width:1120px;
+}
+body[data-page="tag"] .tag-side-drop{
+  top:118px;
+  width:96px;
+  height:calc(100vh - 190px);
+}
+body[data-page="tag"] .tag-side-drop-left{
+  left:24px;
+}
+body[data-page="tag"] .tag-side-drop-right{
+  right:24px;
+}
+body[data-page="tag"] .tag-filter-tabs{
+  display:flex !important;
+  flex-direction:row !important;
+  flex-wrap:wrap !important;
+  justify-content:flex-start !important;
+  align-items:center !important;
+  overflow:visible !important;
+  overflow-x:visible !important;
+  overflow-y:visible !important;
+  gap:10px !important;
+  padding:14px 16px !important;
+}
+body[data-page="tag"] .tag-filter-btn{
+  flex:0 0 auto !important;
+  min-width:fit-content !important;
+  max-width:100% !important;
+}
+body[data-page="tag"] .tag-index-cloud{
+  max-height:calc(100vh - 430px);
+  min-height:120px;
+  overflow-y:auto;
+  overflow-x:hidden;
+  padding:6px 6px 6px 2px;
+  align-content:flex-start;
+  align-items:flex-start;
+}
+body[data-page="tag"] .tag-index-cloud::-webkit-scrollbar{
+  width:8px;
+}
+body[data-page="tag"] .tag-index-cloud::-webkit-scrollbar-thumb{
+  background:#d6d6d6;
+  border-radius:999px;
+}
+body[data-page="tag"] .tag-drop-zone{
+  flex:1 1 100%;
+}
+@media (max-width:980px){
+  body[data-page="tag"] .tag-page-card{
+    width:min(960px, 94%);
+  }
+  body[data-page="tag"] .tag-side-drop{
+    position:static;
+    width:min(960px, 94%);
+    height:auto;
+    min-height:0;
+    margin:10px auto;
+    border-radius:14px;
+  }
+  body[data-page="tag"] .tag-drag-actions{
+    pointer-events:auto;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    width:min(960px, 94%);
+    margin:0 auto;
+  }
+  body[data-page="tag"] .tag-drop-zone{
+    min-height:92px;
+    border-radius:14px;
+  }
+}
