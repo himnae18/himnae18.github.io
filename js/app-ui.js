@@ -910,11 +910,35 @@
 
   function onDragOver(e) {
     e.preventDefault();
-    e.dataTransfer.dropEffect = "move";
+    const types = Array.from(e.dataTransfer?.types || []);
+    if (types.includes("application/x-music-tag")) e.dataTransfer.dropEffect = "copy";
+    else e.dataTransfer.dropEffect = "move";
+  }
+
+  function addDraggedTagToSong(tag, dropIndex) {
+    const cleanTag = S.normalizeTag ? S.normalizeTag(tag) : String(tag || "").trim();
+    const song = Array.isArray(S.songs) ? S.songs[dropIndex] : null;
+    if (!cleanTag || !song) return;
+    S.dragIndex = null;
+
+    song.tags = S.applyTitleFixedTagsToTags
+      ? S.applyTitleFixedTagsToTags(S.addTags(song.tags, cleanTag))
+      : S.addTags(song.tags, cleanTag);
+
+    S.save();
+    showList();
+    updateLyricsDrawer();
+    renderTagTools();
   }
 
   function onDrop(e, dropIndex) {
     e.preventDefault();
+
+    const tag = S.normalizeTag ? S.normalizeTag(e.dataTransfer?.getData("application/x-music-tag") || "") : "";
+    if (tag) {
+      addDraggedTagToSong(tag, dropIndex);
+      return;
+    }
 
     const dragIndex = S.dragIndex;
     if (dragIndex === null || dragIndex === dropIndex) return;

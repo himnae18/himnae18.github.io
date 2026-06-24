@@ -14,6 +14,18 @@ async function addSong() {
   }
 
   const meta = await fetchYouTubeMeta(ytUrl);
+  const duplicateMatches = window.AppState?.collectDuplicateSongs?.({
+    ytUrl,
+    id,
+    title: meta.title,
+    storeKey: window.AppState?.storeKey || ""
+  }) || [];
+  if (duplicateMatches.length > 0) {
+    const canAddDuplicate = typeof window.AppState?.confirmDuplicateAdd === "function"
+      ? window.AppState.confirmDuplicateAdd(duplicateMatches)
+      : true;
+    if (!canAddDuplicate) return;
+  }
 
   songs.push({
     title: meta.title,

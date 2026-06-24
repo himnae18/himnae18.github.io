@@ -858,6 +858,67 @@
     }
   }
 
+  function normalizeDuplicateTitle(value) {
+    const text = safeText(value);
+    if (!text || text === "제목 없음") return "";
+    return text.toLowerCase().replace(/\s+/g, "");
+  }
+
+  function collectDuplicateSongs({ ytUrl = "", id = "", title = "", storeKey: duplicateStoreKey = "" } = {}) {
+    const cleanUrl = safeLink(ytUrl);
+    const cleanId = safeText(id) || extractID(cleanUrl);
+    const titleKey = normalizeDuplicateTitle(title);
+    const stores = duplicateStoreKey
+      ? ALL_STORES.filter((item) => item.key === duplicateStoreKey)
+      : ALL_STORES;
+
+    const result = [];
+    stores.forEach((collection) => {
+      cleanSongArray(readStorage(collection.key)).forEach((song, index) => {
+        const songId = song.id || extractID(song.ytUrl);
+        const sameLink = !!((cleanId && songId && songId === cleanId) || (cleanUrl && safeLink(song.ytUrl) === cleanUrl));
+        const sameTitle = !!(titleKey && normalizeDuplicateTitle(song.title) === titleKey);
+        if (!sameLink && !sameTitle) return;
+        result.push({
+          song,
+          index,
+          storeKey: collection.key,
+          store: collection,
+          sameLink,
+          sameTitle
+        });
+      });
+    });
+    return result;
+  }
+
+  function confirmDuplicateAdd(duplicates = []) {
+    if (!Array.isArray(duplicates) || duplicates.length === 0) return true;
+    if (typeof window.confirm !== "function") return true;
+
+    const first = duplicates[0];
+    const reasons = [];
+    if (duplicates.some((item) => item.sameLink)) reasons.push("링크가 같음");
+    if (duplicates.some((item) => item.sameTitle)) reasons.push("제목이 같음");
+    const title = safeText(first?.song?.title) || "제목 없음";
+    const place = safeText(first?.store?.label) || "현재 목록";
+    const extra = duplicates.length > 1 ? ` 외 ${duplicates.length - 1}개` : "";
+
+    return window.confirm(
+      `이미 같은 영상이 있어.
+
+` +
+      `- 중복 이유: ${reasons.join(" / ") || "같은 영상"}
+` +
+      `- 기존 영상: ${title}${extra}
+` +
+      `- 위치: ${place}
+
+` +
+      `그래도 새로 추가할까?`
+    );
+  }
+
   async function addVideoToStoreWithTags({ ytUrl, storeKey: wantedStoreKey, tags = [], mr = "", original = "", lyrics = "" } = {}) {
     const cleanUrl = safeLink(ytUrl);
     const id = extractID(cleanUrl);
@@ -867,49 +928,32 @@
     if (!cleanUrl || !id) return { ok: false, error: "유튜브 링크가 올바르지 않아." };
 
     const meta = await fetchYouTubeMeta(cleanUrl);
+    const duplicates = collectDuplicateSongs({ ytUrl: cleanUrl, id, title: meta.title, storeKey: targetStore.key });
+    if (duplicates.length > 0 && !confirmDuplicateAdd(duplicates)) {
+      return { ok: false, cancelled: true, duplicate: true, duplicates, error: "중복 추가를 취소했어." };
+    }
+
     ensureTagKinds(tags, "song");
     const finalTags = applyTitleFixedTagsToTags(tags);
     ensureTagKinds(finalTags, "song");
     const arr = cleanSongArray(readStorage(targetStore.key));
-    const foundIndex = arr.findIndex((song) => {
-      const songId = song.id || extractID(song.ytUrl);
-      return (songId && songId === id) || safeLink(song.ytUrl) === cleanUrl;
-    });
 
-    let index = foundIndex;
-    if (foundIndex >= 0) {
-      arr[foundIndex] = cleanSong({
-        ...arr[foundIndex],
-        title: arr[foundIndex].title || meta.title || "제목 없음",
-        author: arr[foundIndex].author || meta.author || "",
-        ytUrl: arr[foundIndex].ytUrl || cleanUrl,
-        id: arr[foundIndex].id || id,
-        tags: addTags(arr[foundIndex].tags, finalTags),
-        mr: arr[foundIndex].mr || safeLink(mr),
-        original: arr[foundIndex].original || safeLink(original),
-        lyrics: arr[foundIndex].lyrics || safeText(lyrics),
-        aspect: arr[foundIndex].aspect || meta.aspect || "",
-        thumbnailWidth: arr[foundIndex].thumbnailWidth || meta.thumbnailWidth || 0,
-        thumbnailHeight: arr[foundIndex].thumbnailHeight || meta.thumbnailHeight || 0
-      });
-    } else {
-      arr.push(cleanSong({
-        title: meta.title || "제목 없음",
-        author: meta.author || "",
-        ytUrl: cleanUrl,
-        id,
-        lyrics: safeText(lyrics),
-        mr: safeLink(mr),
-        score: "",
-        original: safeLink(original),
-        memo: "",
-        tags: finalTags,
-        aspect: meta.aspect || "",
-        thumbnailWidth: meta.thumbnailWidth || 0,
-        thumbnailHeight: meta.thumbnailHeight || 0
-      }));
-      index = arr.length - 1;
-    }
+    arr.push(cleanSong({
+      title: meta.title || "제목 없음",
+      author: meta.author || "",
+      ytUrl: cleanUrl,
+      id,
+      lyrics: safeText(lyrics),
+      mr: safeLink(mr),
+      score: "",
+      original: safeLink(original),
+      memo: "",
+      tags: finalTags,
+      aspect: meta.aspect || "",
+      thumbnailWidth: meta.thumbnailWidth || 0,
+      thumbnailHeight: meta.thumbnailHeight || 0
+    }));
+    const index = arr.length - 1;
 
     writeStorage(targetStore.key, arr);
 
@@ -918,7 +962,7 @@
       current = index;
     }
 
-    return { ok: true, storeKey: targetStore.key, store: targetStore, index, song: arr[index], updatedExisting: foundIndex >= 0 };
+    return { ok: true, storeKey: targetStore.key, store: targetStore, index, song: arr[index], updatedExisting: false, duplicateAllowed: duplicates.length > 0 };
   }
 
   function getAllSongs() {
@@ -971,6 +1015,9 @@
     escapeHTML,
     extractID,
     fetchYouTubeMeta,
+    normalizeDuplicateTitle,
+    collectDuplicateSongs,
+    confirmDuplicateAdd,
     normalizeTag,
     normalizeTags,
     normalizeVideoAspect,

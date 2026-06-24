@@ -228,7 +228,7 @@
     try {
       const result = await S.addVideoToStoreWithTags({ ytUrl, storeKey, tags: cleanTags });
       if (!result?.ok) {
-        alert(result?.error || "영상을 추가하지 못했어.");
+        if (!result?.cancelled) alert(result?.error || "영상을 추가하지 못했어.");
         return result;
       }
 
