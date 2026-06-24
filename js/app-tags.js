@@ -8,6 +8,7 @@
   const TAG_FILTERS = [
     { key: "all", label: "모두" },
     { key: "title", label: "제목태그" },
+    { key: "playlist", label: "재생목록" },
     { key: "song", label: "노래전용" },
     { key: "lecture", label: "강의전용" },
     { key: "general", label: "일반(유머)" },
@@ -551,8 +552,17 @@
         }
 
         if (action === "register-title") {
+          S.unregisterPlaylistTag?.(tag);
           registerTitleTag(tag);
           flashDropZone(zone, "등록 완료");
+          refreshTagPageAfterChange();
+          return;
+        }
+
+        if (action === "register-playlist") {
+          unregisterTitleTag(tag);
+          S.registerPlaylistTag?.(tag);
+          flashDropZone(zone, "재생목록 완료");
           refreshTagPageAfterChange();
           return;
         }
@@ -562,6 +572,46 @@
           flashDropZone(zone, "해제 완료");
           refreshTagPageAfterChange();
         }
+      });
+    });
+  }
+
+  function bindFilterDropActions(root) {
+    if (!root) return;
+    root.querySelectorAll("[data-tag-filter]").forEach((btn) => {
+      btn.addEventListener("dragover", (e) => {
+        const hasTag = Array.from(e.dataTransfer?.types || []).includes("application/x-music-tag");
+        if (!hasTag) return;
+        const mode = btn.getAttribute("data-tag-filter") || "";
+        if (!["title", "playlist", "song", "lecture", "general", "pretty", "other"].includes(mode)) return;
+        e.preventDefault();
+        btn.classList.add("tag-filter-drop-over");
+        if (e.dataTransfer) e.dataTransfer.dropEffect = "move";
+      });
+
+      btn.addEventListener("dragleave", () => btn.classList.remove("tag-filter-drop-over"));
+
+      btn.addEventListener("drop", (e) => {
+        const tag = S.normalizeTag(e.dataTransfer?.getData("application/x-music-tag") || "");
+        const mode = btn.getAttribute("data-tag-filter") || "";
+        if (!tag || !["title", "playlist", "song", "lecture", "general", "pretty", "other"].includes(mode)) return;
+        e.preventDefault();
+        btn.classList.remove("tag-filter-drop-over");
+
+        if (mode === "title") {
+          S.unregisterPlaylistTag?.(tag);
+          registerTitleTag(tag);
+        } else if (mode === "playlist") {
+          unregisterTitleTag(tag);
+          S.registerPlaylistTag?.(tag);
+        } else {
+          unregisterTitleTag(tag);
+          S.unregisterPlaylistTag?.(tag);
+          S.setTagKind?.(tag, mode);
+        }
+
+        setTagIndexFilter(mode);
+        renderTagIndex();
       });
     });
   }
@@ -616,26 +666,24 @@
     const badgeStyle = tagCountBadgeStyle(count, maxCount);
     const fixed = registered && S.getTitleFixedTags ? S.getTitleFixedTags(clean) : [];
     return `
-      <span class="tag-index-chip-wrap">
-        <a class="tag-chip tag-index-chip ${registered ? "is-title-tag" : ""} ${hasShared ? "has-title-shared" : ""} ${isPlaylist ? "is-playlist-tag" : ""}"
-          href="${tagPageUrl(clean)}"
-          draggable="true"
-          data-drag-tag="${safe}"
-          title="드래그: 삭제/제목등록 · 우클릭: ${registered ? "고정태그 추가" : "영상 추가"}">
-          #${safe}
-          ${registered ? `<span class="tag-title-badge">${hasShared ? "가사 있음" : "제목"}</span>` : `<span class="tag-kind-badge">${S.escapeHTML(kindLabel)}</span>`}
-          ${isPlaylist ? `<span class="tag-playlist-badge">재생목록</span>` : ""}
-          ${fixed.length ? `<span class="tag-fixed-badge">고정 ${fixed.length}</span>` : ""}
-          <span class="tag-count" style="${badgeStyle}">${count}</span>
-        </a>
-        ${(!registered && !isPlaylist) ? `<select class="tag-kind-select" data-tag-kind-select="${safe}" aria-label="#${safe} 태그 종류 변경">${kindOptionsHTML(kind)}</select>` : ""}
-      </span>
+      <a class="tag-chip tag-index-chip ${registered ? "is-title-tag" : ""} ${hasShared ? "has-title-shared" : ""} ${isPlaylist ? "is-playlist-tag" : ""}"
+        href="${tagPageUrl(clean)}"
+        draggable="true"
+        data-drag-tag="${safe}"
+        title="드래그: 삭제/제목등록/재생목록/분류이동 · 우클릭: ${registered ? "고정태그 추가" : "영상 추가"}">
+        #${safe}
+        ${registered ? `<span class="tag-title-badge">${hasShared ? "가사 있음" : "제목"}</span>` : (isPlaylist ? "" : `<span class="tag-kind-badge">${S.escapeHTML(kindLabel)}</span>`)}
+        ${isPlaylist ? `<span class="tag-playlist-badge">재생목록</span>` : ""}
+        ${fixed.length ? `<span class="tag-fixed-badge">고정 ${fixed.length}</span>` : ""}
+        <span class="tag-count" style="${badgeStyle}">${count}</span>
+      </a>
     `;
   }
 
   function filterTagCounts(counts, titleTags, mode) {
     const titleSet = new Set(titleTags);
     if (mode === "title") return counts.filter(([tag]) => titleSet.has(S.normalizeTag(tag)));
+    if (mode === "playlist") return counts.filter(([tag]) => S.isPlaylistTag?.(tag));
     if (mode === "all") return counts;
     return counts.filter(([tag]) => {
       const clean = S.normalizeTag(tag);
@@ -799,6 +847,10 @@
           </div>
         </div>
         <div class="tag-side-drop tag-side-drop-right">
+          <div class="tag-drop-zone tag-drop-playlist" data-tag-drop-action="register-playlist">
+            <strong>재생목록</strong>
+            <span>묶음 태그로 표시</span>
+          </div>
           <div class="tag-drop-zone tag-drop-register" data-tag-drop-action="register-title">
             <strong>제목등록</strong>
             <span>노래 제목 태그로 표시</span>
@@ -808,11 +860,10 @@
       <section class="tag-page-card">
         <h2>${filterTitle}</h2>
         ${indexVideoAddHTML()}
-        ${playlistTagsHTML()}
         <div class="tag-filter-tabs" aria-label="태그 보기 필터">
           ${TAG_FILTERS.map((item) => tagFilterButtonHTML(item.key, item.label, currentFilter, filterCounts[item.key] || 0)).join("")}
         </div>
-        <p class="tag-page-help">제목태그로 등록한 태그가 같은 영상/노래는 가사창의 가사·메모·기타 내용을 같이 써. 가사/메모/기타 공유 데이터가 있는 제목태그는 핑크색으로 표시돼.</p>
+        <p class="tag-page-help">태그를 왼쪽/오른쪽 큰 영역으로 끌면 삭제·제목등록·재생목록 등록이 되고, 아래 분류 버튼으로 끌면 노래전용/강의전용/일반/이쁜거/기타 분류가 바뀌어. 공유 데이터가 있는 제목태그는 핑크색으로 표시돼.</p>
         <div class="tag-cloud tag-index-cloud">
           ${visibleCounts.length ? visibleCounts.map(([tag, count]) => tagChipHTML(tag, count, titleTags, maxCount)).join("") : `<p class="empty-center">이 분류에 표시할 태그가 없어.</p>`}
         </div>
@@ -827,9 +878,8 @@
     });
 
     bindIndexVideoAdd();
-    bindPlaylistTagAdd(root);
-    bindTagKindSelectors(root);
     bindTagDragActions(root);
+    bindFilterDropActions(root);
   }
 
   function bindPlayerVideoAdd(selected) {

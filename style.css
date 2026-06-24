@@ -2001,19 +2001,28 @@ body[data-page="tag"] .tag-tools .tag-tools-path-list::-webkit-scrollbar-thumb{
   opacity:.92;
   word-break:keep-all;
 }
+.tag-drop-delete{
+  background:#e83434;
+}
 .tag-drop-unregister{
   flex:0 0 29%;
-  background:#707070;
+  background:#9f1111;
   border-top:1px solid rgba(255,255,255,.3);
+}
+.tag-drop-playlist{
+  background:#ffd12f;
+  color:#111;
+  border-bottom:1px solid rgba(0,0,0,.12);
+}
+.tag-drop-register{
+  background:#47ad4e;
+  color:#fff;
 }
 .tag-drop-unregister strong{
   font-size:13px;
 }
 .tag-drop-unregister span{
   font-size:10px;
-}
-.tag-drop-register{
-  background:#9b9b9b;
 }
 .tag-drop-zone.tag-drop-over{
   background:var(--main);
@@ -2191,7 +2200,7 @@ body[data-store="cnSongs"] .lyrics-tabs .tab-link{
 .tag-filter-tabs{
   display:flex;
   align-items:center;
-  gap:24px;
+  gap:14px;
   margin:8px 0 10px;
   padding:18px 16px;
   background:#d8d8d8;
@@ -2402,7 +2411,7 @@ body[data-store="cnSongs"] .lyrics-tabs .tab-link{
 
 
 .tag-filter-btn{
-  min-width:96px;
+  min-width:88px;
   min-height:42px;
   padding:8px 16px;
   border:1px solid #cfcfcf;
@@ -2420,13 +2429,19 @@ body[data-store="cnSongs"] .lyrics-tabs .tab-link{
 }
 .tag-filter-btn:hover{ background:#f8f8f8; border-color:#b9b9b9; }
 .tag-filter-btn.is-active{ background:#ececec; border-color:#aaa; outline:2px solid rgba(0,0,0,.08); }
+.tag-filter-btn.tag-filter-drop-over{
+  outline:4px dashed rgba(255,95,168,.42);
+  outline-offset:3px;
+  background:#fff0f7;
+  border-color:#ff86bf;
+}
 .tag-filter-btn b{
   min-width:20px; height:20px; padding:0 6px; border-radius:999px; background:#111; color:#fff;
   display:inline-flex; align-items:center; justify-content:center; font-size:11px; line-height:1;
 }
 
 
-/* 태그 종류 / 재생목록 태그 / 자동완성 / 드래그 영상 추가 */
+/* 태그 종류 / 재생목록 / 자동완성 / 드래그 영상 추가 */
 .tag-index-add-video.is-url-dragover,
 .tag-player-add-video.is-url-dragover,
 .tag-video-add-box.is-url-dragover{

@@ -29,7 +29,7 @@
     { key: "general", label: "일반(유머)" },
     { key: "pretty", label: "이쁜거(뮤비/일러)" },
     { key: "other", label: "기타" },
-    { key: "playlist", label: "재생목록 태그" }
+    { key: "playlist", label: "재생목록" }
   ];
 
   function readStorage(key) {
